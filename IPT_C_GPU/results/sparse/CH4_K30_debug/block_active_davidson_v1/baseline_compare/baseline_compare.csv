@@ -1,0 +1,5 @@
+baseline_steps,denom_clip,exit_code,status,baseline_max_relative_eigen_residual,pair_28_residual,pair_29_residual,basis_cols,accepted_entries,orthogonality_error,result_dir
+30,3e-9,3,failed,1.6210718171212894e-09,7.1156024335350873e-14,1.6210718171212894e-09,39,44,1.6431300764452317e-14,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/block_active_davidson_v1/baseline_compare/steps_30_denom_3e-9
+30,1e-8,3,failed,5.0803095999687211e-09,1.6092439582965254e-13,5.0803095999687211e-09,37,42,1.6431300764452317e-14,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/block_active_davidson_v1/baseline_compare/steps_30_denom_1e-8
+40,3e-9,3,failed,0.0054238305251029266,1.1319814989260442e-08,0.0054238305251029266,33,0,1.021405182655144e-14,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/block_active_davidson_v1/baseline_compare/steps_40_denom_3e-9
+40,1e-8,3,failed,2.8707870270886921e-11,6.2407042851650445e-14,2.8707870270886921e-11,52,57,1.5099033134902129e-14,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/block_active_davidson_v1/baseline_compare/steps_40_denom_1e-8

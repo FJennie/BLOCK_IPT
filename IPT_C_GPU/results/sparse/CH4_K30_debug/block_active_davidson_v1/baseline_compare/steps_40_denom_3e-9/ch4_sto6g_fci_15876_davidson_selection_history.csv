@@ -1,0 +1,3 @@
+davidson_step,pair_index,residual,selected_by_residual,selected_forced,skipped_converged,skipped_active_tol,skipped_linear_dependent,skipped_locked_old_logic_should_not_happen,correction_norm_before_ortho,correction_norm_after_ortho
+1,29,0.0054238305251029266,1,0,0,0,0,0,0.59682048547425037,0.37962804464373751
+1,28,1.1319814989260442e-08,1,0,0,0,0,0,5.3008837038339641e-07,5.261527216998875e-07

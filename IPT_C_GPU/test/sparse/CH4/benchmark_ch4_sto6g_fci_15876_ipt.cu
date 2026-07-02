@@ -146,8 +146,14 @@ typedef struct {
     int adaptive_target_block_end;
     std::string adaptive_added_indices;
     std::vector<IPTDavidsonHistoryEntry> davidson_history;
+    std::vector<IPTDavidsonSelectionEntry> davidson_selection_history;
+    std::vector<IPTDavidsonBlockHistoryEntry> davidson_block_history;
     int davidson_restart_count;
+    int jd_local_attempted;
+    int jd_local_accepted;
+    std::vector<IPTJDLocalHistoryEntry> jd_local_history;
     std::vector<double> eigenvalues;
+    std::vector<double> eigenvectors;
     std::vector<double> relative_eigen_residuals;
     int status;
     char error[128];
@@ -1486,7 +1492,32 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
                 ipt.davidson_history,
                 ipt.davidson_history + ipt.davidson_history_count);
         }
+        if (ipt.davidson_selection_history_count > 0 &&
+            ipt.davidson_selection_history != NULL) {
+            result.davidson_selection_history.assign(
+                ipt.davidson_selection_history,
+                ipt.davidson_selection_history +
+                    ipt.davidson_selection_history_count);
+        }
+        if (ipt.davidson_block_history_count > 0 &&
+            ipt.davidson_block_history != NULL) {
+            result.davidson_block_history.assign(
+                ipt.davidson_block_history,
+                ipt.davidson_block_history +
+                    ipt.davidson_block_history_count);
+        }
+        result.jd_local_attempted = ipt.jd_local_attempted;
+        result.jd_local_accepted = ipt.jd_local_accepted;
+        if (ipt.jd_local_history_count > 0 &&
+            ipt.jd_local_history != NULL) {
+            result.jd_local_history.assign(
+                ipt.jd_local_history,
+                ipt.jd_local_history + ipt.jd_local_history_count);
+        }
         pairs_to_check = std::min(result.requested_k, result.returned_k);
+        result.eigenvectors.assign(
+            ipt.vectors,
+            ipt.vectors + (size_t)matrix->n * (size_t)pairs_to_check);
         for (int col = 0; col < pairs_to_check; ++col) {
             const double *vector = ipt.vectors + (size_t)col * (size_t)matrix->n;
             double residual =
@@ -1573,6 +1604,10 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             "davidson_residual_after=%.17g davidson_denom_clip=%.17g "
             "davidson_history_count=%zu "
             "davidson_restart_count=%d "
+            "davidson_selection_history_count=%zu "
+            "davidson_block_history_count=%zu "
+            "jd_local_attempted=%d jd_local_accepted=%d "
+            "jd_local_history_count=%zu "
             "adaptive_block_enabled=%d adaptive_coupling_tau=%.17g "
             "adaptive_limit_hit=%d adaptive_added_indices=%s "
             "adaptive_final_target_block_start=%d "
@@ -1598,6 +1633,10 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             result.davidson_residual_after, result.davidson_denom_clip,
             result.davidson_history.size(),
             result.davidson_restart_count,
+            result.davidson_selection_history.size(),
+            result.davidson_block_history.size(),
+            result.jd_local_attempted, result.jd_local_accepted,
+            result.jd_local_history.size(),
             result.adaptive_block_enabled,
             result.adaptive_coupling_tau, result.adaptive_limit_hit,
             result.adaptive_added_indices.c_str(),
@@ -1634,6 +1673,126 @@ static void write_davidson_history(FILE *history_csv,
                 entry.max_relative_eigen_residual_index,
                 entry.pair_28_residual, entry.pair_29_residual,
                 entry.orthogonality_max_abs_error, entry.restarted);
+    }
+}
+
+static void write_davidson_selection_history(
+    FILE *history_csv, const TrialResult &result)
+{
+    for (const IPTDavidsonSelectionEntry &entry :
+         result.davidson_selection_history) {
+        fprintf(history_csv,
+                "%d,%d,%.17g,%d,%d,%d,%d,%d,%d,%.17g,%.17g\n",
+                entry.davidson_step, entry.pair_index, entry.residual,
+                entry.selected_by_residual, entry.selected_forced,
+                entry.skipped_converged, entry.skipped_active_tol,
+                entry.skipped_linear_dependent,
+                entry.skipped_locked_old_logic_should_not_happen,
+                entry.correction_norm_before_ortho,
+                entry.correction_norm_after_ortho);
+    }
+}
+
+static void write_davidson_block_history(
+    FILE *history_csv, const TrialResult &result)
+{
+    for (const IPTDavidsonBlockHistoryEntry &entry :
+         result.davidson_block_history) {
+        fprintf(history_csv,
+                "%d,%s,%d,%d,%s,%s,%.17g,%.17g,%.17g,%.17g,"
+                "%.17g,%.17g,%d,%s,%d,%d,%.17g,%.17g\n",
+                entry.davidson_step, entry.active_pairs,
+                entry.accepted_corrections,
+                entry.rejected_corrections,
+                entry.correction_norm_before_ortho,
+                entry.correction_norm_after_ortho,
+                entry.residual_before_global,
+                entry.residual_after_global,
+                entry.pair_28_before, entry.pair_28_after,
+                entry.pair_29_before, entry.pair_29_after,
+                entry.accepted, entry.reject_reason,
+                entry.basis_cols_before, entry.basis_cols_after,
+                entry.orthogonality_error_before,
+                entry.orthogonality_error_after);
+    }
+}
+
+static void write_jd_local_history(FILE *history_csv,
+                                   const TrialResult &result)
+{
+    for (const IPTJDLocalHistoryEntry &entry : result.jd_local_history) {
+        fprintf(history_csv,
+                "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g\n",
+                entry.jd_step, entry.active_pair_index,
+                entry.residual_before, entry.residual_after,
+                entry.accepted, entry.basis_cols,
+                entry.max_relative_eigen_residual,
+                entry.max_relative_eigen_residual_index,
+                entry.pair_28_residual, entry.pair_29_residual,
+                entry.orthogonality_max_abs_error);
+    }
+}
+
+static void write_residual_support(
+    FILE *csv, const CscMatrixView *matrix,
+    const Ch4Diagnostics &diagnostics, const TrialResult &result,
+    int pair_index, int top)
+{
+    std::vector<double> av((size_t)matrix->n, 0.0);
+    std::vector<double> residual((size_t)matrix->n, 0.0);
+    std::vector<int> order((size_t)matrix->n, 0);
+    int target_start = -1;
+    int target_end = -1;
+
+    if (csv == NULL || pair_index < 0 ||
+        pair_index >= (int)result.eigenvalues.size() ||
+        (size_t)(pair_index + 1) * (size_t)matrix->n >
+            result.eigenvectors.size()) {
+        return;
+    }
+    if (diagnostics.target_block_id >= 0 &&
+        diagnostics.target_block_id < (int)diagnostics.blocks.size()) {
+        target_start =
+            diagnostics.blocks[(size_t)diagnostics.target_block_id].first;
+        target_end =
+            diagnostics.blocks[(size_t)diagnostics.target_block_id].second;
+    }
+    {
+        const double *vector =
+            result.eigenvectors.data() +
+            (size_t)pair_index * (size_t)matrix->n;
+        double eigenvalue = result.eigenvalues[(size_t)pair_index];
+
+        csc_matvec_block(matrix, vector, matrix->n, av.data(), matrix->n, 1);
+        for (int original = 0; original < matrix->n; ++original) {
+            residual[(size_t)original] =
+                av[(size_t)original] - eigenvalue * vector[original];
+            order[(size_t)original] = original;
+        }
+        std::stable_sort(
+            order.begin(), order.end(), [&](int a, int b) {
+                return fabs(residual[(size_t)a]) >
+                       fabs(residual[(size_t)b]);
+            });
+        top = std::max(0, std::min(top, matrix->n));
+        for (int rank = 0; rank < top; ++rank) {
+            int original = order[(size_t)rank];
+            int sorted =
+                diagnostics.inverse_perm[(size_t)original];
+            double diagonal =
+                diagnostics.original_diagonal[(size_t)original];
+
+            fprintf(csv,
+                    "%d,%d,%d,%d,%.17g,%.17g,%.17g,%.17g,%d,%d,%d,%d\n",
+                    pair_index, rank + 1, original, sorted,
+                    residual[(size_t)original],
+                    fabs(residual[(size_t)original]), diagonal,
+                    diagonal - eigenvalue,
+                    sorted >= target_start && sorted <= target_end,
+                    sorted >= 0 && sorted < 30,
+                    sorted >= 30 && sorted < 40,
+                    sorted >= 40 && sorted < 80);
+        }
     }
 }
 
@@ -1920,6 +2079,12 @@ int main(void)
     int save_matrix = env_bool("IPT_SAVE_MATRIX", 0);
     int dump_diag_gaps = env_bool("IPT_DUMP_DIAG_GAPS", 0);
     int dump_coupling_gap = env_bool("IPT_DUMP_COUPLING_GAP", 0);
+    int dump_residual_support =
+        env_bool("IPT_DUMP_RESIDUAL_SUPPORT", 0);
+    int residual_support_pair =
+        env_int("IPT_RESIDUAL_SUPPORT_PAIR", 29);
+    int residual_support_top =
+        env_int("IPT_RESIDUAL_SUPPORT_TOP", 100);
     int ritz_check_interval = env_int("IPT_RITZ_CHECK_INTERVAL", 0);
     const char *matrix_source = "generated";
     double matrix_norm = NAN;
@@ -1931,10 +2096,18 @@ int main(void)
     char diag_gaps_path[4096];
     char coupling_gap_path[4096];
     char davidson_history_path[4096];
+    char davidson_selection_history_path[4096];
+    char davidson_block_history_path[4096];
+    char jd_local_history_path[4096];
+    char residual_support_path[4096];
     FILE *csv = NULL;
     FILE *summary = NULL;
     FILE *pair_csv = NULL;
     FILE *davidson_history_csv = NULL;
+    FILE *davidson_selection_history_csv = NULL;
+    FILE *davidson_block_history_csv = NULL;
+    FILE *jd_local_history_csv = NULL;
+    FILE *residual_support_csv = NULL;
     std::vector<TrialResult> primme_results;
     std::vector<TrialResult> ipt_results;
     bool benchmark_succeeded = true;
@@ -2006,13 +2179,35 @@ int main(void)
              "%s/ch4_sto6g_fci_15876_coupling_gap.csv", dir);
     snprintf(davidson_history_path, sizeof(davidson_history_path),
              "%s/ch4_sto6g_fci_15876_davidson_history.csv", dir);
+    snprintf(
+        davidson_selection_history_path,
+        sizeof(davidson_selection_history_path),
+        "%s/ch4_sto6g_fci_15876_davidson_selection_history.csv", dir);
+    snprintf(davidson_block_history_path,
+             sizeof(davidson_block_history_path),
+             "%s/ch4_sto6g_fci_15876_davidson_block_history.csv", dir);
+    snprintf(jd_local_history_path, sizeof(jd_local_history_path),
+             "%s/ch4_sto6g_fci_15876_jd_local_history.csv", dir);
+    snprintf(residual_support_path, sizeof(residual_support_path),
+             "%s/ch4_sto6g_fci_15876_residual_support.csv", dir);
 
     csv = fopen(csv_path, "w");
     summary = fopen(summary_path, "w");
     pair_csv = fopen(pair_csv_path, "w");
     davidson_history_csv = fopen(davidson_history_path, "w");
+    davidson_selection_history_csv =
+        fopen(davidson_selection_history_path, "w");
+    davidson_block_history_csv =
+        fopen(davidson_block_history_path, "w");
+    jd_local_history_csv = fopen(jd_local_history_path, "w");
+    if (dump_residual_support) {
+        residual_support_csv = fopen(residual_support_path, "w");
+    }
     if (csv == NULL || summary == NULL || pair_csv == NULL ||
-        davidson_history_csv == NULL) {
+        davidson_history_csv == NULL || jd_local_history_csv == NULL ||
+        davidson_selection_history_csv == NULL ||
+        davidson_block_history_csv == NULL ||
+        (dump_residual_support && residual_support_csv == NULL)) {
         fprintf(stderr, "could not open result files in %s\n", dir);
         if (csv != NULL) {
             fclose(csv);
@@ -2025,6 +2220,18 @@ int main(void)
         }
         if (davidson_history_csv != NULL) {
             fclose(davidson_history_csv);
+        }
+        if (jd_local_history_csv != NULL) {
+            fclose(jd_local_history_csv);
+        }
+        if (davidson_selection_history_csv != NULL) {
+            fclose(davidson_selection_history_csv);
+        }
+        if (davidson_block_history_csv != NULL) {
+            fclose(davidson_block_history_csv);
+        }
+        if (residual_support_csv != NULL) {
+            fclose(residual_support_csv);
         }
         return 2;
     }
@@ -2042,6 +2249,34 @@ int main(void)
             "accepted,basis_cols,max_relative_eigen_residual,"
             "max_relative_eigen_residual_index,pair_28_residual,"
             "pair_29_residual,orthogonality_error,restarted\n");
+    fprintf(davidson_selection_history_csv,
+            "davidson_step,pair_index,residual,selected_by_residual,"
+            "selected_forced,skipped_converged,skipped_active_tol,"
+            "skipped_linear_dependent,"
+            "skipped_locked_old_logic_should_not_happen,"
+            "correction_norm_before_ortho,"
+            "correction_norm_after_ortho\n");
+    fprintf(davidson_block_history_csv,
+            "davidson_step,active_pairs,accepted_corrections,"
+            "rejected_corrections,correction_norm_before_ortho,"
+            "correction_norm_after_ortho,residual_before_global,"
+            "residual_after_global,pair_28_before,pair_28_after,"
+            "pair_29_before,pair_29_after,accepted,reject_reason,"
+            "basis_cols_before,basis_cols_after,"
+            "orthogonality_error_before,"
+            "orthogonality_error_after\n");
+    fprintf(jd_local_history_csv,
+            "jd_step,active_pair_index,residual_before,residual_after,"
+            "accepted,basis_cols,max_relative_eigen_residual,"
+            "max_relative_eigen_residual_index,pair_28_residual,"
+            "pair_29_residual,orthogonality_error\n");
+    if (residual_support_csv != NULL) {
+        fprintf(residual_support_csv,
+                "pair_index,rank,original_index,sorted_index,"
+                "residual_value,abs_residual_value,diagonal_value,"
+                "denom,inside_target_block,inside_first_30,"
+                "inside_31_40,inside_41_80\n");
+    }
 
     printf("CH4/STO-6G full FCI CSC benchmark: n=%d "
            "nnz=%d k=%d repeats=%d tol=%.3e run_primme=%d\n",
@@ -2081,6 +2316,61 @@ int main(void)
             ipt_cuda_env_double("IPT_DAVIDSON_LOCKED_TOL", 1.0e-12),
             ipt_cuda_env_int("IPT_DAVIDSON_RESTART_EVERY", 20),
             ipt_cuda_env_int("IPT_DAVIDSON_RESTART_KEEP_EXTRA", 5));
+    fprintf(summary,
+            "baseline_steps=%d\n"
+            "davidson_extra_steps=%d\n"
+            "davidson_converged_tol=%.17g\n"
+            "davidson_active_tol=%.17g\n"
+            "davidson_protect_tol_role=orthogonalization_and_pollution_"
+            "protection_only\n"
+            "davidson_locked_old_logic_active_selection=0\n"
+            "davidson_force_active_pairs=%s\n"
+            "davidson_block_active=%d\n",
+            ipt_cuda_env_int("IPT_DAVIDSON_STEPS", 1),
+            ipt_cuda_env_int("IPT_DAVIDSON_EXTRA_STEPS", 0),
+            ipt_cuda_env_double("IPT_DAVIDSON_CONVERGED_TOL", 1.0e-13),
+            ipt_cuda_env_double("IPT_DAVIDSON_ACTIVE_TOL", 1.0e-13),
+            getenv("IPT_DAVIDSON_FORCE_ACTIVE_PAIRS") == NULL
+                ? "none"
+                : getenv("IPT_DAVIDSON_FORCE_ACTIVE_PAIRS"),
+            ipt_cuda_env_flag("IPT_DAVIDSON_BLOCK_ACTIVE"));
+    fprintf(summary,
+            "dump_residual_support=%d\n"
+            "residual_support_pair=%d\n"
+            "residual_support_top=%d\n"
+            "jd_local_correction=%d\n"
+            "jd_local_active_pairs=%s\n"
+            "jd_local_window_start=%d\n"
+            "jd_local_window_end=%d\n"
+            "jd_local_damping=%.17g\n"
+            "jd_local_max_dim=%d\n"
+            "jd_local_set=%s\n"
+            "jd_local_support_top=%d\n"
+            "jd_local_outside_correction=%s\n"
+            "jd_local_steps=%d\n"
+            "jd_accept_only_if_improves=%d\n",
+            dump_residual_support, residual_support_pair,
+            residual_support_top,
+            ipt_cuda_env_flag("IPT_JD_LOCAL_CORRECTION"),
+            getenv("IPT_JD_LOCAL_ACTIVE_PAIRS") == NULL
+                ? "29"
+                : getenv("IPT_JD_LOCAL_ACTIVE_PAIRS"),
+            ipt_cuda_env_int("IPT_JD_LOCAL_WINDOW_START", 25),
+            ipt_cuda_env_int("IPT_JD_LOCAL_WINDOW_END", 40),
+            ipt_cuda_env_double("IPT_JD_LOCAL_DAMPING", 1.0e-8),
+            ipt_cuda_env_int("IPT_JD_LOCAL_MAX_DIM", 80),
+            getenv("IPT_JD_LOCAL_SET") == NULL
+                ? "window"
+                : getenv("IPT_JD_LOCAL_SET"),
+            ipt_cuda_env_int("IPT_JD_LOCAL_SUPPORT_TOP", 80),
+            getenv("IPT_JD_LOCAL_OUTSIDE_CORRECTION") == NULL
+                ? "none"
+                : getenv("IPT_JD_LOCAL_OUTSIDE_CORRECTION"),
+            ipt_cuda_env_int("IPT_JD_LOCAL_STEPS", 1),
+            getenv("IPT_JD_ACCEPT_ONLY_IF_IMPROVES") == NULL
+                ? 1
+                : ipt_cuda_env_flag(
+                      "IPT_JD_ACCEPT_ONLY_IF_IMPROVES"));
     write_diagonal_diagnostics(summary, diag_gaps_path, diagnostics,
                                dump_diag_gaps);
     write_coupling_gap_diagnostics(summary, coupling_gap_path, diagnostics,
@@ -2181,6 +2471,16 @@ int main(void)
         write_trial_csv(csv, result);
         write_pair_residuals(pair_csv, result);
         write_davidson_history(davidson_history_csv, result);
+        write_davidson_selection_history(
+            davidson_selection_history_csv, result);
+        write_davidson_block_history(
+            davidson_block_history_csv, result);
+        write_jd_local_history(jd_local_history_csv, result);
+        if (residual_support_csv != NULL) {
+            write_residual_support(
+                residual_support_csv, &matrix, diagnostics, result,
+                residual_support_pair, residual_support_top);
+        }
         benchmark_succeeded =
             benchmark_succeeded && trial_succeeded(result);
     }
@@ -2193,6 +2493,12 @@ int main(void)
     fflush(csv);
     fflush(pair_csv);
     fflush(davidson_history_csv);
+    fflush(davidson_selection_history_csv);
+    fflush(davidson_block_history_csv);
+    fflush(jd_local_history_csv);
+    if (residual_support_csv != NULL) {
+        fflush(residual_support_csv);
+    }
 
     write_block_diagnostics(
         summary, diagnostics, ipt_k,
@@ -2216,10 +2522,22 @@ int main(void)
     fclose(summary);
     fclose(pair_csv);
     fclose(davidson_history_csv);
+    fclose(davidson_selection_history_csv);
+    fclose(davidson_block_history_csv);
+    fclose(jd_local_history_csv);
+    if (residual_support_csv != NULL) {
+        fclose(residual_support_csv);
+    }
 
     printf("wrote %s\n", csv_path);
     printf("wrote %s\n", summary_path);
     printf("wrote %s\n", pair_csv_path);
     printf("wrote %s\n", davidson_history_path);
+    printf("wrote %s\n", davidson_selection_history_path);
+    printf("wrote %s\n", davidson_block_history_path);
+    printf("wrote %s\n", jd_local_history_path);
+    if (dump_residual_support) {
+        printf("wrote %s\n", residual_support_path);
+    }
     return benchmark_succeeded ? 0 : 3;
 }

@@ -1,0 +1,2 @@
+selection_metric=final_max_relative_eigen_residual
+best_row=1e-8,20,3,0,success,30,7.4309745867086624e-10,8.8208469669436617e-14,7.4309745867086624e-10,42,1.8429702208777599e-14,20,20,20,8.9723596496938299e-14,1,7.3998076568640368e-14,7.3548101542611783e-14,42,1.3988810110276972e-14,0,0,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/block_active_davidson_v1/denom_1e-8_extra_20_ortho_3

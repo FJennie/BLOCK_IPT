@@ -1,0 +1,2 @@
+method,repeat,requested_k,basis_cols,returned_k,iterations,status,time_total_sec,max_relative_eigen_residual,max_relative_eigen_residual_index,relative_fixed_point_residual
+IPT_CUDA_BLOCK_CLUSTER,1,30,52,30,200,failed,23.489333876059391,2.8707870270886921e-11,29,1.0047483555654124
