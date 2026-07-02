@@ -1,0 +1,297 @@
+===== ACX CUDA sweep job =====
+Tue Jun 16 14:24:57 CST 2026
+gsn0
+SLURM_JOB_ID=3021311
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/ACX
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/ACX
+ACX_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX
+ACX_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX
+ACX_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/acx_cuda_sweep_summary.txt
+ACX_SWEEP_NS=4096,8192,16384
+ACX_EPSILON_VALUES=0.06,0.08,0.1,0.12
+ACX_TOL=1e-12
+ACX_MAXITER=1000
+ACX_REPEATS=5
+ACX_WARMUP_N=128
+ACX_APPEND_RESULTS=false
+ACX_COMPUTE_RESIDUAL=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Tue Jun 16 14:24:57 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:51:00.0 Off |                    0 |
+| N/A   29C    P0              58W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== ACX CUDA sweep =====
+root=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX
+logs=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX
+summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/acx_cuda_sweep_summary.txt
+N values = 4096, 8192, 16384
+epsilon values = 0.06, 0.08, 0.1, 0.12
+tol=9.9999999999999998e-13 maxiter=1000 repeats=5 warmup_n=128 seed=20260615 gpu=NVIDIA A100-SXM4-80GB
+GPU memory at start: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=4096 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.61925872 s
+GPU memory after matrix: free 78.597 GiB / total 79.151 GiB
+ACX warmup for N=4096
+  ACX run 1/5: total=0.21404834 s, iter=0.2021249 s, finalize=0.0072294846 s, max_apply_res=2.1373738e-10, abs_res=nan, fixed_point_res=2.3194414e-13, iters=5, f_calls=11, converged=1, status=ok
+  ACX run 2/5: total=0.20797831 s, iter=0.19610038 s, finalize=0.0072093988 s, max_apply_res=2.1373738e-10, abs_res=nan, fixed_point_res=2.3194414e-13, iters=5, f_calls=11, converged=1, status=ok
+  ACX run 3/5: total=0.20878181 s, iter=0.19686344 s, finalize=0.0072089857 s, max_apply_res=2.1373738e-10, abs_res=nan, fixed_point_res=2.3194414e-13, iters=5, f_calls=11, converged=1, status=ok
+  ACX run 4/5: total=0.20813013 s, iter=0.19620823 s, finalize=0.0072087329 s, max_apply_res=2.1373738e-10, abs_res=nan, fixed_point_res=2.3194414e-13, iters=5, f_calls=11, converged=1, status=ok
+  ACX run 5/5: total=0.20827423 s, iter=0.19634224 s, finalize=0.0072105159 s, max_apply_res=2.1373738e-10, abs_res=8.0624594e-11, fixed_point_res=2.3194414e-13, iters=5, f_calls=11, converged=1, status=ok
+Original IPT warmup for N=4096
+  original IPT run 1/5: total=0.15087461 s, fixed_point_res=4.5204844e-13, abs_res=nan, iters=17, converged=1, status=ok
+  original IPT run 2/5: total=0.15073689 s, fixed_point_res=4.5204844e-13, abs_res=nan, iters=17, converged=1, status=ok
+  original IPT run 3/5: total=0.15141871 s, fixed_point_res=4.5204844e-13, abs_res=nan, iters=17, converged=1, status=ok
+  original IPT run 4/5: total=0.15134434 s, fixed_point_res=4.5204844e-13, abs_res=nan, iters=17, converged=1, status=ok
+  original IPT run 5/5: total=0.15120656 s, fixed_point_res=4.5204844e-13, abs_res=3.9753154e-10, iters=17, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=8192 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.1240637 s
+GPU memory after matrix: free 78.222 GiB / total 79.151 GiB
+ACX warmup for N=8192
+  ACX run 1/5: total=1.4386554 s, iter=1.3749098 s, finalize=0.057855453 s, max_apply_res=3.6182125e-09, abs_res=nan, fixed_point_res=8.437287e-13, iters=5, f_calls=11, converged=1, status=ok
+  ACX run 2/5: total=1.4422586 s, iter=1.3785221 s, finalize=0.057847655 s, max_apply_res=3.6182125e-09, abs_res=nan, fixed_point_res=8.437287e-13, iters=5, f_calls=11, converged=1, status=ok
+  ACX run 3/5: total=1.4401909 s, iter=1.3765218 s, finalize=0.057884464 s, max_apply_res=3.6182125e-09, abs_res=nan, fixed_point_res=8.437287e-13, iters=5, f_calls=11, converged=1, status=ok
+  ACX run 4/5: total=1.4394105 s, iter=1.3759691 s, finalize=0.057563346 s, max_apply_res=3.6182125e-09, abs_res=nan, fixed_point_res=8.437287e-13, iters=5, f_calls=11, converged=1, status=ok
+  ACX run 5/5: total=1.4385316 s, iter=1.3751645 s, finalize=0.057463211 s, max_apply_res=3.6182125e-09, abs_res=8.6246044e-10, fixed_point_res=8.437287e-13, iters=5, f_calls=11, converged=1, status=ok
+Original IPT warmup for N=8192
+  original IPT run 1/5: total=1.2004265 s, fixed_point_res=2.8422028e-13, abs_res=nan, iters=18, converged=1, status=ok
+  original IPT run 2/5: total=1.2011655 s, fixed_point_res=2.8422028e-13, abs_res=nan, iters=18, converged=1, status=ok
+  original IPT run 3/5: total=1.1994487 s, fixed_point_res=2.8422028e-13, abs_res=nan, iters=18, converged=1, status=ok
+  original IPT run 4/5: total=1.2024506 s, fixed_point_res=2.8422028e-13, abs_res=nan, iters=18, converged=1, status=ok
+  original IPT run 5/5: total=1.2037733 s, fixed_point_res=2.8422028e-13, abs_res=5.4143216e-10, iters=18, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=16384 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 13.401698 s
+GPU memory after matrix: free 76.722 GiB / total 79.151 GiB
+ACX warmup for N=16384
+  ACX run 1/5: total=11.389955 s, iter=10.896487 s, finalize=0.48097463 s, max_apply_res=4.7739264e-10, abs_res=nan, fixed_point_res=4.3658834e-14, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 2/5: total=11.402925 s, iter=10.905154 s, finalize=0.48331639 s, max_apply_res=4.7739264e-10, abs_res=nan, fixed_point_res=4.3658834e-14, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 3/5: total=11.398489 s, iter=10.903332 s, finalize=0.48249414 s, max_apply_res=4.7739264e-10, abs_res=nan, fixed_point_res=4.3658834e-14, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 4/5: total=11.406071 s, iter=10.905167 s, finalize=0.48361812 s, max_apply_res=4.7739264e-10, abs_res=nan, fixed_point_res=4.3658834e-14, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 5/5: total=11.404586 s, iter=10.905514 s, finalize=0.4846658 s, max_apply_res=4.7739264e-10, abs_res=2.1119592e-11, fixed_point_res=4.3658834e-14, iters=6, f_calls=13, converged=1, status=ok
+Original IPT warmup for N=16384
+  original IPT run 1/5: total=9.5658967 s, fixed_point_res=7.0403659e-13, abs_res=nan, iters=18, converged=1, status=ok
+  original IPT run 2/5: total=9.5722448 s, fixed_point_res=7.0403659e-13, abs_res=nan, iters=18, converged=1, status=ok
+  original IPT run 3/5: total=9.5722373 s, fixed_point_res=7.0403659e-13, abs_res=nan, iters=18, converged=1, status=ok
+  original IPT run 4/5: total=9.5713038 s, fixed_point_res=7.0403659e-13, abs_res=nan, iters=18, converged=1, status=ok
+  original IPT run 5/5: total=9.5629901 s, fixed_point_res=7.0403659e-13, abs_res=2.8666783e-09, iters=18, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.08 N=4096 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.51109936 s
+GPU memory after matrix: free 78.597 GiB / total 79.151 GiB
+ACX warmup for N=4096
+  ACX run 1/5: total=0.24363329 s, iter=0.23173915 s, finalize=0.0071984441 s, max_apply_res=9.6306409e-11, abs_res=nan, fixed_point_res=1.1282028e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 2/5: total=0.24350832 s, iter=0.23162378 s, finalize=0.0071982341 s, max_apply_res=9.6306409e-11, abs_res=nan, fixed_point_res=1.1282028e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 3/5: total=0.24398713 s, iter=0.23209858 s, finalize=0.0071988036 s, max_apply_res=9.6306409e-11, abs_res=nan, fixed_point_res=1.1282028e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 4/5: total=0.24318449 s, iter=0.23130347 s, finalize=0.0072005237 s, max_apply_res=9.6306409e-11, abs_res=nan, fixed_point_res=1.1282028e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 5/5: total=0.24412268 s, iter=0.23221673 s, finalize=0.0071986304 s, max_apply_res=9.6306409e-11, abs_res=1.3864173e-11, fixed_point_res=1.1282028e-13, iters=6, f_calls=13, converged=1, status=ok
+Original IPT warmup for N=4096
+  original IPT run 1/5: total=0.18718279 s, fixed_point_res=8.3889752e-13, abs_res=nan, iters=21, converged=1, status=ok
+  original IPT run 2/5: total=0.18651606 s, fixed_point_res=8.3889752e-13, abs_res=nan, iters=21, converged=1, status=ok
+  original IPT run 3/5: total=0.18654028 s, fixed_point_res=8.3889752e-13, abs_res=nan, iters=21, converged=1, status=ok
+  original IPT run 4/5: total=0.18660079 s, fixed_point_res=8.3889752e-13, abs_res=nan, iters=21, converged=1, status=ok
+  original IPT run 5/5: total=0.18653835 s, fixed_point_res=8.3889752e-13, abs_res=9.7120447e-10, iters=21, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.08 N=8192 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.2317477 s
+GPU memory after matrix: free 78.222 GiB / total 79.151 GiB
+ACX warmup for N=8192
+  ACX run 1/5: total=1.6995911 s, iter=1.6356405 s, finalize=0.058062848 s, max_apply_res=8.1013619e-10, abs_res=nan, fixed_point_res=4.1138119e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 2/5: total=1.7005052 s, iter=1.6370275 s, finalize=0.057552248 s, max_apply_res=8.1013619e-10, abs_res=nan, fixed_point_res=4.1138119e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 3/5: total=1.7017341 s, iter=1.6374297 s, finalize=0.05838514 s, max_apply_res=8.1013619e-10, abs_res=nan, fixed_point_res=4.1138119e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 4/5: total=1.6995753 s, iter=1.6354131 s, finalize=0.058262434 s, max_apply_res=8.1013619e-10, abs_res=nan, fixed_point_res=4.1138119e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 5/5: total=1.7028753 s, iter=1.6375872 s, finalize=0.058450322 s, max_apply_res=8.1013619e-10, abs_res=7.4278787e-11, fixed_point_res=4.1138119e-13, iters=6, f_calls=13, converged=1, status=ok
+Original IPT warmup for N=8192
+  original IPT run 1/5: total=1.5229893 s, fixed_point_res=4.6106594e-13, abs_res=nan, iters=23, converged=1, status=ok
+  original IPT run 2/5: total=1.5263974 s, fixed_point_res=4.6106594e-13, abs_res=nan, iters=23, converged=1, status=ok
+  original IPT run 3/5: total=1.5273701 s, fixed_point_res=4.6106594e-13, abs_res=nan, iters=23, converged=1, status=ok
+  original IPT run 4/5: total=1.5283623 s, fixed_point_res=4.6106594e-13, abs_res=nan, iters=23, converged=1, status=ok
+  original IPT run 5/5: total=1.5274173 s, fixed_point_res=4.6106594e-13, abs_res=1.145655e-09, iters=23, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.08 N=16384 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 13.287464 s
+GPU memory after matrix: free 76.722 GiB / total 79.151 GiB
+ACX warmup for N=16384
+  ACX run 1/5: total=11.415026 s, iter=10.915585 s, finalize=0.48679926 s, max_apply_res=1.391851e-09, abs_res=nan, fixed_point_res=4.865034e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 2/5: total=11.400562 s, iter=10.90405 s, finalize=0.48444952 s, max_apply_res=1.391851e-09, abs_res=nan, fixed_point_res=4.865034e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 3/5: total=11.410915 s, iter=10.914576 s, finalize=0.48379155 s, max_apply_res=1.391851e-09, abs_res=nan, fixed_point_res=4.865034e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 4/5: total=11.404587 s, iter=10.906442 s, finalize=0.48569413 s, max_apply_res=1.391851e-09, abs_res=nan, fixed_point_res=4.865034e-13, iters=6, f_calls=13, converged=1, status=ok
+  ACX run 5/5: total=11.403109 s, iter=10.908481 s, finalize=0.48208804 s, max_apply_res=1.391851e-09, abs_res=2.0004411e-10, fixed_point_res=4.865034e-13, iters=6, f_calls=13, converged=1, status=ok
+Original IPT warmup for N=16384
+  original IPT run 1/5: total=12.589054 s, fixed_point_res=5.172992e-13, abs_res=nan, iters=24, converged=1, status=ok
+  original IPT run 2/5: total=12.586269 s, fixed_point_res=5.172992e-13, abs_res=nan, iters=24, converged=1, status=ok
+  original IPT run 3/5: total=12.586111 s, fixed_point_res=5.172992e-13, abs_res=nan, iters=24, converged=1, status=ok
+  original IPT run 4/5: total=12.596034 s, fixed_point_res=5.172992e-13, abs_res=nan, iters=24, converged=1, status=ok
+  original IPT run 5/5: total=12.582607 s, fixed_point_res=5.172992e-13, abs_res=2.8328864e-09, iters=24, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=4096 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.60439382 s
+GPU memory after matrix: free 78.597 GiB / total 79.151 GiB
+ACX warmup for N=4096
+  ACX run 1/5: total=0.29655193 s, iter=0.28466958 s, finalize=0.0071928711 s, max_apply_res=2.9029109e-10, abs_res=nan, fixed_point_res=1.2757164e-13, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 2/5: total=0.29715629 s, iter=0.285296 s, finalize=0.0071933311 s, max_apply_res=2.9029109e-10, abs_res=nan, fixed_point_res=1.2757164e-13, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 3/5: total=0.29664729 s, iter=0.28478492 s, finalize=0.0071923607 s, max_apply_res=2.9029109e-10, abs_res=nan, fixed_point_res=1.2757164e-13, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 4/5: total=0.29634314 s, iter=0.284459 s, finalize=0.0071926899 s, max_apply_res=2.9029109e-10, abs_res=nan, fixed_point_res=1.2757164e-13, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 5/5: total=0.29649717 s, iter=0.28459591 s, finalize=0.0071956618 s, max_apply_res=2.9029109e-10, abs_res=1.0943919e-10, fixed_point_res=1.2757164e-13, iters=7, f_calls=16, converged=1, status=ok
+Original IPT warmup for N=4096
+  original IPT run 1/5: total=0.23744717 s, fixed_point_res=6.5367115e-13, abs_res=nan, iters=27, converged=1, status=ok
+  original IPT run 2/5: total=0.23653267 s, fixed_point_res=6.5367115e-13, abs_res=nan, iters=27, converged=1, status=ok
+  original IPT run 3/5: total=0.2360478 s, fixed_point_res=6.5367115e-13, abs_res=nan, iters=27, converged=1, status=ok
+  original IPT run 4/5: total=0.23728817 s, fixed_point_res=6.5367115e-13, abs_res=nan, iters=27, converged=1, status=ok
+  original IPT run 5/5: total=0.23660472 s, fixed_point_res=6.5367115e-13, abs_res=9.3785727e-10, iters=27, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=8192 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.1967439 s
+GPU memory after matrix: free 78.222 GiB / total 79.151 GiB
+ACX warmup for N=8192
+  ACX run 1/5: total=2.0746001 s, iter=2.0103212 s, finalize=0.058412003 s, max_apply_res=5.0948003e-11, abs_res=nan, fixed_point_res=4.414349e-14, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 2/5: total=2.0768076 s, iter=2.0128806 s, finalize=0.058072428 s, max_apply_res=5.0948003e-11, abs_res=nan, fixed_point_res=4.414349e-14, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 3/5: total=2.0783874 s, iter=2.0142552 s, finalize=0.058297277 s, max_apply_res=5.0948003e-11, abs_res=nan, fixed_point_res=4.414349e-14, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 4/5: total=2.0760065 s, iter=2.0117244 s, finalize=0.058468266 s, max_apply_res=5.0948003e-11, abs_res=nan, fixed_point_res=4.414349e-14, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 5/5: total=2.0762282 s, iter=2.0123774 s, finalize=0.058004445 s, max_apply_res=5.0948003e-11, abs_res=3.5772203e-11, fixed_point_res=4.414349e-14, iters=7, f_calls=16, converged=1, status=ok
+Original IPT warmup for N=8192
+  original IPT run 1/5: total=1.9046869 s, fixed_point_res=6.1971405e-13, abs_res=nan, iters=29, converged=1, status=ok
+  original IPT run 2/5: total=1.9064847 s, fixed_point_res=6.1971405e-13, abs_res=nan, iters=29, converged=1, status=ok
+  original IPT run 3/5: total=1.9085429 s, fixed_point_res=6.1971405e-13, abs_res=nan, iters=29, converged=1, status=ok
+  original IPT run 4/5: total=1.9089136 s, fixed_point_res=6.1971405e-13, abs_res=nan, iters=29, converged=1, status=ok
+  original IPT run 5/5: total=1.9092917 s, fixed_point_res=6.1971405e-13, abs_res=2.0023786e-09, iters=29, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=16384 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 13.457894 s
+GPU memory after matrix: free 76.722 GiB / total 79.151 GiB
+ACX warmup for N=16384
+  ACX run 1/5: total=13.922046 s, iter=13.424709 s, finalize=0.48464987 s, max_apply_res=8.8152739e-10, abs_res=nan, fixed_point_res=9.3277786e-14, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 2/5: total=13.911203 s, iter=13.415186 s, finalize=0.48255701 s, max_apply_res=8.8152739e-10, abs_res=nan, fixed_point_res=9.3277786e-14, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 3/5: total=13.929744 s, iter=13.434851 s, finalize=0.4825036 s, max_apply_res=8.8152739e-10, abs_res=nan, fixed_point_res=9.3277786e-14, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 4/5: total=13.924009 s, iter=13.426344 s, finalize=0.48511834 s, max_apply_res=8.8152739e-10, abs_res=nan, fixed_point_res=9.3277786e-14, iters=7, f_calls=16, converged=1, status=ok
+  ACX run 5/5: total=13.942779 s, iter=13.445143 s, finalize=0.48517175 s, max_apply_res=8.8152739e-10, abs_res=4.4401414e-10, fixed_point_res=9.3277786e-14, iters=7, f_calls=16, converged=1, status=ok
+Original IPT warmup for N=16384
+  original IPT run 1/5: total=16.627913 s, fixed_point_res=5.6534426e-13, abs_res=nan, iters=32, converged=1, status=ok
+  original IPT run 2/5: total=16.617075 s, fixed_point_res=5.6534426e-13, abs_res=nan, iters=32, converged=1, status=ok
+  original IPT run 3/5: total=16.617013 s, fixed_point_res=5.6534426e-13, abs_res=nan, iters=32, converged=1, status=ok
+  original IPT run 4/5: total=16.626436 s, fixed_point_res=5.6534426e-13, abs_res=nan, iters=32, converged=1, status=ok
+  original IPT run 5/5: total=16.639263 s, fixed_point_res=5.6534426e-13, abs_res=3.770158e-09, iters=32, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=4096 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.52236384 s
+GPU memory after matrix: free 78.597 GiB / total 79.151 GiB
+ACX warmup for N=4096
+  ACX run 1/5: total=0.33267019 s, iter=0.32078216 s, finalize=0.0071923761 s, max_apply_res=7.0780483e-11, abs_res=nan, fixed_point_res=2.3534557e-14, iters=8, f_calls=18, converged=1, status=ok
+  ACX run 2/5: total=0.33232638 s, iter=0.32044066 s, finalize=0.007191001 s, max_apply_res=7.0780483e-11, abs_res=nan, fixed_point_res=2.3534557e-14, iters=8, f_calls=18, converged=1, status=ok
+  ACX run 3/5: total=0.33262948 s, iter=0.32073441 s, finalize=0.007192784 s, max_apply_res=7.0780483e-11, abs_res=nan, fixed_point_res=2.3534557e-14, iters=8, f_calls=18, converged=1, status=ok
+  ACX run 4/5: total=0.33248454 s, iter=0.32059314 s, finalize=0.0071905679 s, max_apply_res=7.0780483e-11, abs_res=nan, fixed_point_res=2.3534557e-14, iters=8, f_calls=18, converged=1, status=ok
+  ACX run 5/5: total=0.33263895 s, iter=0.32074384 s, finalize=0.0071913111 s, max_apply_res=7.0780483e-11, abs_res=6.4533751e-12, fixed_point_res=2.3534557e-14, iters=8, f_calls=18, converged=1, status=ok
+Original IPT warmup for N=4096
+  original IPT run 1/5: total=0.29443849 s, fixed_point_res=9.022751e-13, abs_res=nan, iters=34, converged=1, status=ok
+  original IPT run 2/5: total=0.29531693 s, fixed_point_res=9.022751e-13, abs_res=nan, iters=34, converged=1, status=ok
+  original IPT run 3/5: total=0.29464046 s, fixed_point_res=9.022751e-13, abs_res=nan, iters=34, converged=1, status=ok
+  original IPT run 4/5: total=0.2954424 s, fixed_point_res=9.022751e-13, abs_res=nan, iters=34, converged=1, status=ok
+  original IPT run 5/5: total=0.29484386 s, fixed_point_res=9.022751e-13, abs_res=1.6151765e-09, iters=34, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=8192 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.1185553 s
+GPU memory after matrix: free 78.222 GiB / total 79.151 GiB
+ACX warmup for N=8192
+  ACX run 1/5: total=2.3310711 s, iter=2.2672659 s, finalize=0.057873875 s, max_apply_res=6.1945067e-10, abs_res=nan, fixed_point_res=2.5449718e-13, iters=8, f_calls=18, converged=1, status=ok
+  ACX run 2/5: total=2.3265987 s, iter=2.2624843 s, finalize=0.058239659 s, max_apply_res=6.1945067e-10, abs_res=nan, fixed_point_res=2.5449718e-13, iters=8, f_calls=18, converged=1, status=ok
+  ACX run 3/5: total=2.3295326 s, iter=2.265719 s, finalize=0.057925008 s, max_apply_res=6.1945067e-10, abs_res=nan, fixed_point_res=2.5449718e-13, iters=8, f_calls=18, converged=1, status=ok
+  ACX run 4/5: total=2.3270282 s, iter=2.2629404 s, finalize=0.058219516 s, max_apply_res=6.1945067e-10, abs_res=nan, fixed_point_res=2.5449718e-13, iters=8, f_calls=18, converged=1, status=ok
+  ACX run 5/5: total=2.3269672 s, iter=2.2631347 s, finalize=0.057942253 s, max_apply_res=6.1945067e-10, abs_res=1.0545681e-10, fixed_point_res=2.5449718e-13, iters=8, f_calls=18, converged=1, status=ok
+Original IPT warmup for N=8192
+  original IPT run 1/5: total=2.6019044 s, fixed_point_res=7.3744142e-13, abs_res=nan, iters=40, converged=1, status=ok
+  original IPT run 2/5: total=2.6016936 s, fixed_point_res=7.3744142e-13, abs_res=nan, iters=40, converged=1, status=ok
+  original IPT run 3/5: total=2.606371 s, fixed_point_res=7.3744142e-13, abs_res=nan, iters=40, converged=1, status=ok
+  original IPT run 4/5: total=2.6017457 s, fixed_point_res=7.3744142e-13, abs_res=nan, iters=40, converged=1, status=ok
+  original IPT run 5/5: total=2.604817 s, fixed_point_res=7.3744142e-13, abs_res=2.6173168e-09, iters=40, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=16384 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 13.852142 s
+GPU memory after matrix: free 76.722 GiB / total 79.151 GiB
+ACX warmup for N=16384
+  ACX run 1/5: total=18.124269 s, iter=17.626263 s, finalize=0.48457116 s, max_apply_res=1.0554192e-09, abs_res=nan, fixed_point_res=9.3006764e-14, iters=9, f_calls=21, converged=1, status=ok
+  ACX run 2/5: total=18.117617 s, iter=17.618645 s, finalize=0.48605907 s, max_apply_res=1.0554192e-09, abs_res=nan, fixed_point_res=9.3006764e-14, iters=9, f_calls=21, converged=1, status=ok
+  ACX run 3/5: total=18.151556 s, iter=17.65471 s, finalize=0.48331415 s, max_apply_res=1.0554192e-09, abs_res=nan, fixed_point_res=9.3006764e-14, iters=9, f_calls=21, converged=1, status=ok
+  ACX run 4/5: total=18.14484 s, iter=17.649232 s, finalize=0.48327968 s, max_apply_res=1.0554192e-09, abs_res=nan, fixed_point_res=9.3006764e-14, iters=9, f_calls=21, converged=1, status=ok
+  ACX run 5/5: total=18.129821 s, iter=17.634201 s, finalize=0.48313092 s, max_apply_res=1.0554192e-09, abs_res=6.2613421e-10, fixed_point_res=9.3006764e-14, iters=9, f_calls=21, converged=1, status=ok
+Original IPT warmup for N=16384
+  original IPT run 1/5: total=21.692615 s, fixed_point_res=8.5199219e-13, abs_res=nan, iters=42, converged=1, status=ok
+  original IPT run 2/5: total=21.720922 s, fixed_point_res=8.5199219e-13, abs_res=nan, iters=42, converged=1, status=ok
+  original IPT run 3/5: total=21.698462 s, fixed_point_res=8.5199219e-13, abs_res=nan, iters=42, converged=1, status=ok
+  original IPT run 4/5: total=21.64742 s, fixed_point_res=8.5199219e-13, abs_res=nan, iters=42, converged=1, status=ok
+  original IPT run 5/5: total=21.661819 s, fixed_point_res=8.5199219e-13, abs_res=7.1161471e-09, iters=42, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== done failures=0 =====
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX:
+total 104K
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 16 10:14 acx_cuda_sweep_3020709.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.1K Jun 16 10:15 acx_cuda_sweep_3020709.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.1K Jun 16 10:15 acx_cuda_sweep_3020709.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 16 10:45 acx_cuda_sweep_3020720.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  11K Jun 16 10:35 acx_cuda_sweep_3020720.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  11K Jun 16 10:35 acx_cuda_sweep_3020720.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 16 14:24 acx_cuda_sweep_3021311.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  26K Jun 16 14:39 acx_cuda_sweep_3021311.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  26K Jun 16 14:39 acx_cuda_sweep_3021311.out
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   71 Jun 16 14:24 latest_acx_cuda_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/acx_cuda_sweep_3021311.log
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX:
+total 32K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.5K Jun 16 14:27 acx_cuda_sweep_epsilon_0_06.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.5K Jun 16 14:30 acx_cuda_sweep_epsilon_0_08.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.5K Jun 16 14:34 acx_cuda_sweep_epsilon_0_1.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.4K Jun 16 14:39 acx_cuda_sweep_epsilon_0_12.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  14K Jun 16 14:39 acx_cuda_sweep_summary.txt
+finished at: Tue Jun 16 14:39:30 CST 2026

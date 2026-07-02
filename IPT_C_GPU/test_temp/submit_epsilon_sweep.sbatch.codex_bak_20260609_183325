@@ -1,0 +1,248 @@
+#!/usr/bin/env bash
+#SBATCH --job-name=ipt_eps_sweep
+#SBATCH --partition=gpu1
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --gres=gpu:1
+#SBATCH --mem=128G
+#SBATCH --time=08:00:00
+#SBATCH --output=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/epsilon_sweep_%j.out
+#SBATCH --error=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/epsilon_sweep_%j.err
+
+set -uo pipefail
+
+ROOT="${IPT_C_ROOT:-/fs1/home/nudt_liujie/ftt/IPT_C_GPU}"
+OUT_DIR="${IPT_EPSILON_TEST_DIR:-$ROOT/results/EPSILON_test}"
+LOG_DIR="${IPT_C_LOG_DIR:-$ROOT/logs}"
+RUN_LOG="$OUT_DIR/epsilon_sweep_${SLURM_JOB_ID:-manual}.log"
+SUMMARY="$OUT_DIR/epsilon_sweep_summary.csv"
+THRESHOLDS="$OUT_DIR/epsilon_sweep_thresholds.txt"
+
+mkdir -p "$OUT_DIR/raw" "$LOG_DIR"
+ln -sfn "$RUN_LOG" "$OUT_DIR/latest_epsilon_sweep.log"
+exec > >(tee "$RUN_LOG") 2>&1
+
+if [ -f /fs1/software/modules/4.2.1-gcc8.4.1/init/bash ]; then
+    source /fs1/software/modules/4.2.1-gcc8.4.1/init/bash
+elif [ -f /etc/profile.d/module.sh ]; then
+    source /etc/profile.d/module.sh
+fi
+
+module load GCC/12.2.0
+module load CUDA/12.2
+
+cd "$ROOT"
+
+export IPT_C_ROOT="$ROOT"
+export IPT_TOL="${IPT_TOL:-1e-12}"
+export IPT_MAXITER="${IPT_MAXITER:-1000}"
+export IPT_REPEATS="${IPT_REPEATS:-1}"
+export IPT_SEED="${IPT_SEED:-20260603}"
+export IPT_COMPUTE_RESIDUALS="${IPT_COMPUTE_RESIDUALS:-true}"
+
+EPS_VALUES="${IPT_EPSILON_VALUES:-0.005 0.01 0.02 0.05 0.08 0.1 0.15 0.2 0.3 0.4 0.5}"
+N_VALUES="${IPT_EPSILON_TEST_NS:-8192,16384}"
+RUN_TIMEOUT_SECONDS="${IPT_RUN_TIMEOUT_SECONDS:-900}"
+APPEND_RESULTS="${IPT_EPSILON_SWEEP_APPEND:-false}"
+
+echo "===== IPT_C GPU epsilon sweep ====="
+date
+hostname
+echo "SLURM_JOB_ID=${SLURM_JOB_ID:-}"
+echo "SLURM_JOB_NODELIST=${SLURM_JOB_NODELIST:-}"
+echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-}"
+echo "ROOT=$ROOT"
+echo "OUT_DIR=$OUT_DIR"
+echo "N_VALUES=$N_VALUES"
+echo "EPS_VALUES=$EPS_VALUES"
+echo "IPT_TOL=$IPT_TOL"
+echo "IPT_MAXITER=$IPT_MAXITER"
+echo "IPT_REPEATS=$IPT_REPEATS"
+echo "IPT_COMPUTE_RESIDUALS=$IPT_COMPUTE_RESIDUALS"
+echo "RUN_TIMEOUT_SECONDS=$RUN_TIMEOUT_SECONDS"
+echo "APPEND_RESULTS=$APPEND_RESULTS"
+module list 2>&1
+echo
+nvidia-smi || true
+echo
+
+if [ "$APPEND_RESULTS" = "true" ] && [ -s "$SUMMARY" ]; then
+    echo "Appending rows to existing $SUMMARY"
+else
+    printf "N,epsilon,tol,maxiter,repeats,run_status,converged,slower_than_syevd,time_syevd_sec,time_ipt_sec,syevd_over_ipt,ipt_fixed_point_residual,ipt_iterations,residual_syevd,residual_ipt,gpu_name,raw_dir,run_log\n" > "$SUMMARY"
+fi
+
+append_missing_row() {
+    local n="$1"
+    local eps="$2"
+    local run_status="$3"
+    local raw_dir="$4"
+    local run_log="$5"
+
+    printf "%s,%s,%s,%s,%s,%s,false,unknown,nan,nan,nan,nan,0,nan,nan,unknown,%s,%s\n" \
+        "$n" "$eps" "$IPT_TOL" "$IPT_MAXITER" "$IPT_REPEATS" "$run_status" \
+        "$raw_dir" "$run_log" >> "$SUMMARY"
+}
+
+append_csv_row() {
+    local n="$1"
+    local eps="$2"
+    local run_status="$3"
+    local raw_dir="$4"
+    local run_log="$5"
+    local csv="$raw_dir/gpu_syevd_vs_ipt_results.csv"
+
+    if [ ! -s "$csv" ]; then
+        append_missing_row "$n" "$eps" "$run_status" "$raw_dir" "$run_log"
+        return
+    fi
+
+    tail -n 1 "$csv" | awk -F, \
+        -v n="$n" \
+        -v eps="$eps" \
+        -v tol="$IPT_TOL" \
+        -v maxiter="$IPT_MAXITER" \
+        -v repeats="$IPT_REPEATS" \
+        -v run_status="$run_status" \
+        -v raw_dir="$raw_dir" \
+        -v run_log="$run_log" '
+        function clean(x) { gsub(/^[ \t]+|[ \t]+$/, "", x); return x }
+        function finite(x) {
+            x = tolower(clean(x))
+            return x != "" && x !~ /nan/ && x !~ /inf/
+        }
+        function numout(x) {
+            return finite(x) ? sprintf("%.17g", x + 0.0) : "nan"
+        }
+        {
+            time_syevd = clean($3)
+            time_ipt = clean($4)
+            residual_syevd = clean($5)
+            residual_ipt = clean($6)
+            fp = clean($7)
+            iterations = clean($8)
+            gpu_name = clean($9)
+            converged = (finite(fp) && (fp + 0.0) <= (tol + 0.0)) ? "true" : "false"
+            slower = (finite(time_syevd) && finite(time_ipt) && (time_ipt + 0.0) > (time_syevd + 0.0)) ? "true" : "false"
+            speedup = (finite(time_syevd) && finite(time_ipt) && (time_ipt + 0.0) > 0.0) ? (time_syevd + 0.0) / (time_ipt + 0.0) : "nan"
+            printf "%s,%s,%.17g,%d,%d,%s,%s,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s,%s\n", \
+                n, eps, tol + 0.0, maxiter + 0, repeats + 0, run_status, \
+                converged, slower, numout(time_syevd), numout(time_ipt), \
+                (speedup == "nan" ? "nan" : sprintf("%.17g", speedup)), \
+                numout(fp), iterations + 0, numout(residual_syevd), \
+                numout(residual_ipt), \
+                gpu_name, raw_dir, run_log
+        }' >> "$SUMMARY"
+}
+
+for n in ${N_VALUES//,/ }; do
+    for eps in $EPS_VALUES; do
+        eps_label="$(printf "%s" "$eps" | sed 's/[^0-9A-Za-z]/_/g')"
+        raw_dir="$OUT_DIR/raw/N_${n}/eps_${eps_label}"
+        run_log="$raw_dir/run.log"
+        mkdir -p "$raw_dir"
+
+        echo
+        echo "===== N=$n EPSILON=$eps ====="
+        export IPT_BENCH_NS="$n"
+        export IPT_EPSILON="$eps"
+        export IPT_C_RESULTS_DIR="$raw_dir"
+        export IPT_C_LOG_DIR="$LOG_DIR"
+
+        if command -v timeout >/dev/null 2>&1; then
+            timeout "$RUN_TIMEOUT_SECONDS" ./test/benchmark_gpu_syevd_vs_ipt_cuda > "$run_log" 2>&1
+            run_code=$?
+        else
+            ./test/benchmark_gpu_syevd_vs_ipt_cuda > "$run_log" 2>&1
+            run_code=$?
+        fi
+
+        if [ "$run_code" -eq 0 ]; then
+            run_status="ok"
+        elif [ "$run_code" -eq 124 ]; then
+            run_status="timeout"
+        else
+            run_status="failed_${run_code}"
+        fi
+
+        append_csv_row "$n" "$eps" "$run_status" "$raw_dir" "$run_log"
+        tail -n 1 "$SUMMARY"
+    done
+done
+
+python3 - "$SUMMARY" "$THRESHOLDS" <<'PY'
+import csv
+import math
+import sys
+
+summary_path, out_path = sys.argv[1:3]
+
+def to_float(value):
+    try:
+        return float(value)
+    except Exception:
+        return math.nan
+
+rows = []
+with open(summary_path, newline="") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        row["_eps"] = to_float(row["epsilon"])
+        row["_time_syevd"] = to_float(row["time_syevd_sec"])
+        row["_time_ipt"] = to_float(row["time_ipt_sec"])
+        row["_fp"] = to_float(row["ipt_fixed_point_residual"])
+        rows.append(row)
+
+by_n = {}
+for row in rows:
+    by_n.setdefault(row["N"], []).append(row)
+
+with open(out_path, "w") as f:
+    f.write("IPT_C GPU EPSILON sweep thresholds\n")
+    f.write(f"summary_csv = {summary_path}\n\n")
+    for n, group in sorted(by_n.items(), key=lambda item: int(item[0])):
+        group = sorted(group, key=lambda row: row["_eps"])
+        first_not_converged = next((row for row in group if row["converged"] != "true"), None)
+        first_slower = next((row for row in group if row["slower_than_syevd"] == "true"), None)
+        last_converged = next((row for row in reversed(group) if row["converged"] == "true"), None)
+        f.write(f"N = {n}\n")
+        if last_converged is not None:
+            f.write(
+                "  largest tested converged epsilon = "
+                f"{last_converged['epsilon']} "
+                f"(iters={last_converged['ipt_iterations']}, "
+                f"fp={last_converged['ipt_fixed_point_residual']}, "
+                f"ipt_time={last_converged['time_ipt_sec']}, "
+                f"syevd_time={last_converged['time_syevd_sec']})\n"
+            )
+        else:
+            f.write("  no tested epsilon converged\n")
+        if first_not_converged is not None:
+            f.write(
+                "  first tested non-converged epsilon = "
+                f"{first_not_converged['epsilon']} "
+                f"(run_status={first_not_converged['run_status']}, "
+                f"iters={first_not_converged['ipt_iterations']}, "
+                f"fp={first_not_converged['ipt_fixed_point_residual']})\n"
+            )
+        else:
+            f.write("  no non-converged epsilon in tested range\n")
+        if first_slower is not None:
+            f.write(
+                "  first tested slower-than-SYEVD epsilon = "
+                f"{first_slower['epsilon']} "
+                f"(ipt_time={first_slower['time_ipt_sec']}, "
+                f"syevd_time={first_slower['time_syevd_sec']}, "
+                f"speedup={first_slower['syevd_over_ipt']})\n"
+            )
+        else:
+            f.write("  IPT was not slower than SYEVD in tested range\n")
+        f.write("\n")
+PY
+
+echo
+echo "===== epsilon sweep done ====="
+echo "summary_csv=$SUMMARY"
+echo "thresholds=$THRESHOLDS"
+cat "$THRESHOLDS"

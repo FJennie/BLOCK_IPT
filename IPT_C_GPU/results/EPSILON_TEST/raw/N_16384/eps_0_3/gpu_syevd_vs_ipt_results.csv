@@ -1,0 +1,2 @@
+N,epsilon,time_syevd_sec,time_ipt_sec,residual_syevd,residual_ipt,ipt_fixed_point_residual,ipt_iterations,gpu_name,status,error
+16384,0.29999999999999999,8.8978618551045656,9.8962096855975688,5.7790465117277212e-09,nan,nan,0,NVIDIA A100-SXM4-80GB,partial_failed,invalid argument

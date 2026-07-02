@@ -1,0 +1,94 @@
+===== N=26000 IPT/ACX all methods sweep job =====
+Thu Jun 18 23:29:37 CST 2026
+gsn1
+SLURM_JOB_ID=3030758
+SLURM_JOB_NODELIST=gsn1
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/ACX/ACX_MIXED_RAYLEIGH
+ACX_MIXED_RAYLEIGH_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods
+ACX_MIXED_RAYLEIGH_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods
+ACX_N26000_ALL_METHODS_CSV=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods/smoke.csv
+ACX_N26000_ALL_METHODS_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods/smoke_summary.txt
+ACX_MIXED_RAYLEIGH_SWEEP_NS=128
+ACX_MIXED_RAYLEIGH_EPSILON_VALUES=0.01
+ACX_TF32_TOL=1e-6
+ACX_TF32_MAXITER=1000
+ACX_FP64_TOL=1e-12
+ACX_FP64_MAXITER=1000
+ACX_MIXED_RAYLEIGH_REPEATS=1
+ACX_MIXED_RAYLEIGH_WARMUP_N=64
+ACX_MIXED_RAYLEIGH_SEED=20260617
+ACX_MIXED_RAYLEIGH_APPEND_RESULTS=false
+ACX_MIXED_RAYLEIGH_COMPUTE_RESIDUAL=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Thu Jun 18 23:29:37 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:A4:00.0 Off |                    0 |
+| N/A   28C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== N=26000 IPT/ACX all methods sweep =====
+root=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods
+logs=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods
+csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods/smoke.csv
+summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods/smoke_summary.txt
+N values = 128
+epsilon values = 0.01
+tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 tf32_maxiter=1000 fp64_maxiter=1000 repeats=1 warmup_n=64 seed=20260617 gpu=NVIDIA A100-SXM4-80GB
+GPU memory at start: free 78.691 GiB / total 79.151 GiB
+
+===== epsilon=0.01 N=128 =====
+GPU memory before matrix: free 78.691 GiB / total 79.151 GiB
+host matrix generated in 8.5929874e-05 s
+GPU memory after matrix: free 78.691 GiB / total 79.151 GiB
+cusolver warmup for N=128
+  cusolver run 1/1: total=0.002717318 s, residual=9.2538705e-13, status=ok
+IPT FP64 warmup for N=128
+  IPT FP64 run 1/1: total=0.00089027314 s, residual=6.834025e-13, fixed=2.5477897e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=7/0/0, f_calls=7/0/0, status=ok
+IPT mixed TF32->FP64 warmup for N=128
+  IPT mixed TF32->FP64 run 1/1: total=0.00082260929 s, residual=6.6931169e-14, fixed=3.37722e-14, tf32_fixed=2.3981161e-08, fp64_fixed=3.37722e-14, iterations=9/4/5, f_calls=9/4/5, status=ok
+IPT mixed Rayleigh TF32->FP64 warmup for N=128
+  IPT mixed Rayleigh TF32->FP64 run 1/1: total=0.0027957866 s, residual=5.4440818e-13, fixed=7.934127e-18, tf32_fixed=2.3981161e-08, fp64_fixed=7.934127e-18, iterations=7/4/3, f_calls=7/4/3, status=ok
+ACX FP64 warmup for N=128
+  ACX FP64 run 1/1: total=0.00095394207 s, residual=5.7535134e-16, fixed=1.2828727e-16, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+ACX mixed TF32->FP64 warmup for N=128
+  ACX mixed TF32->FP64 run 1/1: total=0.00092254207 s, residual=6.3477476e-16, fixed=2.887358e-16, tf32_fixed=9.6127038e-07, fp64_fixed=2.887358e-16, iterations=0/2/3, f_calls=9/3/6, status=ok
+ACX mixed Rayleigh TF32->FP64 warmup for N=128
+  ACX mixed Rayleigh TF32->FP64 run 1/1: total=0.0087720049 s, residual=5.2526268e-13, fixed=8.0507046e-18, tf32_fixed=9.6127038e-07, fp64_fixed=8.0507046e-18, iterations=0/2/2, f_calls=6/3/3, status=ok
+GPU memory after cleanup: free 78.691 GiB / total 79.151 GiB
+
+===== done failures=0 =====
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods:
+total 8.0K
+lrwxrwxrwx 1 nudt_liujie nudt_liujie  125 Jun 18 23:29 latest_n26000_all_methods_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods/n26000_all_methods_sweep_3030758.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.4K Jun 18 23:29 n26000_all_methods_sweep_3030758.log
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/smoke_n26000_all_methods:
+total 1.0K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.8K Jun 18 23:29 smoke.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  831 Jun 18 23:29 smoke_summary.txt
+finished at: Thu Jun 18 23:29:43 CST 2026

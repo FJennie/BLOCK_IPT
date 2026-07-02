@@ -1,0 +1,4 @@
+started_at=2026-06-17T10:21:09+0800 method=acx_mixed_tf32_fp64 repeats=1 tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 gpu=NVIDIA A100-SXM4-80GB
+epsilon=0.06 N=64 started_at=2026-06-17T10:21:09+0800
+epsilon=0.06 N=64 method=acx_mixed_tf32_fp64 finished_at=2026-06-17T10:21:10+0800 status=ok time=0.001241329126060009 tf32_time=0.00030616810545325279 fp64_time=0.0009349980391561985 final_time=2.2120308130979538e-05 abs_residual=4.3934236728901446e-14 tf32_fixed_point_residual=2.5502140525557496e-07 fp64_fixed_point_residual=2.9365281919207993e-14 tf32_iterations=3 fp64_iterations=4 tf32_f_calls=6 fp64_f_calls=8 tf32_converged=1 fp64_converged=1 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED/smoke/acx_mixed_tf32_cuda_sweep_epsilon_0_06.csv
+finished_at=2026-06-17T10:21:10+0800 failures=0

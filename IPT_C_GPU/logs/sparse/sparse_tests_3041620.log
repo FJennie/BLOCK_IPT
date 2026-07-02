@@ -1,0 +1,54 @@
+===== IPT_C_GPU sparse CUDA tests =====
+Sun Jun 21 14:28:55 CST 2026
+gsn0
+SLURM_JOB_ID=3041620
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse
+RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+
+Sun Jun 21 14:28:55 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:C7:00.0 Off |                    0 |
+| N/A   28C    P0              59W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/runtests_sparse.cu -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/runtests_sparse_cuda -lcublas
++ set +x
+
+===== run =====
+CUDA error at /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/../../src/ipt_cuda.cu:1111: PTX JIT compiler library not found
+synthetic_banded_k5 failed: CUDA runtime error
+CUDA error at /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/../../src/ipt_cuda.cu:1111: PTX JIT compiler library not found
+h20_fci_w_k1 failed: CUDA runtime error
+CUDA device 0: NVIDIA A100-SXM4-80GB, compute capability 8.0
+synthetic_banded_k5    n=  64 k=  5 nnz=  190 it=  80 vector_diff=inf value_diff=inf residual=inf FAIL
+h20_fci_w_k1           n=  10 k=  1 nnz=  100 it=  80 vector_diff=inf value_diff=inf residual=inf FAIL
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/sparse_runtests_summary.txt
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/sparse_runtests_summary.csv
+2 sparse CUDA IPT test(s) failed

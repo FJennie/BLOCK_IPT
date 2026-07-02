@@ -1,0 +1,619 @@
+===== IPT mixed TF32 and Rayleigh mixed sweep job =====
+Thu Jun 18 22:47:03 CST 2026
+gsn1
+SLURM_JOB_ID=3030559
+SLURM_JOB_NODELIST=gsn1
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/mixed_precision
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/rayleigh_mixed
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed
+IPT_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed/ipt_mixed_tf32_rayleigh_sweep_summary.txt
+IPT_SWEEP_NS=4096,8192,16384
+IPT_EPSILON_VALUES=0.01,0.02,0.03,0.04,0.05,0.06,0.08,0.1,0.12
+IPT_TF32_TOL=1e-6
+IPT_TF32_MAXITER=1000
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=5
+IPT_WARMUP_N=128
+IPT_APPEND_RESULTS=false
+IPT_SKIP_EXISTING=false
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Thu Jun 18 22:47:04 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:A4:00.0 Off |                    0 |
+| N/A   28C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== IPT mixed TF32 and Rayleigh mixed sweep =====
+results_dir=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed logs_dir=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed/ipt_mixed_tf32_rayleigh_sweep_summary.txt
+N values = 4096, 8192, 16384
+epsilon values = 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.08, 0.1, 0.12
+tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 repeats=5 gpu=NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.722 GiB / total 79.151 GiB
+===== warmup N=128 =====
+===== warmup done =====
+
+===== epsilon=0.01 N=4096 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.48986912 s
+CUDA memory after matrix: free 78.597 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=4096
+  mixed tf32 run 1/5: tf32=0.01238592 s, fp64=0.061182813 s, total=0.073569058 s, tf32_fp=3.6773694e-08, fp64_fp=7.22931e-14, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 2/5: tf32=0.012381904 s, fp64=0.056933213 s, total=0.069315496 s, tf32_fp=3.6773694e-08, fp64_fp=7.22931e-14, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 3/5: tf32=0.011521443 s, fp64=0.053144131 s, total=0.064665922 s, tf32_fp=3.6773694e-08, fp64_fp=7.22931e-14, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 4/5: tf32=0.011507225 s, fp64=0.053070016 s, total=0.064577642 s, tf32_fp=3.6773694e-08, fp64_fp=7.22931e-14, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 5/5: tf32=0.011615028 s, fp64=0.053359661 s, total=0.064975009 s, tf32_fp=3.6773694e-08, fp64_fp=7.22931e-14, abs_res=5.9778441e-12, iters=4/5, status=ok
+Rayleigh mixed QR warmup for N=4096
+  rayleigh run 1/5: tf32=0.011391101 s, orth=0.06663975 s, transform=0.016084449 s, fp64=0.032815907 s, back=0.0080660158 s, total=0.13499722 s, tf32_fp=3.6773694e-08, fp64_fp=9.5291203e-18, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 2/5: tf32=0.012378636 s, orth=0.067581699 s, transform=0.016018363 s, fp64=0.032923932 s, back=0.007949397 s, total=0.13685203 s, tf32_fp=3.6773694e-08, fp64_fp=9.5291203e-18, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 3/5: tf32=0.011449951 s, orth=0.066465966 s, transform=0.015866568 s, fp64=0.032670657 s, back=0.0078765242 s, total=0.13432967 s, tf32_fp=3.6773694e-08, fp64_fp=9.5291203e-18, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 4/5: tf32=0.011598582 s, orth=0.066521701 s, transform=0.016012289 s, fp64=0.032809832 s, back=0.0080388081 s, total=0.13498121 s, tf32_fp=3.6773694e-08, fp64_fp=9.5291203e-18, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 5/5: tf32=0.012272306 s, orth=0.06545963 s, transform=0.015939081 s, fp64=0.032733417 s, back=0.0080803493 s, total=0.13448478 s, tf32_fp=3.6773694e-08, fp64_fp=9.5291203e-18, abs_res=5.133143e-10, iters=4/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.01 N=8192 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.5298386 s
+CUDA memory after matrix: free 78.222 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=8192
+  mixed tf32 run 1/5: tf32=0.043452924 s, fp64=0.37763188 s, total=0.42108524 s, tf32_fp=3.7512042e-08, fp64_fp=1.1241077e-13, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 2/5: tf32=0.04281605 s, fp64=0.37823004 s, total=0.42104638 s, tf32_fp=3.7512042e-08, fp64_fp=1.1241077e-13, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 3/5: tf32=0.042899266 s, fp64=0.3790865 s, total=0.42198605 s, tf32_fp=3.7512042e-08, fp64_fp=1.1241077e-13, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 4/5: tf32=0.042368549 s, fp64=0.37912733 s, total=0.42149635 s, tf32_fp=3.7512042e-08, fp64_fp=1.1241077e-13, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 5/5: tf32=0.04351571 s, fp64=0.37700452 s, total=0.42052067 s, tf32_fp=3.7512042e-08, fp64_fp=1.1241077e-13, abs_res=2.0657758e-11, iters=4/5, status=ok
+Rayleigh mixed QR warmup for N=8192
+  rayleigh run 1/5: tf32=0.043482958 s, orth=0.24209054 s, transform=0.12213197 s, fp64=0.251181 s, back=0.061522545 s, total=0.72040901 s, tf32_fp=3.7512042e-08, fp64_fp=1.232138e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 2/5: tf32=0.043578197 s, orth=0.24242314 s, transform=0.12419242 s, fp64=0.25270833 s, back=0.062062782 s, total=0.72496487 s, tf32_fp=3.7512042e-08, fp64_fp=1.232138e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 3/5: tf32=0.04380927 s, orth=0.24234963 s, transform=0.12514962 s, fp64=0.25240514 s, back=0.060808939 s, total=0.7245226 s, tf32_fp=3.7512042e-08, fp64_fp=1.232138e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 4/5: tf32=0.04378315 s, orth=0.24184582 s, transform=0.12576094 s, fp64=0.25596341 s, back=0.061298007 s, total=0.72865133 s, tf32_fp=3.7512042e-08, fp64_fp=1.232138e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 5/5: tf32=0.042307003 s, orth=0.24410126 s, transform=0.12526905 s, fp64=0.25183524 s, back=0.061291297 s, total=0.72480386 s, tf32_fp=3.7512042e-08, fp64_fp=1.232138e-17, abs_res=1.698218e-09, iters=4/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.01 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 15.199429 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=16384
+  mixed tf32 run 1/5: tf32=0.29995131 s, fp64=2.9981972 s, total=3.2981489 s, tf32_fp=3.8792828e-08, fp64_fp=9.2460918e-14, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 2/5: tf32=0.30373209 s, fp64=2.9901764 s, total=3.2939089 s, tf32_fp=3.8792828e-08, fp64_fp=9.2460918e-14, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 3/5: tf32=0.30288645 s, fp64=2.9915565 s, total=3.2944434 s, tf32_fp=3.8792828e-08, fp64_fp=9.2460918e-14, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 4/5: tf32=0.30303121 s, fp64=2.9927124 s, total=3.2957443 s, tf32_fp=3.8792828e-08, fp64_fp=9.2460918e-14, abs_res=nan, iters=4/5, status=ok
+  mixed tf32 run 5/5: tf32=0.30168155 s, fp64=3.0087378 s, total=3.3104198 s, tf32_fp=3.8792828e-08, fp64_fp=9.2460918e-14, abs_res=3.1180322e-11, iters=4/5, status=ok
+Rayleigh mixed QR warmup for N=16384
+  rayleigh run 1/5: tf32=0.30493813 s, orth=1.1370671 s, transform=1.0557067 s, fp64=2.0006856 s, back=0.49676804 s, total=4.9951656 s, tf32_fp=3.8792828e-08, fp64_fp=1.1546245e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 2/5: tf32=0.30525748 s, orth=1.1366586 s, transform=1.0465793 s, fp64=2.0087355 s, back=0.49876542 s, total=4.9959964 s, tf32_fp=3.8792828e-08, fp64_fp=1.1546245e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 3/5: tf32=0.30515137 s, orth=1.1362197 s, transform=1.0508198 s, fp64=2.0040475 s, back=0.49741064 s, total=4.9936491 s, tf32_fp=3.8792828e-08, fp64_fp=1.1546245e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 4/5: tf32=0.30457931 s, orth=1.1364147 s, transform=1.0539235 s, fp64=2.0013362 s, back=0.49329836 s, total=4.989552 s, tf32_fp=3.8792828e-08, fp64_fp=1.1546245e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 5/5: tf32=0.30791488 s, orth=1.1387169 s, transform=1.0535149 s, fp64=2.0133971 s, back=0.49514507 s, total=5.0086888 s, tf32_fp=3.8792828e-08, fp64_fp=1.1546245e-17, abs_res=6.2240313e-09, iters=4/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.02 N=4096 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.64098497 s
+CUDA memory after matrix: free 78.597 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=4096
+  mixed tf32 run 1/5: tf32=0.011616122 s, fp64=0.061505996 s, total=0.073122392 s, tf32_fp=5.1499913e-07, fp64_fp=1.3176097e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 2/5: tf32=0.011615423 s, fp64=0.062319771 s, total=0.073935387 s, tf32_fp=5.1499913e-07, fp64_fp=1.3176097e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 3/5: tf32=0.011610006 s, fp64=0.061049868 s, total=0.072660202 s, tf32_fp=5.1499913e-07, fp64_fp=1.3176097e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 4/5: tf32=0.0116152 s, fp64=0.061564903 s, total=0.073180345 s, tf32_fp=5.1499913e-07, fp64_fp=1.3176097e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 5/5: tf32=0.011577067 s, fp64=0.061688914 s, total=0.073266166 s, tf32_fp=5.1499913e-07, fp64_fp=1.3176097e-13, abs_res=2.6333048e-11, iters=4/6, status=ok
+Rayleigh mixed QR warmup for N=4096
+  rayleigh run 1/5: tf32=0.012399888 s, orth=0.066766113 s, transform=0.01600148 s, fp64=0.033181628 s, back=0.0081632896 s, total=0.1365124 s, tf32_fp=5.1499913e-07, fp64_fp=7.5834725e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 2/5: tf32=0.012289999 s, orth=0.066866555 s, transform=0.015999468 s, fp64=0.033018263 s, back=0.0080900108 s, total=0.1362643 s, tf32_fp=5.1499913e-07, fp64_fp=7.5834725e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 3/5: tf32=0.012262505 s, orth=0.066645668 s, transform=0.016086159 s, fp64=0.032878729 s, back=0.008109712 s, total=0.13598277 s, tf32_fp=5.1499913e-07, fp64_fp=7.5834725e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 4/5: tf32=0.012275962 s, orth=0.066634656 s, transform=0.016036166 s, fp64=0.032892199 s, back=0.0080334898 s, total=0.13587247 s, tf32_fp=5.1499913e-07, fp64_fp=7.5834725e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 5/5: tf32=0.012420564 s, orth=0.066690086 s, transform=0.016000923 s, fp64=0.032887189 s, back=0.0079802647 s, total=0.13597903 s, tf32_fp=5.1499913e-07, fp64_fp=7.5834725e-17, abs_res=9.3356551e-10, iters=4/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.02 N=8192 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.5716715 s
+CUDA memory after matrix: free 78.222 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=8192
+  mixed tf32 run 1/5: tf32=0.043414494 s, fp64=0.44220053 s, total=0.48561531 s, tf32_fp=5.4343124e-07, fp64_fp=2.0808291e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 2/5: tf32=0.042545639 s, fp64=0.4453622 s, total=0.48790814 s, tf32_fp=5.4343124e-07, fp64_fp=2.0808291e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 3/5: tf32=0.043873674 s, fp64=0.44708834 s, total=0.49096248 s, tf32_fp=5.4343124e-07, fp64_fp=2.0808291e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 4/5: tf32=0.043136074 s, fp64=0.44371437 s, total=0.48685068 s, tf32_fp=5.4343124e-07, fp64_fp=2.0808291e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 5/5: tf32=0.042721051 s, fp64=0.44574977 s, total=0.48847106 s, tf32_fp=5.4343124e-07, fp64_fp=2.0808291e-13, abs_res=8.8551439e-11, iters=4/6, status=ok
+Rayleigh mixed QR warmup for N=8192
+  rayleigh run 1/5: tf32=0.042918127 s, orth=0.24328984 s, transform=0.12728036 s, fp64=0.25639383 s, back=0.061546673 s, total=0.73142882 s, tf32_fp=5.4343124e-07, fp64_fp=9.3470023e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 2/5: tf32=0.043562483 s, orth=0.24256492 s, transform=0.12528393 s, fp64=0.25802491 s, back=0.062084438 s, total=0.73152068 s, tf32_fp=5.4343124e-07, fp64_fp=9.3470023e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 3/5: tf32=0.042633599 s, orth=0.2443901 s, transform=0.12601516 s, fp64=0.25410794 s, back=0.0622074 s, total=0.7293542 s, tf32_fp=5.4343124e-07, fp64_fp=9.3470023e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 4/5: tf32=0.044257377 s, orth=0.24370002 s, transform=0.1265495 s, fp64=0.2535051 s, back=0.061429822 s, total=0.72944182 s, tf32_fp=5.4343124e-07, fp64_fp=9.3470023e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 5/5: tf32=0.042781266 s, orth=0.24171013 s, transform=0.12554794 s, fp64=0.25409098 s, back=0.061239489 s, total=0.72536982 s, tf32_fp=5.4343124e-07, fp64_fp=9.3470023e-17, abs_res=2.4997973e-09, iters=4/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.02 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 14.937414 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=16384
+  mixed tf32 run 1/5: tf32=0.30288758 s, fp64=3.5048618 s, total=3.8077498 s, tf32_fp=5.6310449e-07, fp64_fp=1.8307186e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 2/5: tf32=0.30320586 s, fp64=3.50571 s, total=3.8089163 s, tf32_fp=5.6310449e-07, fp64_fp=1.8307186e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 3/5: tf32=0.30365702 s, fp64=3.500083 s, total=3.8037403 s, tf32_fp=5.6310449e-07, fp64_fp=1.8307186e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 4/5: tf32=0.30375643 s, fp64=3.5218399 s, total=3.8255967 s, tf32_fp=5.6310449e-07, fp64_fp=1.8307186e-13, abs_res=nan, iters=4/6, status=ok
+  mixed tf32 run 5/5: tf32=0.30440866 s, fp64=3.5044701 s, total=3.808879 s, tf32_fp=5.6310449e-07, fp64_fp=1.8307186e-13, abs_res=1.719128e-10, iters=4/6, status=ok
+Rayleigh mixed QR warmup for N=16384
+  rayleigh run 1/5: tf32=0.30507657 s, orth=1.1398373 s, transform=1.0550844 s, fp64=2.0087938 s, back=0.49468921 s, total=5.0034812 s, tf32_fp=5.6310449e-07, fp64_fp=8.0946372e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 2/5: tf32=0.30276863 s, orth=1.1384025 s, transform=1.0469254 s, fp64=2.0115026 s, back=0.49601237 s, total=4.9956115 s, tf32_fp=5.6310449e-07, fp64_fp=8.0946372e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 3/5: tf32=0.30400861 s, orth=1.1383602 s, transform=1.0526157 s, fp64=2.0015175 s, back=0.49657053 s, total=4.9930725 s, tf32_fp=5.6310449e-07, fp64_fp=8.0946372e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 4/5: tf32=0.30535344 s, orth=1.1384296 s, transform=1.05526 s, fp64=2.0141725 s, back=0.48657325 s, total=4.9997887 s, tf32_fp=5.6310449e-07, fp64_fp=8.0946372e-17, abs_res=nan, iters=4/3, status=ok
+  rayleigh run 5/5: tf32=0.30583336 s, orth=1.1545047 s, transform=1.0551742 s, fp64=2.0202548 s, back=0.49510754 s, total=5.0308746 s, tf32_fp=5.6310449e-07, fp64_fp=8.0946372e-17, abs_res=7.0969588e-09, iters=4/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.03 N=4096 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.5874118 s
+CUDA memory after matrix: free 78.597 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=4096
+  mixed tf32 run 1/5: tf32=0.01283246 s, fp64=0.068715739 s, total=0.08154846 s, tf32_fp=2.510154e-07, fp64_fp=2.2510128e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 2/5: tf32=0.012868045 s, fp64=0.069080333 s, total=0.081948778 s, tf32_fp=2.510154e-07, fp64_fp=2.2510128e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 3/5: tf32=0.012845328 s, fp64=0.069293744 s, total=0.082139401 s, tf32_fp=2.510154e-07, fp64_fp=2.2510128e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 4/5: tf32=0.012871431 s, fp64=0.069191316 s, total=0.082063134 s, tf32_fp=2.510154e-07, fp64_fp=2.2510128e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 5/5: tf32=0.012871557 s, fp64=0.069196439 s, total=0.082068276 s, tf32_fp=2.510154e-07, fp64_fp=2.2510128e-13, abs_res=9.2330417e-11, iters=5/7, status=ok
+Rayleigh mixed QR warmup for N=4096
+  rayleigh run 1/5: tf32=0.013508917 s, orth=0.066046228 s, transform=0.015901636 s, fp64=0.032602456 s, back=0.0080090668 s, total=0.1360683 s, tf32_fp=2.510154e-07, fp64_fp=2.3177861e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 2/5: tf32=0.013577199 s, orth=0.06608077 s, transform=0.016043766 s, fp64=0.03289882 s, back=0.0080833202 s, total=0.13668388 s, tf32_fp=2.510154e-07, fp64_fp=2.3177861e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 3/5: tf32=0.013578167 s, orth=0.066101318 s, transform=0.015999633 s, fp64=0.032898577 s, back=0.0080289631 s, total=0.13660666 s, tf32_fp=2.510154e-07, fp64_fp=2.3177861e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 4/5: tf32=0.013571207 s, orth=0.066278265 s, transform=0.016082515 s, fp64=0.033070002 s, back=0.0080163232 s, total=0.13701831 s, tf32_fp=2.510154e-07, fp64_fp=2.3177861e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 5/5: tf32=0.013501263 s, orth=0.065894818 s, transform=0.016010848 s, fp64=0.032804878 s, back=0.0080260299 s, total=0.13623784 s, tf32_fp=2.510154e-07, fp64_fp=2.3177861e-16, abs_res=1.4388732e-09, iters=5/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.03 N=8192 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.4466263 s
+CUDA memory after matrix: free 78.222 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=8192
+  mixed tf32 run 1/5: tf32=0.051701768 s, fp64=0.50593077 s, total=0.557633 s, tf32_fp=2.7146999e-07, fp64_fp=3.9148296e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 2/5: tf32=0.05227806 s, fp64=0.50918079 s, total=0.56145938 s, tf32_fp=2.7146999e-07, fp64_fp=3.9148296e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 3/5: tf32=0.052474677 s, fp64=0.50837738 s, total=0.56085227 s, tf32_fp=2.7146999e-07, fp64_fp=3.9148296e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 4/5: tf32=0.052235409 s, fp64=0.50819491 s, total=0.56043056 s, tf32_fp=2.7146999e-07, fp64_fp=3.9148296e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 5/5: tf32=0.052348216 s, fp64=0.5086581 s, total=0.56100653 s, tf32_fp=2.7146999e-07, fp64_fp=3.9148296e-13, abs_res=2.8602191e-10, iters=5/7, status=ok
+Rayleigh mixed QR warmup for N=8192
+  rayleigh run 1/5: tf32=0.052025438 s, orth=0.24372458 s, transform=0.12553013 s, fp64=0.25744118 s, back=0.062161683 s, total=0.74088302 s, tf32_fp=2.7146999e-07, fp64_fp=2.7856009e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 2/5: tf32=0.052243522 s, orth=0.24379846 s, transform=0.12601439 s, fp64=0.25603391 s, back=0.061936585 s, total=0.74002687 s, tf32_fp=2.7146999e-07, fp64_fp=2.7856009e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 3/5: tf32=0.052768642 s, orth=0.24455096 s, transform=0.12702444 s, fp64=0.255745 s, back=0.062196281 s, total=0.74228532 s, tf32_fp=2.7146999e-07, fp64_fp=2.7856009e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 4/5: tf32=0.053154155 s, orth=0.24416903 s, transform=0.1255647 s, fp64=0.25517544 s, back=0.061916266 s, total=0.73997959 s, tf32_fp=2.7146999e-07, fp64_fp=2.7856009e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 5/5: tf32=0.052515254 s, orth=0.24579277 s, transform=0.12490817 s, fp64=0.31058856 s, back=0.061608667 s, total=0.79541343 s, tf32_fp=2.7146999e-07, fp64_fp=2.7856009e-16, abs_res=3.8377101e-09, iters=5/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.03 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 15.210573 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=16384
+  mixed tf32 run 1/5: tf32=0.37522225 s, fp64=4.0044644 s, total=4.3796871 s, tf32_fp=2.9340973e-07, fp64_fp=4.0929991e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 2/5: tf32=0.37320898 s, fp64=4.0281612 s, total=4.4013706 s, tf32_fp=2.9340973e-07, fp64_fp=4.0929991e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 3/5: tf32=0.37439993 s, fp64=4.0261266 s, total=4.400527 s, tf32_fp=2.9340973e-07, fp64_fp=4.0929991e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 4/5: tf32=0.37420717 s, fp64=4.0430797 s, total=4.4172873 s, tf32_fp=2.9340973e-07, fp64_fp=4.0929991e-13, abs_res=nan, iters=5/7, status=ok
+  mixed tf32 run 5/5: tf32=0.3771685 s, fp64=4.0196429 s, total=4.3968117 s, tf32_fp=2.9340973e-07, fp64_fp=4.0929991e-13, abs_res=6.542793e-10, iters=5/7, status=ok
+Rayleigh mixed QR warmup for N=16384
+  rayleigh run 1/5: tf32=0.37701332 s, orth=1.1386713 s, transform=1.0562421 s, fp64=2.0044536 s, back=0.49632468 s, total=5.072705 s, tf32_fp=2.9340973e-07, fp64_fp=2.3684296e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 2/5: tf32=0.37696004 s, orth=1.1397158 s, transform=1.0540759 s, fp64=2.0084782 s, back=0.49450199 s, total=5.0737319 s, tf32_fp=2.9340973e-07, fp64_fp=2.3684296e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 3/5: tf32=0.37668074 s, orth=1.140146 s, transform=1.0554967 s, fp64=1.9995297 s, back=0.49556214 s, total=5.0674152 s, tf32_fp=2.9340973e-07, fp64_fp=2.3684296e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 4/5: tf32=0.3755357 s, orth=1.1391982 s, transform=1.0562876 s, fp64=2.0005856 s, back=0.49518294 s, total=5.06679 s, tf32_fp=2.9340973e-07, fp64_fp=2.3684296e-16, abs_res=nan, iters=5/3, status=ok
+  rayleigh run 5/5: tf32=0.37740447 s, orth=1.1402193 s, transform=1.0570314 s, fp64=2.006919 s, back=0.49587184 s, total=5.077446 s, tf32_fp=2.9340973e-07, fp64_fp=2.3684296e-16, abs_res=9.0836868e-09, iters=5/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.04 N=4096 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.43960111 s
+CUDA memory after matrix: free 78.597 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=4096
+  mixed tf32 run 1/5: tf32=0.01409744 s, fp64=0.078569237 s, total=0.092667098 s, tf32_fp=1.6876067e-07, fp64_fp=1.7539745e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 2/5: tf32=0.014109255 s, fp64=0.07807799 s, total=0.092187742 s, tf32_fp=1.6876067e-07, fp64_fp=1.7539745e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 3/5: tf32=0.014066348 s, fp64=0.07829092 s, total=0.092357659 s, tf32_fp=1.6876067e-07, fp64_fp=1.7539745e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 4/5: tf32=0.014060131 s, fp64=0.077507578 s, total=0.091568008 s, tf32_fp=1.6876067e-07, fp64_fp=1.7539745e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 5/5: tf32=0.014077191 s, fp64=0.077965162 s, total=0.092042767 s, tf32_fp=1.6876067e-07, fp64_fp=1.7539745e-13, abs_res=7.4787437e-11, iters=6/8, status=ok
+Rayleigh mixed QR warmup for N=4096
+  rayleigh run 1/5: tf32=0.025557996 s, orth=0.0653852 s, transform=0.015896354 s, fp64=0.042731755 s, back=0.0078844246 s, total=0.15745573 s, tf32_fp=1.6876067e-07, fp64_fp=6.1699507e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 2/5: tf32=0.013965019 s, orth=0.077747012 s, transform=0.018972989 s, fp64=0.033518902 s, back=0.0095391138 s, total=0.15374304 s, tf32_fp=1.6876067e-07, fp64_fp=6.1699507e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 3/5: tf32=0.023087279 s, orth=0.067919138 s, transform=0.016668308 s, fp64=0.035543051 s, back=0.008054283 s, total=0.15127206 s, tf32_fp=1.6876067e-07, fp64_fp=6.1699507e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 4/5: tf32=0.03486457 s, orth=0.065655181 s, transform=0.015993647 s, fp64=0.032911132 s, back=0.0079386979 s, total=0.15736323 s, tf32_fp=1.6876067e-07, fp64_fp=6.1699507e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 5/5: tf32=0.014825722 s, orth=0.065531042 s, transform=0.015945651 s, fp64=0.032612792 s, back=0.0078651151 s, total=0.13678032 s, tf32_fp=1.6876067e-07, fp64_fp=6.1699507e-16, abs_res=1.7754981e-09, iters=6/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.04 N=8192 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.6567642 s
+CUDA memory after matrix: free 78.222 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=8192
+  mixed tf32 run 1/5: tf32=0.059791275 s, fp64=0.57191817 s, total=0.63170992 s, tf32_fp=1.8733508e-07, fp64_fp=4.10845e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 2/5: tf32=0.059805873 s, fp64=0.57010218 s, total=0.62990833 s, tf32_fp=1.8733508e-07, fp64_fp=4.10845e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 3/5: tf32=0.060279137 s, fp64=0.57278924 s, total=0.63306866 s, tf32_fp=1.8733508e-07, fp64_fp=4.10845e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 4/5: tf32=0.060398464 s, fp64=0.57233577 s, total=0.63273448 s, tf32_fp=1.8733508e-07, fp64_fp=4.10845e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 5/5: tf32=0.060661368 s, fp64=0.57381123 s, total=0.63447303 s, tf32_fp=1.8733508e-07, fp64_fp=4.10845e-13, abs_res=4.5223864e-10, iters=6/8, status=ok
+Rayleigh mixed QR warmup for N=8192
+  rayleigh run 1/5: tf32=0.060472214 s, orth=0.24310275 s, transform=0.12630856 s, fp64=0.25487453 s, back=0.06208654 s, total=0.7468446 s, tf32_fp=1.8733508e-07, fp64_fp=7.3681862e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 2/5: tf32=0.059645995 s, orth=0.24243565 s, transform=0.12609639 s, fp64=0.25567286 s, back=0.061494751 s, total=0.74534564 s, tf32_fp=1.8733508e-07, fp64_fp=7.3681862e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 3/5: tf32=0.06030974 s, orth=0.2438561 s, transform=0.12751558 s, fp64=0.25369279 s, back=0.062319371 s, total=0.74769358 s, tf32_fp=1.8733508e-07, fp64_fp=7.3681862e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 4/5: tf32=0.061407913 s, orth=0.24276011 s, transform=0.12536401 s, fp64=0.25918386 s, back=0.061501162 s, total=0.75021705 s, tf32_fp=1.8733508e-07, fp64_fp=7.3681862e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 5/5: tf32=0.060638334 s, orth=0.24845905 s, transform=0.12580425 s, fp64=0.25549594 s, back=0.06186669 s, total=0.75226427 s, tf32_fp=1.8733508e-07, fp64_fp=7.3681862e-16, abs_res=5.2632458e-09, iters=6/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.04 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 15.079443 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=16384
+  mixed tf32 run 1/5: tf32=0.44515054 s, fp64=4.510024 s, total=4.9551749 s, tf32_fp=2.0007306e-07, fp64_fp=3.3390355e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 2/5: tf32=0.45064329 s, fp64=4.5132875 s, total=4.9639312 s, tf32_fp=2.0007306e-07, fp64_fp=3.3390355e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 3/5: tf32=0.44681716 s, fp64=4.5570647 s, total=5.0038822 s, tf32_fp=2.0007306e-07, fp64_fp=3.3390355e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 4/5: tf32=0.44946892 s, fp64=4.5209449 s, total=4.9704142 s, tf32_fp=2.0007306e-07, fp64_fp=3.3390355e-13, abs_res=nan, iters=6/8, status=ok
+  mixed tf32 run 5/5: tf32=0.44806807 s, fp64=4.5247153 s, total=4.9727837 s, tf32_fp=2.0007306e-07, fp64_fp=3.3390355e-13, abs_res=8.1237382e-10, iters=6/8, status=ok
+Rayleigh mixed QR warmup for N=16384
+  rayleigh run 1/5: tf32=0.44938609 s, orth=1.1397774 s, transform=1.0573673 s, fp64=2.015259 s, back=0.49698989 s, total=5.1587797 s, tf32_fp=2.0007306e-07, fp64_fp=6.1919069e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 2/5: tf32=0.44975137 s, orth=1.1393829 s, transform=1.0536017 s, fp64=2.0173338 s, back=0.49665918 s, total=5.156729 s, tf32_fp=2.0007306e-07, fp64_fp=6.1919069e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 3/5: tf32=0.44770449 s, orth=1.1396322 s, transform=1.0540454 s, fp64=2.007928 s, back=0.49711175 s, total=5.1464218 s, tf32_fp=2.0007306e-07, fp64_fp=6.1919069e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 4/5: tf32=0.44974886 s, orth=1.1376658 s, transform=1.0505376 s, fp64=2.0104675 s, back=0.49429799 s, total=5.1427177 s, tf32_fp=2.0007306e-07, fp64_fp=6.1919069e-16, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 5/5: tf32=0.44787353 s, orth=1.1386354 s, transform=1.0542792 s, fp64=2.0196183 s, back=0.49641869 s, total=5.156825 s, tf32_fp=2.0007306e-07, fp64_fp=6.1919069e-16, abs_res=1.2155465e-08, iters=6/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.05 N=4096 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.54701056 s
+CUDA memory after matrix: free 78.597 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=4096
+  mixed tf32 run 1/5: tf32=0.014187401 s, fp64=0.085720453 s, total=0.099908139 s, tf32_fp=5.67404e-07, fp64_fp=2.7227193e-13, abs_res=nan, iters=6/9, status=ok
+  mixed tf32 run 2/5: tf32=0.014091386 s, fp64=0.085474152 s, total=0.099566097 s, tf32_fp=5.67404e-07, fp64_fp=2.7227193e-13, abs_res=nan, iters=6/9, status=ok
+  mixed tf32 run 3/5: tf32=0.014023472 s, fp64=0.085911792 s, total=0.099935762 s, tf32_fp=5.67404e-07, fp64_fp=2.7227193e-13, abs_res=nan, iters=6/9, status=ok
+  mixed tf32 run 4/5: tf32=0.014102091 s, fp64=0.08606326 s, total=0.10016558 s, tf32_fp=5.67404e-07, fp64_fp=2.7227193e-13, abs_res=nan, iters=6/9, status=ok
+  mixed tf32 run 5/5: tf32=0.014037498 s, fp64=0.086459461 s, total=0.10049718 s, tf32_fp=5.67404e-07, fp64_fp=2.7227193e-13, abs_res=1.9227418e-10, iters=6/9, status=ok
+Rayleigh mixed QR warmup for N=4096
+  rayleigh run 1/5: tf32=0.014876509 s, orth=0.066621342 s, transform=0.01598833 s, fp64=0.033023466 s, back=0.0080183302 s, total=0.13852798 s, tf32_fp=5.67404e-07, fp64_fp=1.2556598e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 2/5: tf32=0.014864728 s, orth=0.066713451 s, transform=0.016068992 s, fp64=0.033200662 s, back=0.0080569829 s, total=0.13890482 s, tf32_fp=5.67404e-07, fp64_fp=1.2556598e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 3/5: tf32=0.014896256 s, orth=0.066627855 s, transform=0.015992512 s, fp64=0.032983372 s, back=0.0080203861 s, total=0.13852038 s, tf32_fp=5.67404e-07, fp64_fp=1.2556598e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 4/5: tf32=0.014889807 s, orth=0.066602973 s, transform=0.015991397 s, fp64=0.033036063 s, back=0.0080188033 s, total=0.13853904 s, tf32_fp=5.67404e-07, fp64_fp=1.2556598e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 5/5: tf32=0.014885583 s, orth=0.066686006 s, transform=0.016069405 s, fp64=0.033037908 s, back=0.0080156229 s, total=0.13869453 s, tf32_fp=5.67404e-07, fp64_fp=1.2556598e-15, abs_res=1.9911041e-09, iters=6/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.05 N=8192 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.7249862 s
+CUDA memory after matrix: free 78.222 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=8192
+  mixed tf32 run 1/5: tf32=0.060659804 s, fp64=0.63190418 s, total=0.69256444 s, tf32_fp=6.6089609e-07, fp64_fp=6.6481904e-13, abs_res=nan, iters=6/9, status=ok
+  mixed tf32 run 2/5: tf32=0.060052041 s, fp64=0.63518125 s, total=0.69523403 s, tf32_fp=6.6089609e-07, fp64_fp=6.6481904e-13, abs_res=nan, iters=6/9, status=ok
+  mixed tf32 run 3/5: tf32=0.061124462 s, fp64=0.63544004 s, total=0.69656481 s, tf32_fp=6.6089609e-07, fp64_fp=6.6481904e-13, abs_res=nan, iters=6/9, status=ok
+  mixed tf32 run 4/5: tf32=0.06107575 s, fp64=0.6412722 s, total=0.70234842 s, tf32_fp=6.6089609e-07, fp64_fp=6.6481904e-13, abs_res=nan, iters=6/9, status=ok
+  mixed tf32 run 5/5: tf32=0.061240234 s, fp64=0.63593281 s, total=0.69717324 s, tf32_fp=6.6089609e-07, fp64_fp=6.6481904e-13, abs_res=1.0144662e-09, iters=6/9, status=ok
+Rayleigh mixed QR warmup for N=8192
+  rayleigh run 1/5: tf32=0.061615247 s, orth=0.24439934 s, transform=0.12636892 s, fp64=0.2576389 s, back=0.061706218 s, total=0.75172863 s, tf32_fp=6.6089609e-07, fp64_fp=1.4988823e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 2/5: tf32=0.061200557 s, orth=0.24466138 s, transform=0.12630343 s, fp64=0.25404036 s, back=0.0620734 s, total=0.74827913 s, tf32_fp=6.6089609e-07, fp64_fp=1.4988823e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 3/5: tf32=0.061396868 s, orth=0.24296632 s, transform=0.1245747 s, fp64=0.2540861 s, back=0.061469402 s, total=0.74449339 s, tf32_fp=6.6089609e-07, fp64_fp=1.4988823e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 4/5: tf32=0.060712755 s, orth=0.24330455 s, transform=0.12617457 s, fp64=0.25727389 s, back=0.061153084 s, total=0.74861885 s, tf32_fp=6.6089609e-07, fp64_fp=1.4988823e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 5/5: tf32=0.061035002 s, orth=0.24568047 s, transform=0.12649629 s, fp64=0.25772136 s, back=0.062117958 s, total=0.75305108 s, tf32_fp=6.6089609e-07, fp64_fp=1.4988823e-15, abs_res=6.881796e-09, iters=6/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.05 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 14.996367 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=16384
+  mixed tf32 run 1/5: tf32=0.44541493 s, fp64=5.5142142 s, total=5.9596294 s, tf32_fp=7.1216795e-07, fp64_fp=3.719411e-13, abs_res=nan, iters=6/10, status=ok
+  mixed tf32 run 2/5: tf32=0.44748573 s, fp64=5.5384666 s, total=5.9859527 s, tf32_fp=7.1216795e-07, fp64_fp=3.719411e-13, abs_res=nan, iters=6/10, status=ok
+  mixed tf32 run 3/5: tf32=0.44925321 s, fp64=5.5248205 s, total=5.9740741 s, tf32_fp=7.1216795e-07, fp64_fp=3.719411e-13, abs_res=nan, iters=6/10, status=ok
+  mixed tf32 run 4/5: tf32=0.4483861 s, fp64=5.5224069 s, total=5.9707933 s, tf32_fp=7.1216795e-07, fp64_fp=3.719411e-13, abs_res=nan, iters=6/10, status=ok
+  mixed tf32 run 5/5: tf32=0.44713558 s, fp64=5.5524433 s, total=5.9995792 s, tf32_fp=7.1216795e-07, fp64_fp=3.719411e-13, abs_res=1.2758082e-09, iters=6/10, status=ok
+Rayleigh mixed QR warmup for N=16384
+  rayleigh run 1/5: tf32=0.4492616 s, orth=1.1387443 s, transform=1.0547075 s, fp64=2.0167852 s, back=0.49644388 s, total=5.1559425 s, tf32_fp=7.1216795e-07, fp64_fp=1.2434949e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 2/5: tf32=0.44864147 s, orth=1.1380636 s, transform=1.0539902 s, fp64=1.9964113 s, back=0.49640172 s, total=5.1335084 s, tf32_fp=7.1216795e-07, fp64_fp=1.2434949e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 3/5: tf32=0.44883496 s, orth=1.1407199 s, transform=1.0569698 s, fp64=2.0157294 s, back=0.49519254 s, total=5.1574466 s, tf32_fp=7.1216795e-07, fp64_fp=1.2434949e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 4/5: tf32=0.44764871 s, orth=1.1392437 s, transform=1.054014 s, fp64=2.010436 s, back=0.48750651 s, total=5.138849 s, tf32_fp=7.1216795e-07, fp64_fp=1.2434949e-15, abs_res=nan, iters=6/3, status=ok
+  rayleigh run 5/5: tf32=0.45045796 s, orth=1.1402142 s, transform=1.0550951 s, fp64=2.0131009 s, back=0.49516995 s, total=5.1540382 s, tf32_fp=7.1216795e-07, fp64_fp=1.2434949e-15, abs_res=1.6175457e-08, iters=6/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=4096 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.55838581 s
+CUDA memory after matrix: free 78.597 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=4096
+  mixed tf32 run 1/5: tf32=0.015383723 s, fp64=0.094361958 s, total=0.109746 s, tf32_fp=4.0398717e-07, fp64_fp=7.6431742e-13, abs_res=nan, iters=7/10, status=ok
+  mixed tf32 run 2/5: tf32=0.015385766 s, fp64=0.093375736 s, total=0.10876185 s, tf32_fp=4.0398717e-07, fp64_fp=7.6431742e-13, abs_res=nan, iters=7/10, status=ok
+  mixed tf32 run 3/5: tf32=0.015318254 s, fp64=0.094374237 s, total=0.10969303 s, tf32_fp=4.0398717e-07, fp64_fp=7.6431742e-13, abs_res=nan, iters=7/10, status=ok
+  mixed tf32 run 4/5: tf32=0.015408369 s, fp64=0.093205433 s, total=0.10861423 s, tf32_fp=4.0398717e-07, fp64_fp=7.6431742e-13, abs_res=nan, iters=7/10, status=ok
+  mixed tf32 run 5/5: tf32=0.015278194 s, fp64=0.094491067 s, total=0.10976956 s, tf32_fp=4.0398717e-07, fp64_fp=7.6431742e-13, abs_res=6.5123042e-10, iters=7/10, status=ok
+Rayleigh mixed QR warmup for N=4096
+  rayleigh run 1/5: tf32=0.015999836 s, orth=0.066066943 s, transform=0.016001565 s, fp64=0.03291399 s, back=0.0079411999 s, total=0.13892353 s, tf32_fp=4.0398717e-07, fp64_fp=1.8490005e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 2/5: tf32=0.014993382 s, orth=0.066244643 s, transform=0.016001279 s, fp64=0.032990539 s, back=0.0080321892 s, total=0.13826203 s, tf32_fp=4.0398717e-07, fp64_fp=1.8490005e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 3/5: tf32=0.016071465 s, orth=0.066329418 s, transform=0.016065841 s, fp64=0.033165443 s, back=0.0080550988 s, total=0.13968727 s, tf32_fp=4.0398717e-07, fp64_fp=1.8490005e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 4/5: tf32=0.0160317 s, orth=0.066268295 s, transform=0.015997724 s, fp64=0.032992469 s, back=0.0080190958 s, total=0.13930928 s, tf32_fp=4.0398717e-07, fp64_fp=1.8490005e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 5/5: tf32=0.016031067 s, orth=0.066223471 s, transform=0.016000109 s, fp64=0.033082863 s, back=0.0080626509 s, total=0.13940016 s, tf32_fp=4.0398717e-07, fp64_fp=1.8490005e-15, abs_res=2.1441864e-09, iters=7/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=8192 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.5830296 s
+CUDA memory after matrix: free 78.222 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=8192
+  mixed tf32 run 1/5: tf32=0.06933677 s, fp64=0.75963329 s, total=0.82897048 s, tf32_fp=4.7961329e-07, fp64_fp=4.4074104e-13, abs_res=nan, iters=7/11, status=ok
+  mixed tf32 run 2/5: tf32=0.076874882 s, fp64=0.77052968 s, total=0.84740505 s, tf32_fp=4.7961329e-07, fp64_fp=4.4074104e-13, abs_res=nan, iters=7/11, status=ok
+  mixed tf32 run 3/5: tf32=0.07010024 s, fp64=0.76294653 s, total=0.83304702 s, tf32_fp=4.7961329e-07, fp64_fp=4.4074104e-13, abs_res=nan, iters=7/11, status=ok
+  mixed tf32 run 4/5: tf32=0.069357835 s, fp64=0.76280699 s, total=0.83216544 s, tf32_fp=4.7961329e-07, fp64_fp=4.4074104e-13, abs_res=nan, iters=7/11, status=ok
+  mixed tf32 run 5/5: tf32=0.070094612 s, fp64=0.76402586 s, total=0.83412083 s, tf32_fp=4.7961329e-07, fp64_fp=4.4074104e-13, abs_res=7.8932288e-10, iters=7/11, status=ok
+Rayleigh mixed QR warmup for N=8192
+  rayleigh run 1/5: tf32=0.070035999 s, orth=0.24475477 s, transform=0.12533152 s, fp64=0.25337473 s, back=0.062380328 s, total=0.75587735 s, tf32_fp=4.7961329e-07, fp64_fp=2.2838873e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 2/5: tf32=0.071177701 s, orth=0.24521084 s, transform=0.12686709 s, fp64=0.2554186 s, back=0.061488448 s, total=0.76016269 s, tf32_fp=4.7961329e-07, fp64_fp=2.2838873e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 3/5: tf32=0.070497993 s, orth=0.24546971 s, transform=0.12713346 s, fp64=0.25590585 s, back=0.06147897 s, total=0.76048599 s, tf32_fp=4.7961329e-07, fp64_fp=2.2838873e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 4/5: tf32=0.069607 s, orth=0.24525827 s, transform=0.12622479 s, fp64=0.26025333 s, back=0.061628216 s, total=0.7629716 s, tf32_fp=4.7961329e-07, fp64_fp=2.2838873e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 5/5: tf32=0.070084353 s, orth=0.24447359 s, transform=0.12550073 s, fp64=0.25525108 s, back=0.062083629 s, total=0.75739339 s, tf32_fp=4.7961329e-07, fp64_fp=2.2838873e-15, abs_res=8.2266783e-09, iters=7/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 15.380221 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=16384
+  mixed tf32 run 1/5: tf32=0.51801877 s, fp64=6.0233278 s, total=6.541347 s, tf32_fp=5.4167042e-07, fp64_fp=8.5795125e-13, abs_res=nan, iters=7/11, status=ok
+  mixed tf32 run 2/5: tf32=0.5238729 s, fp64=6.0296402 s, total=6.5535134 s, tf32_fp=5.4167042e-07, fp64_fp=8.5795125e-13, abs_res=nan, iters=7/11, status=ok
+  mixed tf32 run 3/5: tf32=0.54322282 s, fp64=6.0357011 s, total=6.5789245 s, tf32_fp=5.4167042e-07, fp64_fp=8.5795125e-13, abs_res=nan, iters=7/11, status=ok
+  mixed tf32 run 4/5: tf32=0.51815432 s, fp64=6.0195689 s, total=6.5377236 s, tf32_fp=5.4167042e-07, fp64_fp=8.5795125e-13, abs_res=nan, iters=7/11, status=ok
+  mixed tf32 run 5/5: tf32=0.51992585 s, fp64=6.0363835 s, total=6.5563098 s, tf32_fp=5.4167042e-07, fp64_fp=8.5795125e-13, abs_res=3.379593e-09, iters=7/11, status=ok
+Rayleigh mixed QR warmup for N=16384
+  rayleigh run 1/5: tf32=0.52088098 s, orth=1.1389519 s, transform=1.0545799 s, fp64=2.0058175 s, back=0.49325389 s, total=5.2134842 s, tf32_fp=5.4167042e-07, fp64_fp=1.8625058e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 2/5: tf32=0.52172612 s, orth=1.1401353 s, transform=1.0464918 s, fp64=2.0099799 s, back=0.49525521 s, total=5.2135883 s, tf32_fp=5.4167042e-07, fp64_fp=1.8625058e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 3/5: tf32=0.5214493 s, orth=1.1435839 s, transform=1.0546322 s, fp64=2.0159688 s, back=0.49673966 s, total=5.2323739 s, tf32_fp=5.4167042e-07, fp64_fp=1.8625058e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 4/5: tf32=0.52182449 s, orth=1.13941 s, transform=1.0562796 s, fp64=2.0132121 s, back=0.49606813 s, total=5.2267943 s, tf32_fp=5.4167042e-07, fp64_fp=1.8625058e-15, abs_res=nan, iters=7/3, status=ok
+  rayleigh run 5/5: tf32=0.52074536 s, orth=1.1393971 s, transform=1.0553623 s, fp64=2.0101709 s, back=0.49668982 s, total=5.2223655 s, tf32_fp=5.4167042e-07, fp64_fp=1.8625058e-15, abs_res=1.9862137e-08, iters=7/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.08 N=4096 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.57563507 s
+CUDA memory after matrix: free 78.597 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=4096
+  mixed tf32 run 1/5: tf32=0.016660451 s, fp64=0.11858224 s, total=0.13524305 s, tf32_fp=9.271288e-07, fp64_fp=7.464678e-13, abs_res=nan, iters=8/13, status=ok
+  mixed tf32 run 2/5: tf32=0.016659167 s, fp64=0.11977579 s, total=0.13643525 s, tf32_fp=9.271288e-07, fp64_fp=7.464678e-13, abs_res=nan, iters=8/13, status=ok
+  mixed tf32 run 3/5: tf32=0.016624619 s, fp64=0.11890224 s, total=0.13552727 s, tf32_fp=9.271288e-07, fp64_fp=7.464678e-13, abs_res=nan, iters=8/13, status=ok
+  mixed tf32 run 4/5: tf32=0.016622797 s, fp64=0.11971126 s, total=0.13633431 s, tf32_fp=9.271288e-07, fp64_fp=7.464678e-13, abs_res=nan, iters=8/13, status=ok
+  mixed tf32 run 5/5: tf32=0.016513706 s, fp64=0.11936603 s, total=0.13588002 s, tf32_fp=9.271288e-07, fp64_fp=7.464678e-13, abs_res=8.6999468e-10, iters=8/13, status=ok
+Rayleigh mixed QR warmup for N=4096
+  rayleigh run 1/5: tf32=0.017334434 s, orth=0.066075842 s, transform=0.016005115 s, fp64=0.032913816 s, back=0.0080371019 s, total=0.14036631 s, tf32_fp=9.271288e-07, fp64_fp=4.9464025e-15, abs_res=nan, iters=8/3, status=ok
+  rayleigh run 2/5: tf32=0.01732871 s, orth=0.065962886 s, transform=0.016076607 s, fp64=0.032905429 s, back=0.0081566311 s, total=0.14043026 s, tf32_fp=9.271288e-07, fp64_fp=4.9464025e-15, abs_res=nan, iters=8/3, status=ok
+  rayleigh run 3/5: tf32=0.01722679 s, orth=0.065900825 s, transform=0.016045204 s, fp64=0.032719261 s, back=0.008078869 s, total=0.13997095 s, tf32_fp=9.271288e-07, fp64_fp=4.9464025e-15, abs_res=nan, iters=8/3, status=ok
+  rayleigh run 4/5: tf32=0.017269073 s, orth=0.065880341 s, transform=0.016055317 s, fp64=0.032906652 s, back=0.0081310263 s, total=0.14024241 s, tf32_fp=9.271288e-07, fp64_fp=4.9464025e-15, abs_res=nan, iters=8/3, status=ok
+  rayleigh run 5/5: tf32=0.017145729 s, orth=0.06596987 s, transform=0.016076462 s, fp64=0.032873091 s, back=0.0081034228 s, total=0.14016857 s, tf32_fp=9.271288e-07, fp64_fp=4.9464025e-15, abs_res=2.182769e-09, iters=8/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.08 N=8192 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.6340459 s
+CUDA memory after matrix: free 78.222 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=8192
+  mixed tf32 run 1/5: tf32=0.087168641 s, fp64=0.950653 s, total=1.037822 s, tf32_fp=5.4361824e-07, fp64_fp=6.2418602e-13, abs_res=nan, iters=9/14, status=ok
+  mixed tf32 run 2/5: tf32=0.088041637 s, fp64=0.95135675 s, total=1.0393989 s, tf32_fp=5.4361824e-07, fp64_fp=6.2418602e-13, abs_res=nan, iters=9/14, status=ok
+  mixed tf32 run 3/5: tf32=0.087386985 s, fp64=0.9542208 s, total=1.0416082 s, tf32_fp=5.4361824e-07, fp64_fp=6.2418602e-13, abs_res=nan, iters=9/14, status=ok
+  mixed tf32 run 4/5: tf32=0.087477353 s, fp64=0.9529749 s, total=1.0404526 s, tf32_fp=5.4361824e-07, fp64_fp=6.2418602e-13, abs_res=nan, iters=9/14, status=ok
+  mixed tf32 run 5/5: tf32=0.086249865 s, fp64=0.95292739 s, total=1.0391776 s, tf32_fp=5.4361824e-07, fp64_fp=6.2418602e-13, abs_res=1.5213478e-09, iters=9/14, status=ok
+Rayleigh mixed QR warmup for N=8192
+  rayleigh run 1/5: tf32=0.087944019 s, orth=0.24408998 s, transform=0.12602262 s, fp64=0.25561396 s, back=0.061477475 s, total=0.77514806 s, tf32_fp=5.4361824e-07, fp64_fp=5.9435069e-15, abs_res=nan, iters=9/3, status=ok
+  rayleigh run 2/5: tf32=0.087792225 s, orth=0.24461026 s, transform=0.12513195 s, fp64=0.2554947 s, back=0.061706095 s, total=0.77473523 s, tf32_fp=5.4361824e-07, fp64_fp=5.9435069e-15, abs_res=nan, iters=9/3, status=ok
+  rayleigh run 3/5: tf32=0.088062271 s, orth=0.24377553 s, transform=0.12685035 s, fp64=0.25520973 s, back=0.061538158 s, total=0.77543604 s, tf32_fp=5.4361824e-07, fp64_fp=5.9435069e-15, abs_res=nan, iters=9/3, status=ok
+  rayleigh run 4/5: tf32=0.086550334 s, orth=0.2445573 s, transform=0.12666482 s, fp64=0.25503219 s, back=0.06238175 s, total=0.77518639 s, tf32_fp=5.4361824e-07, fp64_fp=5.9435069e-15, abs_res=nan, iters=9/3, status=ok
+  rayleigh run 5/5: tf32=0.087092964 s, orth=0.24503282 s, transform=0.12549917 s, fp64=0.25406966 s, back=0.061230829 s, total=0.77292544 s, tf32_fp=5.4361824e-07, fp64_fp=5.9435069e-15, abs_res=1.0047401e-08, iters=9/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.08 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 15.469265 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=16384
+  mixed tf32 run 1/5: tf32=0.66373291 s, fp64=7.5497968 s, total=8.2135305 s, tf32_fp=5.6002237e-07, fp64_fp=9.8700632e-13, abs_res=nan, iters=9/14, status=ok
+  mixed tf32 run 2/5: tf32=0.66413818 s, fp64=7.5424115 s, total=8.2065501 s, tf32_fp=5.6002237e-07, fp64_fp=9.8700632e-13, abs_res=nan, iters=9/14, status=ok
+  mixed tf32 run 3/5: tf32=0.6637336 s, fp64=7.548793 s, total=8.2125272 s, tf32_fp=5.6002237e-07, fp64_fp=9.8700632e-13, abs_res=nan, iters=9/14, status=ok
+  mixed tf32 run 4/5: tf32=0.66477552 s, fp64=7.5676417 s, total=8.2324177 s, tf32_fp=5.6002237e-07, fp64_fp=9.8700632e-13, abs_res=nan, iters=9/14, status=ok
+  mixed tf32 run 5/5: tf32=0.66377755 s, fp64=7.5547401 s, total=8.2185181 s, tf32_fp=5.6002237e-07, fp64_fp=9.8700632e-13, abs_res=5.509697e-09, iters=9/14, status=ok
+Rayleigh mixed QR warmup for N=16384
+  rayleigh run 1/5: tf32=0.6630972 s, orth=1.1394586 s, transform=1.0554393 s, fp64=2.0158354 s, back=0.49761803 s, total=5.3714485 s, tf32_fp=5.6002237e-07, fp64_fp=4.9712722e-15, abs_res=nan, iters=9/3, status=ok
+  rayleigh run 2/5: tf32=0.66860031 s, orth=1.1413585 s, transform=1.0542696 s, fp64=2.0150427 s, back=0.49769128 s, total=5.3769624 s, tf32_fp=5.6002237e-07, fp64_fp=4.9712722e-15, abs_res=nan, iters=9/3, status=ok
+  rayleigh run 3/5: tf32=0.67216447 s, orth=1.1412564 s, transform=1.0524483 s, fp64=2.0128862 s, back=0.49715137 s, total=5.3759068 s, tf32_fp=5.6002237e-07, fp64_fp=4.9712722e-15, abs_res=nan, iters=9/3, status=ok
+  rayleigh run 4/5: tf32=0.6665888 s, orth=1.1382964 s, transform=1.0557076 s, fp64=2.0205185 s, back=0.49756057 s, total=5.3786719 s, tf32_fp=5.6002237e-07, fp64_fp=4.9712722e-15, abs_res=nan, iters=9/3, status=ok
+  rayleigh run 5/5: tf32=0.67847162 s, orth=1.1389563 s, transform=1.0544959 s, fp64=2.0201959 s, back=0.49757043 s, total=5.3896901 s, tf32_fp=5.6002237e-07, fp64_fp=4.9712722e-15, abs_res=2.8341883e-08, iters=9/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=4096 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.68810573 s
+CUDA memory after matrix: free 78.597 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=4096
+  mixed tf32 run 1/5: tf32=0.020243159 s, fp64=0.1447725 s, total=0.16501605 s, tf32_fp=6.9730332e-07, fp64_fp=8.9389682e-13, abs_res=nan, iters=11/16, status=ok
+  mixed tf32 run 2/5: tf32=0.020105775 s, fp64=0.14345702 s, total=0.16356315 s, tf32_fp=6.9730332e-07, fp64_fp=8.9389682e-13, abs_res=nan, iters=11/16, status=ok
+  mixed tf32 run 3/5: tf32=0.020137998 s, fp64=0.14404394 s, total=0.1641824 s, tf32_fp=6.9730332e-07, fp64_fp=8.9389682e-13, abs_res=nan, iters=11/16, status=ok
+  mixed tf32 run 4/5: tf32=0.020267318 s, fp64=0.14376772 s, total=0.16403547 s, tf32_fp=6.9730332e-07, fp64_fp=8.9389682e-13, abs_res=nan, iters=11/16, status=ok
+  mixed tf32 run 5/5: tf32=0.020215799 s, fp64=0.14411099 s, total=0.1643271 s, tf32_fp=6.9730332e-07, fp64_fp=8.9389682e-13, abs_res=1.2518322e-09, iters=11/16, status=ok
+Rayleigh mixed QR warmup for N=4096
+  rayleigh run 1/5: tf32=0.020893995 s, orth=0.065884258 s, transform=0.015995437 s, fp64=0.032809634 s, back=0.0081230411 s, total=0.14370637 s, tf32_fp=6.9730332e-07, fp64_fp=9.8927812e-15, abs_res=nan, iters=11/3, status=ok
+  rayleigh run 2/5: tf32=0.020728063 s, orth=0.066093682 s, transform=0.016059339 s, fp64=0.033086892 s, back=0.0079701608 s, total=0.14393814 s, tf32_fp=6.9730332e-07, fp64_fp=9.8927812e-15, abs_res=nan, iters=11/3, status=ok
+  rayleigh run 3/5: tf32=0.020932522 s, orth=0.065964222 s, transform=0.016056834 s, fp64=0.033078928 s, back=0.008131037 s, total=0.14416354 s, tf32_fp=6.9730332e-07, fp64_fp=9.8927812e-15, abs_res=nan, iters=11/3, status=ok
+  rayleigh run 4/5: tf32=0.020811307 s, orth=0.065798125 s, transform=0.015991666 s, fp64=0.03295402 s, back=0.0081223543 s, total=0.14367747 s, tf32_fp=6.9730332e-07, fp64_fp=9.8927812e-15, abs_res=nan, iters=11/3, status=ok
+  rayleigh run 5/5: tf32=0.020735982 s, orth=0.066071186 s, transform=0.016000486 s, fp64=0.033033221 s, back=0.0080244341 s, total=0.14386531 s, tf32_fp=6.9730332e-07, fp64_fp=9.8927812e-15, abs_res=2.0049001e-09, iters=11/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=8192 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.4301869 s
+CUDA memory after matrix: free 78.222 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=8192
+  mixed tf32 run 1/5: tf32=0.10523722 s, fp64=1.3305954 s, total=1.4358331 s, tf32_fp=9.7970023e-07, fp64_fp=7.1155669e-13, abs_res=nan, iters=11/20, status=ok
+  mixed tf32 run 2/5: tf32=0.10486513 s, fp64=1.3326302 s, total=1.4374957 s, tf32_fp=9.7970023e-07, fp64_fp=7.1155669e-13, abs_res=nan, iters=11/20, status=ok
+  mixed tf32 run 3/5: tf32=0.10527487 s, fp64=1.3317406 s, total=1.437016 s, tf32_fp=9.7970023e-07, fp64_fp=7.1155669e-13, abs_res=nan, iters=11/20, status=ok
+  mixed tf32 run 4/5: tf32=0.10545097 s, fp64=1.3315199 s, total=1.4369711 s, tf32_fp=9.7970023e-07, fp64_fp=7.1155669e-13, abs_res=nan, iters=11/20, status=ok
+  mixed tf32 run 5/5: tf32=0.10562112 s, fp64=1.332387 s, total=1.4380087 s, tf32_fp=9.7970023e-07, fp64_fp=7.1155669e-13, abs_res=2.0202566e-09, iters=11/20, status=ok
+Rayleigh mixed QR warmup for N=8192
+  rayleigh run 1/5: tf32=0.10520995 s, orth=0.24464959 s, transform=0.12670127 s, fp64=0.25373504 s, back=0.06184432 s, total=0.79214017 s, tf32_fp=9.7970023e-07, fp64_fp=1.2417483e-14, abs_res=nan, iters=11/3, status=ok
+  rayleigh run 2/5: tf32=0.10594727 s, orth=0.24517806 s, transform=0.12626142 s, fp64=0.25520621 s, back=0.061908188 s, total=0.79450114 s, tf32_fp=9.7970023e-07, fp64_fp=1.2417483e-14, abs_res=nan, iters=11/3, status=ok
+  rayleigh run 3/5: tf32=0.10586842 s, orth=0.24401292 s, transform=0.12503542 s, fp64=0.25424838 s, back=0.062140003 s, total=0.79130515 s, tf32_fp=9.7970023e-07, fp64_fp=1.2417483e-14, abs_res=nan, iters=11/3, status=ok
+  rayleigh run 4/5: tf32=0.10532903 s, orth=0.2438624 s, transform=0.12518127 s, fp64=0.25478031 s, back=0.061974099 s, total=0.7911271 s, tf32_fp=9.7970023e-07, fp64_fp=1.2417483e-14, abs_res=nan, iters=11/3, status=ok
+  rayleigh run 5/5: tf32=0.10393052 s, orth=0.24322266 s, transform=0.12537431 s, fp64=0.25494831 s, back=0.062764747 s, total=0.79024055 s, tf32_fp=9.7970023e-07, fp64_fp=1.2417483e-14, abs_res=1.1109669e-08, iters=11/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 14.795284 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=16384
+  mixed tf32 run 1/5: tf32=0.87976176 s, fp64=10.539533 s, total=11.419295 s, tf32_fp=7.5547706e-07, fp64_fp=5.9646006e-13, abs_res=nan, iters=12/20, status=ok
+  mixed tf32 run 2/5: tf32=0.88062466 s, fp64=10.549249 s, total=11.429874 s, tf32_fp=7.5547706e-07, fp64_fp=5.9646006e-13, abs_res=nan, iters=12/20, status=ok
+  mixed tf32 run 3/5: tf32=0.88117477 s, fp64=10.565035 s, total=11.44621 s, tf32_fp=7.5547706e-07, fp64_fp=5.9646006e-13, abs_res=nan, iters=12/20, status=ok
+  mixed tf32 run 4/5: tf32=0.88138099 s, fp64=10.577941 s, total=11.459323 s, tf32_fp=7.5547706e-07, fp64_fp=5.9646006e-13, abs_res=nan, iters=12/20, status=ok
+  mixed tf32 run 5/5: tf32=0.88419685 s, fp64=10.583743 s, total=11.46794 s, tf32_fp=7.5547706e-07, fp64_fp=5.9646006e-13, abs_res=3.9424475e-09, iters=12/20, status=ok
+Rayleigh mixed QR warmup for N=16384
+  rayleigh run 1/5: tf32=0.88361132 s, orth=1.1401641 s, transform=1.054983 s, fp64=2.0200973 s, back=0.49807574 s, total=5.5969315 s, tf32_fp=7.5547706e-07, fp64_fp=1.010766e-14, abs_res=nan, iters=12/3, status=ok
+  rayleigh run 2/5: tf32=0.88278755 s, orth=1.1416004 s, transform=1.0547643 s, fp64=2.0204371 s, back=0.49889508 s, total=5.5984845 s, tf32_fp=7.5547706e-07, fp64_fp=1.010766e-14, abs_res=nan, iters=12/3, status=ok
+  rayleigh run 3/5: tf32=0.88491746 s, orth=1.1414396 s, transform=1.05619 s, fp64=2.0109133 s, back=0.49571574 s, total=5.5891761 s, tf32_fp=7.5547706e-07, fp64_fp=1.010766e-14, abs_res=nan, iters=12/3, status=ok
+  rayleigh run 4/5: tf32=0.88370682 s, orth=1.1413857 s, transform=1.0526902 s, fp64=2.0223835 s, back=0.49752287 s, total=5.5976891 s, tf32_fp=7.5547706e-07, fp64_fp=1.010766e-14, abs_res=nan, iters=12/3, status=ok
+  rayleigh run 5/5: tf32=0.8813845 s, orth=1.1575854 s, transform=1.0536592 s, fp64=2.0275989 s, back=0.49418647 s, total=5.6144145 s, tf32_fp=7.5547706e-07, fp64_fp=1.010766e-14, abs_res=3.7455576e-08, iters=12/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=4096 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.63417201 s
+CUDA memory after matrix: free 78.597 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=4096
+  mixed tf32 run 1/5: tf32=0.027311109 s, fp64=0.19353162 s, total=0.22084317 s, tf32_fp=9.4362638e-07, fp64_fp=6.2827612e-13, abs_res=nan, iters=17/22, status=ok
+  mixed tf32 run 2/5: tf32=0.027476256 s, fp64=0.19496267 s, total=0.22243942 s, tf32_fp=9.4362638e-07, fp64_fp=6.2827612e-13, abs_res=nan, iters=17/22, status=ok
+  mixed tf32 run 3/5: tf32=0.027263085 s, fp64=0.19445468 s, total=0.22171806 s, tf32_fp=9.4362638e-07, fp64_fp=6.2827612e-13, abs_res=nan, iters=17/22, status=ok
+  mixed tf32 run 4/5: tf32=0.027093356 s, fp64=0.19386432 s, total=0.22095796 s, tf32_fp=9.4362638e-07, fp64_fp=6.2827612e-13, abs_res=nan, iters=17/22, status=ok
+  mixed tf32 run 5/5: tf32=0.027331872 s, fp64=0.19378889 s, total=0.2211213 s, tf32_fp=9.4362638e-07, fp64_fp=6.2827612e-13, abs_res=1.0259276e-09, iters=17/22, status=ok
+Rayleigh mixed QR warmup for N=4096
+  rayleigh run 1/5: tf32=0.027984811 s, orth=0.065983158 s, transform=0.015997177 s, fp64=0.03292982 s, back=0.0079603801 s, total=0.15085535 s, tf32_fp=9.4362638e-07, fp64_fp=1.5202994e-14, abs_res=nan, iters=17/3, status=ok
+  rayleigh run 2/5: tf32=0.02787094 s, orth=0.066251274 s, transform=0.016059185 s, fp64=0.033205015 s, back=0.0080577801 s, total=0.15144419 s, tf32_fp=9.4362638e-07, fp64_fp=1.5202994e-14, abs_res=nan, iters=17/3, status=ok
+  rayleigh run 3/5: tf32=0.028110564 s, orth=0.065817513 s, transform=0.01599741 s, fp64=0.033027533 s, back=0.007993483 s, total=0.1509465 s, tf32_fp=9.4362638e-07, fp64_fp=1.5202994e-14, abs_res=nan, iters=17/3, status=ok
+  rayleigh run 4/5: tf32=0.028045882 s, orth=0.065868214 s, transform=0.016002689 s, fp64=0.032938355 s, back=0.0081369192 s, total=0.15099206 s, tf32_fp=9.4362638e-07, fp64_fp=1.5202994e-14, abs_res=nan, iters=17/3, status=ok
+  rayleigh run 5/5: tf32=0.027923269 s, orth=0.066053612 s, transform=0.016069907 s, fp64=0.033051307 s, back=0.0079749543 s, total=0.15107305 s, tf32_fp=9.4362638e-07, fp64_fp=1.5202994e-14, abs_res=1.7714736e-09, iters=17/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=8192 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.7392285 s
+CUDA memory after matrix: free 78.222 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=8192
+  mixed tf32 run 1/5: tf32=0.19280293 s, fp64=1.3936873 s, total=1.5864909 s, tf32_fp=9.9639956e-07, fp64_fp=7.4299135e-13, abs_res=nan, iters=21/21, status=ok
+  mixed tf32 run 2/5: tf32=0.19419509 s, fp64=1.3961146 s, total=1.59031 s, tf32_fp=9.9639956e-07, fp64_fp=7.4299135e-13, abs_res=nan, iters=21/21, status=ok
+  mixed tf32 run 3/5: tf32=0.19371506 s, fp64=1.3956109 s, total=1.5893263 s, tf32_fp=9.9639956e-07, fp64_fp=7.4299135e-13, abs_res=nan, iters=21/21, status=ok
+  mixed tf32 run 4/5: tf32=0.19346697 s, fp64=1.3981059 s, total=1.5915732 s, tf32_fp=9.9639956e-07, fp64_fp=7.4299135e-13, abs_res=nan, iters=21/21, status=ok
+  mixed tf32 run 5/5: tf32=0.19357421 s, fp64=1.3962963 s, total=1.589871 s, tf32_fp=9.9639956e-07, fp64_fp=7.4299135e-13, abs_res=2.8658962e-09, iters=21/21, status=ok
+Rayleigh mixed QR warmup for N=8192
+  rayleigh run 1/5: tf32=0.19381281 s, orth=0.244664 s, transform=0.12582719 s, fp64=0.25517081 s, back=0.061854395 s, total=0.8813292 s, tf32_fp=9.9639956e-07, fp64_fp=1.7980526e-14, abs_res=nan, iters=21/3, status=ok
+  rayleigh run 2/5: tf32=0.19256548 s, orth=0.24423833 s, transform=0.12322075 s, fp64=0.25571445 s, back=0.06144902 s, total=0.87718804 s, tf32_fp=9.9639956e-07, fp64_fp=1.7980526e-14, abs_res=nan, iters=21/3, status=ok
+  rayleigh run 3/5: tf32=0.1925707 s, orth=0.24387811 s, transform=0.12544758 s, fp64=0.25542426 s, back=0.061945883 s, total=0.87926653 s, tf32_fp=9.9639956e-07, fp64_fp=1.7980526e-14, abs_res=nan, iters=21/3, status=ok
+  rayleigh run 4/5: tf32=0.19449259 s, orth=0.24514632 s, transform=0.12739922 s, fp64=0.25508666 s, back=0.061604647 s, total=0.88372943 s, tf32_fp=9.9639956e-07, fp64_fp=1.7980526e-14, abs_res=nan, iters=21/3, status=ok
+  rayleigh run 5/5: tf32=0.19261346 s, orth=0.2440278 s, transform=0.12651437 s, fp64=0.25537727 s, back=0.061538452 s, total=0.88007135 s, tf32_fp=9.9639956e-07, fp64_fp=1.7980526e-14, abs_res=1.1807308e-08, iters=21/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 14.371188 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=16384
+  mixed tf32 run 1/5: tf32=2.0302597 s, fp64=12.590357 s, total=14.620617 s, tf32_fp=9.8750425e-07, fp64_fp=6.5182982e-13, abs_res=nan, iters=28/24, status=ok
+  mixed tf32 run 2/5: tf32=2.0327906 s, fp64=12.574514 s, total=14.607305 s, tf32_fp=9.8750425e-07, fp64_fp=6.5182982e-13, abs_res=nan, iters=28/24, status=ok
+  mixed tf32 run 3/5: tf32=2.0360339 s, fp64=12.601367 s, total=14.637401 s, tf32_fp=9.8750425e-07, fp64_fp=6.5182982e-13, abs_res=nan, iters=28/24, status=ok
+  mixed tf32 run 4/5: tf32=2.037516 s, fp64=12.553099 s, total=14.590615 s, tf32_fp=9.8750425e-07, fp64_fp=6.5182982e-13, abs_res=nan, iters=28/24, status=ok
+  mixed tf32 run 5/5: tf32=2.0378786 s, fp64=12.578846 s, total=14.616725 s, tf32_fp=9.8750425e-07, fp64_fp=6.5182982e-13, abs_res=5.1727128e-09, iters=28/24, status=ok
+Rayleigh mixed QR warmup for N=16384
+  rayleigh run 1/5: tf32=2.0411509 s, orth=1.1399168 s, transform=1.0552755 s, fp64=2.0205944 s, back=0.49590642 s, total=6.7528439 s, tf32_fp=9.8750425e-07, fp64_fp=1.540512e-14, abs_res=nan, iters=28/3, status=ok
+  rayleigh run 2/5: tf32=2.0405832 s, orth=1.1396174 s, transform=1.0528503 s, fp64=2.0164132 s, back=0.49631685 s, total=6.7457809 s, tf32_fp=9.8750425e-07, fp64_fp=1.540512e-14, abs_res=nan, iters=28/3, status=ok
+  rayleigh run 3/5: tf32=2.0403701 s, orth=1.1399173 s, transform=1.0569718 s, fp64=2.0136958 s, back=0.49733759 s, total=6.7482926 s, tf32_fp=9.8750425e-07, fp64_fp=1.540512e-14, abs_res=nan, iters=28/3, status=ok
+  rayleigh run 4/5: tf32=2.0421578 s, orth=1.1401036 s, transform=1.0521475 s, fp64=2.0193111 s, back=0.4936408 s, total=6.7473608 s, tf32_fp=9.8750425e-07, fp64_fp=1.540512e-14, abs_res=nan, iters=28/3, status=ok
+  rayleigh run 5/5: tf32=2.0411428 s, orth=1.1392963 s, transform=1.0568594 s, fp64=2.0153081 s, back=0.49707585 s, total=6.7496825 s, tf32_fp=9.8750425e-07, fp64_fp=1.540512e-14, abs_res=4.5504687e-08, iters=28/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+===== sweep done failures=0 =====
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed:
+total 528K
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 18 22:40 ipt_mixed_tf32_rayleigh_sweep_3030548.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.3K Jun 18 22:40 ipt_mixed_tf32_rayleigh_sweep_3030548.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 18 22:47 ipt_mixed_tf32_rayleigh_sweep_3030559.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  63K Jun 18 23:03 ipt_mixed_tf32_rayleigh_sweep_3030559.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  63K Jun 18 23:03 ipt_mixed_tf32_rayleigh_sweep_3030559.out
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   97 Jun 18 22:47 latest_ipt_mixed_tf32_rayleigh_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed/ipt_mixed_tf32_rayleigh_sweep_3030559.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   82 Jun 13 20:57 latest_rayleigh_mixed.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed/rayleigh_mixed_3012993.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   96 Jun 15 15:46 latest_rayleigh_mixed_no_norm_smoke.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed/rayleigh_mixed_no_norm_smoke_3018415.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   91 Jun 14 20:38 latest_rayleigh_mixed_qr_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed/rayleigh_mixed_qr_sweep_3015890.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   88 Jun 14 11:23 latest_rayleigh_vs_cusolver.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed/rayleigh_vs_cusolver_3014579.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 13 20:19 rayleigh_mixed_3012929.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.2K Jun 13 20:20 rayleigh_mixed_3012929.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.2K Jun 13 20:20 rayleigh_mixed_3012929.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 13 20:24 rayleigh_mixed_3012933.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.5K Jun 13 20:25 rayleigh_mixed_3012933.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.5K Jun 13 20:25 rayleigh_mixed_3012933.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 13 20:54 rayleigh_mixed_3012981.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.8K Jun 13 20:55 rayleigh_mixed_3012981.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.8K Jun 13 20:55 rayleigh_mixed_3012981.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 13 20:57 rayleigh_mixed_3012993.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.0K Jun 13 20:58 rayleigh_mixed_3012993.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.0K Jun 13 20:58 rayleigh_mixed_3012993.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 15 15:41 rayleigh_mixed_no_norm_smoke_3018406.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  15K Jun 15 15:44 rayleigh_mixed_no_norm_smoke_3018406.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  15K Jun 15 15:44 rayleigh_mixed_no_norm_smoke_3018406.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 15 15:46 rayleigh_mixed_no_norm_smoke_3018415.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  15K Jun 15 15:49 rayleigh_mixed_no_norm_smoke_3018415.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  15K Jun 15 15:49 rayleigh_mixed_no_norm_smoke_3018415.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 13 22:35 rayleigh_mixed_qr_sweep_3013205.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  50K Jun 13 23:01 rayleigh_mixed_qr_sweep_3013205.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  50K Jun 13 23:01 rayleigh_mixed_qr_sweep_3013205.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 14 20:38 rayleigh_mixed_qr_sweep_3015890.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  14K Jun 14 20:39 rayleigh_mixed_qr_sweep_3015890.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  14K Jun 14 20:39 rayleigh_mixed_qr_sweep_3015890.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 14 22:18 rayleigh_mixed_qr_sweep_3016154.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.5K Jun 14 22:19 rayleigh_mixed_qr_sweep_3016154.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 14 15:16 rayleigh_vs_cusolver_3014579.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  39K Jun 14 14:43 rayleigh_vs_cusolver_3014579.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  39K Jun 14 14:43 rayleigh_vs_cusolver_3014579.out
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed:
+total 188K
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  16K Jun 18 23:03 ipt_mixed_tf32_rayleigh_sweep.csv
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  25K Jun 18 23:03 ipt_mixed_tf32_rayleigh_sweep_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.2K Jun 13 20:58 rayleigh_mixed_N16384_epsilon_0_07.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 15 15:49 rayleigh_mixed_no_norm_smoke_epsilon_0_06.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.6K Jun 15 15:49 rayleigh_mixed_no_norm_smoke_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.3K Jun 14 20:39 rayleigh_mixed_qr_N4096_epsilon_0_09_to_0_12_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 13 22:38 rayleigh_mixed_qr_sweep_epsilon_0_01.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 13 22:42 rayleigh_mixed_qr_sweep_epsilon_0_02.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 13 22:45 rayleigh_mixed_qr_sweep_epsilon_0_03.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 13 22:48 rayleigh_mixed_qr_sweep_epsilon_0_04.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 13 22:51 rayleigh_mixed_qr_sweep_epsilon_0_05.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 13 22:55 rayleigh_mixed_qr_sweep_epsilon_0_06.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 13 22:58 rayleigh_mixed_qr_sweep_epsilon_0_07.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 13 23:01 rayleigh_mixed_qr_sweep_epsilon_0_08.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 14 20:39 rayleigh_mixed_qr_sweep_epsilon_0_09.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 14 20:39 rayleigh_mixed_qr_sweep_epsilon_0_11.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 14 20:54 rayleigh_mixed_qr_sweep_epsilon_0_12.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.3K Jun 14 12:22 rayleigh_mixed_qr_sweep_epsilon_0_13.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 14 20:39 rayleigh_mixed_qr_sweep_epsilon_0_1.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  355 Jun 14 11:24 rayleigh_mixed_qr_sweep_epsilon_0_2.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  355 Jun 14 11:24 rayleigh_mixed_qr_sweep_epsilon_0_3.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  355 Jun 14 11:24 rayleigh_mixed_qr_sweep_epsilon_0_4.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  355 Jun 14 11:24 rayleigh_mixed_qr_sweep_epsilon_0_5.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  17K Jun 13 23:01 rayleigh_mixed_qr_sweep_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie  14K Jun 14 14:43 rayleigh_mixed_qr_threshold_sweep_3014579.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.4K Jun 14 15:17 rayleigh_vs_cusolver_detail_stopped_3014579.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie    5 Jun 14 15:17 rayleigh_vs_cusolver_missing_threshold_eps_stopped_3014579.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie  686 Jun 14 15:17 rayleigh_vs_cusolver_threshold_stopped_3014579.csv
+finished at: Thu Jun 18 23:03:12 CST 2026

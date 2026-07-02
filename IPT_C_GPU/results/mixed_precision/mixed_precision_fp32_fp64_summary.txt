@@ -1,0 +1,30 @@
+IPT_C mixed precision benchmark: FP32 initial + FP64 refine
+started_at = 2026-06-10T12:49:32+0800
+ipt_c_root = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+result_csv = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/mixed_precision_fp32_fp64_results.csv
+N = 16384
+warmup_n = 128
+fp32_tol = 9.9999999999999995e-07
+fp32_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 5
+per_epsilon_warmup = true
+seed = 20260603
+epsilon_values = 0.050000000000000003, 0.080000000000000002, 0.10000000000000001, 0.12, 0.14999999999999999
+compute_residuals = true
+cuda_runtime_version = 12020
+cuda_driver_version = 12020
+gpu_name = NVIDIA A100-SXM4-80GB
+
+N=16384 epsilon=0.050000000000000003 started_at=2026-06-10T12:49:32+0800
+N=16384 epsilon=0.050000000000000003 finished_at=2026-06-10T12:50:36+0800 status=ok time_fp32=2.8332519548013808 time_fp64=5.4427856900729239 time_total=8.2760379570536315 fp32_iterations=6 fp64_iterations=10 fp32_fp=6.824785060536735e-07 fp64_fp=4.6083240699834606e-13 final_residual=1.5318266691593454e-09 repeats=5 per_epsilon_warmup=true
+N=16384 epsilon=0.080000000000000002 started_at=2026-06-10T12:50:36+0800
+N=16384 epsilon=0.080000000000000002 finished_at=2026-06-10T12:52:04+0800 status=ok time_fp32=4.2382567105814815 time_fp64=7.9282080843113363 time_total=12.166465103346855 fp32_iterations=9 fp64_iterations=15 fp32_fp=5.0961781691901074e-07 fp64_fp=6.0007345479865453e-13 final_residual=3.195177505938056e-09 repeats=5 per_epsilon_warmup=true
+N=16384 epsilon=0.10000000000000001 started_at=2026-06-10T12:52:04+0800
+N=16384 epsilon=0.10000000000000001 finished_at=2026-06-10T12:53:52+0800 status=ok time_fp32=5.1754406622610984 time_fp64=10.423782489355654 time_total=15.599223472829909 fp32_iterations=11 fp64_iterations=20 fp32_fp=8.4618168105877051e-07 fp64_fp=8.1857195312151541e-13 final_residual=5.7018994984081056e-09 repeats=5 per_epsilon_warmup=true
+N=16384 epsilon=0.12 started_at=2026-06-10T12:53:52+0800
+N=16384 epsilon=0.12 finished_at=2026-06-10T12:56:17+0800 status=ok time_fp32=7.0451045276597144 time_fp64=14.875392318423838 time_total=21.920497174188494 fp32_iterations=15 fp64_iterations=29 fp32_fp=8.7484366993818501e-07 fp64_fp=8.1261452174329036e-13 final_residual=6.3344040620658218e-09 repeats=5 per_epsilon_warmup=true
+N=16384 epsilon=0.14999999999999999 started_at=2026-06-10T12:56:17+0800
+N=16384 epsilon=0.14999999999999999 finished_at=2026-06-10T13:00:46+0800 status=ok time_fp32=13.596318056993187 time_fp64=28.768249468784781 time_total=42.364568070415409 fp32_iterations=29 fp64_iterations=57 fp32_fp=8.6934360306555079e-07 fp64_fp=7.9511681843559132e-13 final_residual=7.5477236498086744e-09 repeats=5 per_epsilon_warmup=true
+finished_at = 2026-06-10T13:00:46+0800

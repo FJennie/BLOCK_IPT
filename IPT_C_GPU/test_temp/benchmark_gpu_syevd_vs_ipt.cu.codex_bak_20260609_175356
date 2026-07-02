@@ -1,0 +1,1048 @@
+#include <cublas_v2.h>
+#include <cuda_runtime.h>
+#include <cusolverDn.h>
+
+#include <errno.h>
+#include <math.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+
+#include "../src/ipt_cuda.cu"
+
+#define DEFAULT_ROOT "/fs1/home/nudt_liujie/ftt/IPT_C_GPU"
+#define DEFAULT_EPSILON 0.01
+#define DEFAULT_IPT_TOL 1.0e-10
+#define DEFAULT_IPT_MAXITER 1000
+#define DEFAULT_REPEATS 10
+#define DEFAULT_SEED 20260603ULL
+#define MAX_NS 64
+#define ERROR_LEN 512
+
+typedef struct {
+    double time_sec;
+    double residual;
+    double fixed_point_residual;
+    int iterations;
+    char status[32];
+    char error[ERROR_LEN];
+} MethodResult;
+
+typedef struct {
+    const char *root;
+    const char *results_dir;
+    const char *logs_dir;
+    double epsilon;
+    double ipt_tol;
+    int ipt_maxiter;
+    int repeats;
+    uint64_t seed;
+    int compute_residuals;
+    int ns[MAX_NS];
+    int n_count;
+    char result_csv[4096];
+    char summary_txt[4096];
+} Config;
+
+static double now_seconds(void)
+{
+    struct timespec ts;
+
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (double)ts.tv_sec + (double)ts.tv_nsec * 1.0e-9;
+}
+
+static void wall_time_string(char *buffer, size_t size)
+{
+    time_t t = time(NULL);
+    struct tm tm_value;
+
+    localtime_r(&t, &tm_value);
+    strftime(buffer, size, "%Y-%m-%dT%H:%M:%S%z", &tm_value);
+}
+
+static int ensure_directory(const char *path)
+{
+    if (mkdir(path, 0775) == 0 || errno == EEXIST) {
+        return 0;
+    }
+
+    fprintf(stderr, "could not create directory %s: %s\n", path,
+            strerror(errno));
+    return -1;
+}
+
+static const char *env_or_default(const char *name, const char *default_value)
+{
+    const char *value = getenv(name);
+
+    return (value == NULL || value[0] == '\0') ? default_value : value;
+}
+
+static int parse_bool_env(const char *name, int default_value)
+{
+    const char *value = getenv(name);
+
+    if (value == NULL || value[0] == '\0') {
+        return default_value;
+    }
+
+    return strcmp(value, "1") == 0 || strcasecmp(value, "true") == 0 ||
+           strcasecmp(value, "yes") == 0 || strcasecmp(value, "y") == 0;
+}
+
+static void parse_ns(Config *cfg)
+{
+    const char *raw = getenv("IPT_BENCH_NS");
+    const int defaults[] = {32,   64,   128,  256,  512,
+                            1024, 2048, 4096, 8192, 16384};
+
+    cfg->n_count = 0;
+
+    if (raw == NULL || raw[0] == '\0') {
+        for (int i = 0; i < (int)(sizeof(defaults) / sizeof(defaults[0]));
+             ++i) {
+            cfg->ns[cfg->n_count++] = defaults[i];
+        }
+        return;
+    }
+
+    {
+        char *copy = strdup(raw);
+        char *token = NULL;
+
+        if (copy == NULL) {
+            fprintf(stderr, "strdup failed while parsing IPT_BENCH_NS\n");
+            exit(2);
+        }
+
+        token = strtok(copy, ",");
+        while (token != NULL && cfg->n_count < MAX_NS) {
+            while (*token == ' ' || *token == '\t') {
+                ++token;
+            }
+            if (*token != '\0') {
+                cfg->ns[cfg->n_count++] = atoi(token);
+            }
+            token = strtok(NULL, ",");
+        }
+        free(copy);
+    }
+
+    if (cfg->n_count == 0) {
+        fprintf(stderr, "IPT_BENCH_NS did not contain any valid N values\n");
+        exit(2);
+    }
+}
+
+static void load_config(Config *cfg)
+{
+    memset(cfg, 0, sizeof(*cfg));
+
+    cfg->root = env_or_default("IPT_C_ROOT", DEFAULT_ROOT);
+    cfg->results_dir = env_or_default("IPT_C_RESULTS_DIR", NULL);
+    cfg->logs_dir = env_or_default("IPT_C_LOG_DIR", NULL);
+
+    if (cfg->results_dir == NULL) {
+        static char default_results[4096];
+        snprintf(default_results, sizeof(default_results), "%s/results",
+                 cfg->root);
+        cfg->results_dir = default_results;
+    }
+
+    if (cfg->logs_dir == NULL) {
+        static char default_logs[4096];
+        snprintf(default_logs, sizeof(default_logs), "%s/logs", cfg->root);
+        cfg->logs_dir = default_logs;
+    }
+
+    cfg->epsilon =
+        getenv("IPT_EPSILON") ? atof(getenv("IPT_EPSILON")) : DEFAULT_EPSILON;
+    cfg->ipt_tol =
+        getenv("IPT_TOL") ? atof(getenv("IPT_TOL")) : DEFAULT_IPT_TOL;
+    cfg->ipt_maxiter = getenv("IPT_MAXITER")
+                           ? atoi(getenv("IPT_MAXITER"))
+                           : DEFAULT_IPT_MAXITER;
+    if (cfg->ipt_tol <= 0.0) {
+        cfg->ipt_tol = DEFAULT_IPT_TOL;
+    }
+    if (cfg->ipt_maxiter <= 0) {
+        cfg->ipt_maxiter = DEFAULT_IPT_MAXITER;
+    }
+    cfg->repeats =
+        getenv("IPT_REPEATS") ? atoi(getenv("IPT_REPEATS")) : DEFAULT_REPEATS;
+    if (cfg->repeats <= 0) {
+        cfg->repeats = DEFAULT_REPEATS;
+    }
+    cfg->seed =
+        getenv("IPT_SEED") ? strtoull(getenv("IPT_SEED"), NULL, 10)
+                           : DEFAULT_SEED;
+    cfg->compute_residuals = parse_bool_env("IPT_COMPUTE_RESIDUALS", 1);
+
+    parse_ns(cfg);
+
+    snprintf(cfg->result_csv, sizeof(cfg->result_csv),
+             "%s/gpu_syevd_vs_ipt_results.csv", cfg->results_dir);
+    snprintf(cfg->summary_txt, sizeof(cfg->summary_txt),
+             "%s/gpu_syevd_vs_ipt_summary.txt", cfg->results_dir);
+}
+
+static void method_result_reset(MethodResult *result, const char *status)
+{
+    result->time_sec = NAN;
+    result->residual = NAN;
+    result->fixed_point_residual = NAN;
+    result->iterations = 0;
+    snprintf(result->status, sizeof(result->status), "%s", status);
+    result->error[0] = '\0';
+}
+
+static void method_result_fail(MethodResult *result, const char *status,
+                               const char *message)
+{
+    snprintf(result->status, sizeof(result->status), "%s", status);
+    snprintf(result->error, sizeof(result->error), "%s", message);
+}
+
+static const char *cuda_status_name(cudaError_t status)
+{
+    return cudaGetErrorString(status);
+}
+
+static const char *cublas_status_name_local(cublasStatus_t status)
+{
+    switch (status) {
+    case CUBLAS_STATUS_SUCCESS:
+        return "CUBLAS_STATUS_SUCCESS";
+    case CUBLAS_STATUS_NOT_INITIALIZED:
+        return "CUBLAS_STATUS_NOT_INITIALIZED";
+    case CUBLAS_STATUS_ALLOC_FAILED:
+        return "CUBLAS_STATUS_ALLOC_FAILED";
+    case CUBLAS_STATUS_INVALID_VALUE:
+        return "CUBLAS_STATUS_INVALID_VALUE";
+    case CUBLAS_STATUS_ARCH_MISMATCH:
+        return "CUBLAS_STATUS_ARCH_MISMATCH";
+    case CUBLAS_STATUS_MAPPING_ERROR:
+        return "CUBLAS_STATUS_MAPPING_ERROR";
+    case CUBLAS_STATUS_EXECUTION_FAILED:
+        return "CUBLAS_STATUS_EXECUTION_FAILED";
+    case CUBLAS_STATUS_INTERNAL_ERROR:
+        return "CUBLAS_STATUS_INTERNAL_ERROR";
+    case CUBLAS_STATUS_NOT_SUPPORTED:
+        return "CUBLAS_STATUS_NOT_SUPPORTED";
+    case CUBLAS_STATUS_LICENSE_ERROR:
+        return "CUBLAS_STATUS_LICENSE_ERROR";
+    default:
+        return "CUBLAS_STATUS_UNKNOWN";
+    }
+}
+
+static const char *cusolver_status_name(cusolverStatus_t status)
+{
+    switch (status) {
+    case CUSOLVER_STATUS_SUCCESS:
+        return "CUSOLVER_STATUS_SUCCESS";
+    case CUSOLVER_STATUS_NOT_INITIALIZED:
+        return "CUSOLVER_STATUS_NOT_INITIALIZED";
+    case CUSOLVER_STATUS_ALLOC_FAILED:
+        return "CUSOLVER_STATUS_ALLOC_FAILED";
+    case CUSOLVER_STATUS_INVALID_VALUE:
+        return "CUSOLVER_STATUS_INVALID_VALUE";
+    case CUSOLVER_STATUS_ARCH_MISMATCH:
+        return "CUSOLVER_STATUS_ARCH_MISMATCH";
+    case CUSOLVER_STATUS_MAPPING_ERROR:
+        return "CUSOLVER_STATUS_MAPPING_ERROR";
+    case CUSOLVER_STATUS_EXECUTION_FAILED:
+        return "CUSOLVER_STATUS_EXECUTION_FAILED";
+    case CUSOLVER_STATUS_INTERNAL_ERROR:
+        return "CUSOLVER_STATUS_INTERNAL_ERROR";
+    case CUSOLVER_STATUS_MATRIX_TYPE_NOT_SUPPORTED:
+        return "CUSOLVER_STATUS_MATRIX_TYPE_NOT_SUPPORTED";
+    default:
+        return "CUSOLVER_STATUS_UNKNOWN";
+    }
+}
+
+static uint64_t splitmix64(uint64_t x)
+{
+    x += 0x9e3779b97f4a7c15ULL;
+    x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
+    x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
+    return x ^ (x >> 31);
+}
+
+static double uniform01(uint64_t seed, int n, int row, int col)
+{
+    uint64_t x = seed + (uint64_t)n * 0xd1b54a32d192ed03ULL;
+
+    x ^= (uint64_t)(row + 1) * 0x9e3779b97f4a7c15ULL;
+    x ^= (uint64_t)(col + 1) * 0xbf58476d1ce4e5b9ULL;
+    return (double)(splitmix64(x) >> 11) * (1.0 / 9007199254740992.0);
+}
+
+static int make_host_matrix(double **matrix_out, int n, double epsilon,
+                            uint64_t seed)
+{
+    size_t elements = (size_t)n * (size_t)n;
+    double *matrix = (double *)malloc(elements * sizeof(double));
+
+    if (matrix == NULL) {
+        return -1;
+    }
+
+    for (int col = 0; col < n; ++col) {
+        for (int row = 0; row <= col; ++row) {
+            double value;
+
+            if (row == col) {
+                value = (double)(row + 1) +
+                        epsilon * uniform01(seed, n, row, col);
+            } else {
+                value =
+                    0.5 * epsilon *
+                    (uniform01(seed, n, row, col) +
+                     uniform01(seed, n, col, row));
+            }
+
+            matrix[row + col * n] = value;
+            matrix[col + row * n] = value;
+        }
+    }
+
+    *matrix_out = matrix;
+    return 0;
+}
+
+__global__ static void subtract_vdiag_kernel(double *residual,
+                                             const double *vectors,
+                                             const double *values, int n,
+                                             int k)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int total = n * k;
+
+    if (idx < total) {
+        int col = idx / n;
+        residual[idx] -= vectors[idx] * values[col];
+    }
+}
+
+static int residual_norm_gpu(cublasHandle_t handle, const double *d_matrix,
+                             const double *d_vectors, const double *d_values,
+                             int n, int k, double *residual_out,
+                             char *error, size_t error_size)
+{
+    int status = 0;
+    size_t elements = (size_t)n * (size_t)k;
+    double *d_residual = NULL;
+    const double one = 1.0;
+    const double zero = 0.0;
+
+    if (elements > (size_t)INT_MAX) {
+        snprintf(error, error_size, "residual vector too large for cuBLAS");
+        return -1;
+    }
+
+    cudaError_t cuda_status =
+        cudaMalloc((void **)&d_residual, elements * sizeof(double));
+    if (cuda_status != cudaSuccess) {
+        snprintf(error, error_size, "cudaMalloc residual failed: %s",
+                 cuda_status_name(cuda_status));
+        return -1;
+    }
+
+    cublasStatus_t cublas_status =
+        cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, k, n, &one, d_matrix,
+                    n, d_vectors, n, &zero, d_residual, n);
+    if (cublas_status != CUBLAS_STATUS_SUCCESS) {
+        snprintf(error, error_size, "residual cublasDgemm failed: %s",
+                 cublas_status_name_local(cublas_status));
+        status = -1;
+        goto cleanup;
+    }
+
+    {
+        int block = 256;
+        int grid = ((int)elements + block - 1) / block;
+
+        subtract_vdiag_kernel<<<grid, block>>>(d_residual, d_vectors, d_values,
+                                               n, k);
+        cuda_status = cudaGetLastError();
+        if (cuda_status != cudaSuccess) {
+            snprintf(error, error_size, "residual kernel launch failed: %s",
+                     cuda_status_name(cuda_status));
+            status = -1;
+            goto cleanup;
+        }
+    }
+
+    cublas_status = cublasDnrm2(handle, (int)elements, d_residual, 1,
+                                residual_out);
+    if (cublas_status != CUBLAS_STATUS_SUCCESS) {
+        snprintf(error, error_size, "residual cublasDnrm2 failed: %s",
+                 cublas_status_name_local(cublas_status));
+        status = -1;
+        goto cleanup;
+    }
+
+    cuda_status = cudaDeviceSynchronize();
+    if (cuda_status != cudaSuccess) {
+        snprintf(error, error_size, "residual synchronize failed: %s",
+                 cuda_status_name(cuda_status));
+        status = -1;
+        goto cleanup;
+    }
+
+cleanup:
+    cudaFree(d_residual);
+    return status;
+}
+
+static MethodResult run_syevd(cusolverDnHandle_t solver_handle,
+                              cublasHandle_t blas_handle,
+                              const double *d_matrix, int n,
+                              int compute_residuals)
+{
+    MethodResult result;
+    double *d_a = NULL;
+    double *d_w = NULL;
+    double *d_work = NULL;
+    int *d_info = NULL;
+    int h_info = 0;
+    int lwork = 0;
+    cudaError_t cuda_status;
+    cusolverStatus_t solver_status;
+
+    method_result_reset(&result, "ok");
+
+    cuda_status =
+        cudaMalloc((void **)&d_a, (size_t)n * (size_t)n * sizeof(double));
+    if (cuda_status != cudaSuccess) {
+        method_result_fail(&result, "failed", cuda_status_name(cuda_status));
+        return result;
+    }
+
+    cuda_status = cudaMemcpy(d_a, d_matrix, (size_t)n * (size_t)n *
+                                               sizeof(double),
+                             cudaMemcpyDeviceToDevice);
+    if (cuda_status != cudaSuccess) {
+        method_result_fail(&result, "failed", cuda_status_name(cuda_status));
+        goto cleanup;
+    }
+
+    cuda_status = cudaDeviceSynchronize();
+    if (cuda_status != cudaSuccess) {
+        method_result_fail(&result, "failed", cuda_status_name(cuda_status));
+        goto cleanup;
+    }
+
+    {
+        double start = now_seconds();
+
+        cuda_status = cudaMalloc((void **)&d_w, (size_t)n * sizeof(double));
+        if (cuda_status != cudaSuccess) {
+            method_result_fail(&result, "failed",
+                               cuda_status_name(cuda_status));
+            goto timed_done;
+        }
+
+        cuda_status = cudaMalloc((void **)&d_info, sizeof(int));
+        if (cuda_status != cudaSuccess) {
+            method_result_fail(&result, "failed",
+                               cuda_status_name(cuda_status));
+            goto timed_done;
+        }
+
+        solver_status = cusolverDnDsyevd_bufferSize(
+            solver_handle, CUSOLVER_EIG_MODE_VECTOR, CUBLAS_FILL_MODE_UPPER, n,
+            d_a, n, d_w, &lwork);
+        if (solver_status != CUSOLVER_STATUS_SUCCESS) {
+            method_result_fail(&result, "failed",
+                               cusolver_status_name(solver_status));
+            goto timed_done;
+        }
+
+        cuda_status =
+            cudaMalloc((void **)&d_work, (size_t)lwork * sizeof(double));
+        if (cuda_status != cudaSuccess) {
+            method_result_fail(&result, "failed",
+                               cuda_status_name(cuda_status));
+            goto timed_done;
+        }
+
+        solver_status = cusolverDnDsyevd(
+            solver_handle, CUSOLVER_EIG_MODE_VECTOR, CUBLAS_FILL_MODE_UPPER, n,
+            d_a, n, d_w, d_work, lwork, d_info);
+        if (solver_status != CUSOLVER_STATUS_SUCCESS) {
+            method_result_fail(&result, "failed",
+                               cusolver_status_name(solver_status));
+            goto timed_done;
+        }
+
+        cuda_status = cudaDeviceSynchronize();
+        if (cuda_status != cudaSuccess) {
+            method_result_fail(&result, "failed",
+                               cuda_status_name(cuda_status));
+            goto timed_done;
+        }
+
+    timed_done:
+        result.time_sec = now_seconds() - start;
+    }
+
+    if (strcmp(result.status, "ok") != 0) {
+        goto cleanup;
+    }
+
+    cuda_status =
+        cudaMemcpy(&h_info, d_info, sizeof(int), cudaMemcpyDeviceToHost);
+    if (cuda_status != cudaSuccess) {
+        method_result_fail(&result, "failed", cuda_status_name(cuda_status));
+        goto cleanup;
+    }
+    if (h_info != 0) {
+        snprintf(result.error, sizeof(result.error),
+                 "cusolverDnDsyevd info=%d", h_info);
+        snprintf(result.status, sizeof(result.status), "failed");
+        goto cleanup;
+    }
+
+    if (compute_residuals) {
+        if (residual_norm_gpu(blas_handle, d_matrix, d_a, d_w, n, n,
+                              &result.residual, result.error,
+                              sizeof(result.error)) != 0) {
+            snprintf(result.status, sizeof(result.status), "failed");
+        }
+    }
+
+cleanup:
+    cudaFree(d_a);
+    cudaFree(d_w);
+    cudaFree(d_work);
+    cudaFree(d_info);
+    return result;
+}
+
+static MethodResult run_ipt(cublasHandle_t blas_handle, const double *d_matrix,
+                            int n, double tol, int maxiter,
+                            int compute_residuals)
+{
+    MethodResult result;
+    double *d_vectors = NULL;
+    double *d_values = NULL;
+    int ipt_status = IPT_CUDA_SUCCESS;
+    cudaError_t cuda_status;
+
+    method_result_reset(&result, "ok");
+
+    {
+        double start = now_seconds();
+
+        ipt_status = ipt_cuda_device_tol(
+            d_matrix, n, n, tol, maxiter, blas_handle, &d_vectors, &d_values,
+            &result.iterations, &result.fixed_point_residual);
+
+        if (ipt_status != IPT_CUDA_SUCCESS) {
+            method_result_fail(&result, "failed",
+                               ipt_cuda_status_string(ipt_status));
+            goto timed_done;
+        }
+
+        cuda_status = cudaDeviceSynchronize();
+        if (cuda_status != cudaSuccess) {
+            method_result_fail(&result, "failed",
+                               cuda_status_name(cuda_status));
+            goto timed_done;
+        }
+
+    timed_done:
+        result.time_sec = now_seconds() - start;
+    }
+
+    if (strcmp(result.status, "ok") == 0 && compute_residuals) {
+        if (residual_norm_gpu(blas_handle, d_matrix, d_vectors, d_values, n, n,
+                              &result.residual, result.error,
+                              sizeof(result.error)) != 0) {
+            snprintf(result.status, sizeof(result.status), "failed");
+        }
+    }
+
+    ipt_cuda_free_device_result(d_vectors, d_values);
+    return result;
+}
+
+static MethodResult run_syevd_average(cusolverDnHandle_t solver_handle,
+                                      cublasHandle_t blas_handle,
+                                      const double *d_matrix, int n,
+                                      int compute_residuals, int repeats)
+{
+    MethodResult average;
+    double total = 0.0;
+    int successful_runs = 0;
+
+    method_result_reset(&average, "ok");
+
+    printf("CUSOLVER SYEVD warmup for N=%d\n", n);
+    {
+        MethodResult warm = run_syevd(solver_handle, blas_handle, d_matrix, n,
+                                      0);
+        if (strcmp(warm.status, "ok") != 0) {
+            method_result_fail(&average, "failed", warm.error);
+            average.time_sec = warm.time_sec;
+            return average;
+        }
+    }
+
+    for (int rep = 1; rep <= repeats; ++rep) {
+        MethodResult one = run_syevd(solver_handle, blas_handle, d_matrix, n,
+                                     compute_residuals && rep == repeats);
+
+        printf("  CUSOLVER SYEVD run %d/%d: time = %.8g s, residual = %.8g, "
+               "status = %s",
+               rep, repeats, one.time_sec, one.residual, one.status);
+        if (one.error[0] != '\0') {
+            printf(", error = %s", one.error);
+        }
+        printf("\n");
+
+        if (strcmp(one.status, "ok") != 0) {
+            average = one;
+            if (successful_runs > 0) {
+                average.time_sec = total / (double)successful_runs;
+            }
+            return average;
+        }
+
+        total += one.time_sec;
+        successful_runs += 1;
+
+        if (rep == repeats) {
+            average.residual = one.residual;
+        }
+    }
+
+    average.time_sec = total / (double)successful_runs;
+    return average;
+}
+
+static MethodResult run_ipt_average(cublasHandle_t blas_handle,
+                                    const double *d_matrix, int n,
+                                    double tol, int maxiter,
+                                    int compute_residuals, int repeats)
+{
+    MethodResult average;
+    double total = 0.0;
+    int successful_runs = 0;
+
+    method_result_reset(&average, "ok");
+
+    printf("IPT warmup for N=%d\n", n);
+    {
+        MethodResult warm = run_ipt(blas_handle, d_matrix, n, tol, maxiter, 0);
+        if (strcmp(warm.status, "ok") != 0) {
+            method_result_fail(&average, "failed", warm.error);
+            average.time_sec = warm.time_sec;
+            return average;
+        }
+    }
+
+    for (int rep = 1; rep <= repeats; ++rep) {
+        MethodResult one = run_ipt(blas_handle, d_matrix, n, tol, maxiter,
+                                   compute_residuals && rep == repeats);
+
+        printf("  IPT run %d/%d: time = %.8g s, fixed_point_residual = %.8g, "
+               "iterations = %d, residual = %.8g, status = %s",
+               rep, repeats, one.time_sec, one.fixed_point_residual,
+               one.iterations, one.residual, one.status);
+        if (one.error[0] != '\0') {
+            printf(", error = %s", one.error);
+        }
+        printf("\n");
+
+        if (strcmp(one.status, "ok") != 0) {
+            average = one;
+            if (successful_runs > 0) {
+                average.time_sec = total / (double)successful_runs;
+            }
+            return average;
+        }
+
+        total += one.time_sec;
+        successful_runs += 1;
+
+        if (rep == repeats) {
+            average.residual = one.residual;
+            average.fixed_point_residual = one.fixed_point_residual;
+            average.iterations = one.iterations;
+        }
+    }
+
+    average.time_sec = total / (double)successful_runs;
+    return average;
+}
+
+static void csv_clean(char *text)
+{
+    for (char *p = text; *p != '\0'; ++p) {
+        if (*p == ',' || *p == '\n' || *p == '\r') {
+            *p = ';';
+        }
+    }
+}
+
+static void write_header(const Config *cfg)
+{
+    FILE *fp = fopen(cfg->result_csv, "w");
+
+    if (fp == NULL) {
+        fprintf(stderr, "could not open %s: %s\n", cfg->result_csv,
+                strerror(errno));
+        exit(2);
+    }
+
+    fprintf(fp,
+            "N,epsilon,time_syevd_sec,time_ipt_sec,residual_syevd,"
+            "residual_ipt,ipt_fixed_point_residual,ipt_iterations,gpu_name,"
+            "status,error\n");
+    fclose(fp);
+}
+
+static void append_row(const Config *cfg, int n, const MethodResult *syevd,
+                       const MethodResult *ipt, const char *gpu_name,
+                       const char *status, const char *error)
+{
+    FILE *fp = fopen(cfg->result_csv, "a");
+    char gpu_clean[256];
+    char status_clean[64];
+    char error_clean[1024];
+
+    if (fp == NULL) {
+        fprintf(stderr, "could not append %s: %s\n", cfg->result_csv,
+                strerror(errno));
+        return;
+    }
+
+    snprintf(gpu_clean, sizeof(gpu_clean), "%s", gpu_name);
+    snprintf(status_clean, sizeof(status_clean), "%s", status);
+    snprintf(error_clean, sizeof(error_clean), "%s", error);
+    csv_clean(gpu_clean);
+    csv_clean(status_clean);
+    csv_clean(error_clean);
+
+    fprintf(fp, "%d,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%d,%s,%s,%s\n", n,
+            cfg->epsilon, syevd->time_sec, ipt->time_sec, syevd->residual,
+            ipt->residual, ipt->fixed_point_residual, ipt->iterations,
+            gpu_clean, status_clean, error_clean);
+    fclose(fp);
+}
+
+static void append_summary(const Config *cfg, const char *message)
+{
+    FILE *fp = fopen(cfg->summary_txt, "a");
+
+    if (fp == NULL) {
+        fprintf(stderr, "could not append %s: %s\n", cfg->summary_txt,
+                strerror(errno));
+        return;
+    }
+
+    fprintf(fp, "%s\n", message);
+    fclose(fp);
+}
+
+static void write_summary_header(const Config *cfg, const char *gpu_name)
+{
+    FILE *fp = fopen(cfg->summary_txt, "w");
+    char time_buf[64];
+    int runtime_version = 0;
+    int driver_version = 0;
+
+    if (fp == NULL) {
+        fprintf(stderr, "could not open %s: %s\n", cfg->summary_txt,
+                strerror(errno));
+        exit(2);
+    }
+
+    wall_time_string(time_buf, sizeof(time_buf));
+    cudaRuntimeGetVersion(&runtime_version);
+    cudaDriverGetVersion(&driver_version);
+
+    fprintf(fp, "IPT_C GPU benchmark: CUSOLVER SYEVD vs IPT\n");
+    fprintf(fp, "started_at = %s\n", time_buf);
+    fprintf(fp, "ipt_c_root = %s\n", cfg->root);
+    fprintf(fp, "result_csv = %s\n", cfg->result_csv);
+    fprintf(fp, "epsilon = %.17g\n", cfg->epsilon);
+    fprintf(fp, "ipt_tol = %.17g\n", cfg->ipt_tol);
+    fprintf(fp, "ipt_maxiter = %d\n", cfg->ipt_maxiter);
+    fprintf(fp, "timing_repeats = %d\n", cfg->repeats);
+    fprintf(fp, "per_N_warmup = true\n");
+    fprintf(fp, "seed = %llu\n", (unsigned long long)cfg->seed);
+    fprintf(fp, "N_values = ");
+    for (int i = 0; i < cfg->n_count; ++i) {
+        fprintf(fp, "%s%d", i == 0 ? "" : ", ", cfg->ns[i]);
+    }
+    fprintf(fp, "\n");
+    fprintf(fp, "compute_residuals = %s\n",
+            cfg->compute_residuals ? "true" : "false");
+    fprintf(fp, "cuda_runtime_version = %d\n", runtime_version);
+    fprintf(fp, "cuda_driver_version = %d\n", driver_version);
+    fprintf(fp, "gpu_name = %s\n\n", gpu_name);
+    fclose(fp);
+}
+
+static void show_gpu_memory(const char *tag)
+{
+    size_t free_bytes = 0;
+    size_t total_bytes = 0;
+
+    if (cudaMemGetInfo(&free_bytes, &total_bytes) == cudaSuccess) {
+        printf("CUDA memory %s: free %.3f GiB / total %.3f GiB\n", tag,
+               (double)free_bytes / 1073741824.0,
+               (double)total_bytes / 1073741824.0);
+    }
+}
+
+static int copy_matrix_to_device(double **d_matrix_out, const double *h_matrix,
+                                 int n, char *error, size_t error_size)
+{
+    size_t bytes = (size_t)n * (size_t)n * sizeof(double);
+    double *d_matrix = NULL;
+    cudaError_t cuda_status = cudaMalloc((void **)&d_matrix, bytes);
+
+    if (cuda_status != cudaSuccess) {
+        snprintf(error, error_size, "cudaMalloc matrix failed: %s",
+                 cuda_status_name(cuda_status));
+        return -1;
+    }
+
+    cuda_status =
+        cudaMemcpy(d_matrix, h_matrix, bytes, cudaMemcpyHostToDevice);
+    if (cuda_status != cudaSuccess) {
+        snprintf(error, error_size, "cudaMemcpy matrix failed: %s",
+                 cuda_status_name(cuda_status));
+        cudaFree(d_matrix);
+        return -1;
+    }
+
+    cuda_status = cudaDeviceSynchronize();
+    if (cuda_status != cudaSuccess) {
+        snprintf(error, error_size, "matrix copy synchronize failed: %s",
+                 cuda_status_name(cuda_status));
+        cudaFree(d_matrix);
+        return -1;
+    }
+
+    *d_matrix_out = d_matrix;
+    return 0;
+}
+
+static void warmup(cublasHandle_t blas_handle, cusolverDnHandle_t solver_handle,
+                   const Config *cfg)
+{
+    double *h_matrix = NULL;
+    double *d_matrix = NULL;
+    char error[ERROR_LEN] = "";
+
+    printf("===== warmup =====\n");
+    if (make_host_matrix(&h_matrix, 32, cfg->epsilon, cfg->seed + 32) != 0) {
+        printf("warmup host matrix allocation failed\n");
+        return;
+    }
+    if (copy_matrix_to_device(&d_matrix, h_matrix, 32, error, sizeof(error)) !=
+        0) {
+        printf("warmup device copy failed: %s\n", error);
+        free(h_matrix);
+        return;
+    }
+
+    (void)run_syevd(solver_handle, blas_handle, d_matrix, 32, 0);
+    (void)run_ipt(blas_handle, d_matrix, 32, cfg->ipt_tol, cfg->ipt_maxiter,
+                  0);
+
+    cudaFree(d_matrix);
+    free(h_matrix);
+    cudaDeviceSynchronize();
+    printf("===== warmup done =====\n");
+}
+
+int main(void)
+{
+    Config cfg;
+    cudaDeviceProp prop;
+    cublasHandle_t blas_handle = NULL;
+    cusolverDnHandle_t solver_handle = NULL;
+    char gpu_name[256] = "unknown_gpu";
+    int failures = 0;
+    cudaError_t cuda_status;
+    cublasStatus_t blas_status;
+    cusolverStatus_t solver_status;
+
+    load_config(&cfg);
+    ensure_directory(cfg.logs_dir);
+    ensure_directory(cfg.results_dir);
+
+    cuda_status = cudaSetDevice(0);
+    if (cuda_status != cudaSuccess) {
+        fprintf(stderr, "cudaSetDevice failed: %s\n",
+                cuda_status_name(cuda_status));
+        return 2;
+    }
+
+    if (cudaGetDeviceProperties(&prop, 0) == cudaSuccess) {
+        snprintf(gpu_name, sizeof(gpu_name), "%s", prop.name);
+    }
+
+    blas_status = cublasCreate(&blas_handle);
+    if (blas_status != CUBLAS_STATUS_SUCCESS) {
+        fprintf(stderr, "cublasCreate failed: %s\n",
+                cublas_status_name_local(blas_status));
+        return 2;
+    }
+
+    solver_status = cusolverDnCreate(&solver_handle);
+    if (solver_status != CUSOLVER_STATUS_SUCCESS) {
+        fprintf(stderr, "cusolverDnCreate failed: %s\n",
+                cusolver_status_name(solver_status));
+        cublasDestroy(blas_handle);
+        return 2;
+    }
+
+    write_header(&cfg);
+    write_summary_header(&cfg, gpu_name);
+
+    printf("===== IPT_C GPU benchmark: CUSOLVER SYEVD vs IPT =====\n");
+    printf("ROOT = %s\n", cfg.root);
+    printf("RESULT_DIR = %s\n", cfg.results_dir);
+    printf("RESULT_CSV = %s\n", cfg.result_csv);
+    printf("SUMMARY_TXT = %s\n", cfg.summary_txt);
+    printf("N values = ");
+    for (int i = 0; i < cfg.n_count; ++i) {
+        printf("%s%d", i == 0 ? "" : ", ", cfg.ns[i]);
+    }
+    printf("\n");
+    printf("epsilon = %.17g\n", cfg.epsilon);
+    printf("ipt_tol = %.17g\n", cfg.ipt_tol);
+    printf("ipt_maxiter = %d\n", cfg.ipt_maxiter);
+    printf("timing_repeats = %d\n", cfg.repeats);
+    printf("per_N_warmup = true\n");
+    printf("seed = %llu\n", (unsigned long long)cfg.seed);
+    printf("compute_residuals = %s\n",
+           cfg.compute_residuals ? "true" : "false");
+    printf("gpu_name = %s\n", gpu_name);
+    show_gpu_memory("at start");
+
+    warmup(blas_handle, solver_handle, &cfg);
+
+    for (int idx = 0; idx < cfg.n_count; ++idx) {
+        int n = cfg.ns[idx];
+        double *h_matrix = NULL;
+        double *d_matrix = NULL;
+        MethodResult syevd;
+        MethodResult ipt;
+        char status[64] = "ok";
+        char error[1024] = "";
+        char summary_line[1024];
+        char time_buf[64];
+
+        method_result_reset(&syevd, "not_run");
+        method_result_reset(&ipt, "not_run");
+
+        printf("\n===== N = %d =====\n", n);
+        wall_time_string(time_buf, sizeof(time_buf));
+        snprintf(summary_line, sizeof(summary_line), "N=%d started_at=%s", n,
+                 time_buf);
+        append_summary(&cfg, summary_line);
+        show_gpu_memory("before matrix");
+
+        if (make_host_matrix(&h_matrix, n, cfg.epsilon, cfg.seed + n) != 0) {
+            snprintf(status, sizeof(status), "failed");
+            snprintf(error, sizeof(error), "host matrix allocation failed");
+            failures++;
+            goto row_done;
+        }
+
+        if (copy_matrix_to_device(&d_matrix, h_matrix, n, error,
+                                  sizeof(error)) != 0) {
+            snprintf(status, sizeof(status), "failed");
+            failures++;
+            goto row_done;
+        }
+
+        free(h_matrix);
+        h_matrix = NULL;
+        show_gpu_memory("after matrix");
+
+        printf("Running CUSOLVER SYEVD for N=%d\n", n);
+        syevd = run_syevd_average(solver_handle, blas_handle, d_matrix, n,
+                                  cfg.compute_residuals, cfg.repeats);
+        printf("CUSOLVER SYEVD average: time = %.8g s, residual = %.8g, "
+               "status = %s",
+               syevd.time_sec, syevd.residual, syevd.status);
+        if (syevd.error[0] != '\0') {
+            printf(", error = %s", syevd.error);
+        }
+        printf("\n");
+
+        printf("Running IPT for N=%d\n", n);
+        ipt = run_ipt_average(blas_handle, d_matrix, n, cfg.ipt_tol,
+                              cfg.ipt_maxiter, cfg.compute_residuals,
+                              cfg.repeats);
+        printf("IPT average: time = %.8g s, fixed_point_residual = %.8g, "
+               "iterations = %d, residual = %.8g, status = %s",
+               ipt.time_sec, ipt.fixed_point_residual, ipt.iterations,
+               ipt.residual, ipt.status);
+        if (ipt.error[0] != '\0') {
+            printf(", error = %s", ipt.error);
+        }
+        printf("\n");
+
+        if (strcmp(syevd.status, "ok") != 0 ||
+            strcmp(ipt.status, "ok") != 0) {
+            snprintf(status, sizeof(status), "partial_failed");
+            snprintf(error, sizeof(error), "%s%s%s", syevd.error,
+                     (syevd.error[0] != '\0' && ipt.error[0] != '\0') ? " | "
+                                                                       : "",
+                     ipt.error);
+            failures++;
+        }
+
+    row_done:
+        append_row(&cfg, n, &syevd, &ipt, gpu_name, status, error);
+        wall_time_string(time_buf, sizeof(time_buf));
+        snprintf(summary_line, sizeof(summary_line),
+                 "N=%d finished_at=%s status=%s time_syevd=%.17g "
+                 "time_ipt=%.17g ipt_iterations=%d "
+                 "ipt_fixed_point_residual=%.17g residual_ipt=%.17g "
+                 "timing_repeats=%d per_N_warmup=true",
+                 n, time_buf, status, syevd.time_sec, ipt.time_sec,
+                 ipt.iterations, ipt.fixed_point_residual, ipt.residual,
+                 cfg.repeats);
+        append_summary(&cfg, summary_line);
+        cudaFree(d_matrix);
+        free(h_matrix);
+        cudaDeviceSynchronize();
+        show_gpu_memory("after cleanup");
+    }
+
+    {
+        char time_buf[64];
+        char summary_line[128];
+
+        wall_time_string(time_buf, sizeof(time_buf));
+        snprintf(summary_line, sizeof(summary_line), "finished_at = %s",
+                 time_buf);
+        append_summary(&cfg, summary_line);
+    }
+
+    printf("===== benchmark done =====\n");
+    printf("Results: %s\n", cfg.result_csv);
+    printf("Summary: %s\n", cfg.summary_txt);
+
+    cusolverDnDestroy(solver_handle);
+    cublasDestroy(blas_handle);
+    return failures == 0 ? 0 : 1;
+}

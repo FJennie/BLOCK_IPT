@@ -1,0 +1,33 @@
+===== IPT_C GPU benchmark: CUSOLVER SYEVD vs IPT =====
+ROOT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+RESULT_DIR = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_1
+RESULT_CSV = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_1/gpu_syevd_vs_ipt_results.csv
+SUMMARY_TXT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_1/gpu_syevd_vs_ipt_summary.txt
+N values = 8192
+epsilon = 0.10000000000000001
+ipt_tol = 9.9999999999999998e-13
+ipt_maxiter = 1000
+timing_repeats = 1
+per_N_warmup = true
+seed = 20260603
+compute_residuals = true
+gpu_name = NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.691 GiB / total 79.151 GiB
+===== warmup =====
+===== warmup done =====
+
+===== N = 8192 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+CUDA memory after matrix: free 78.191 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=8192
+CUSOLVER SYEVD warmup for N=8192
+  CUSOLVER SYEVD run 1/1: time = 1.4558189 s, residual = 1.5251904e-09, status = ok
+CUSOLVER SYEVD average: time = 1.4558189 s, residual = 1.5251904e-09, status = ok
+Running IPT for N=8192
+IPT warmup for N=8192
+  IPT run 1/1: time = 1.9366111 s, fixed_point_residual = 4.9747899e-13, iterations = 30, residual = 1.5019572e-09, status = ok
+IPT average: time = 1.9366111 s, fixed_point_residual = 4.9747899e-13, iterations = 30, residual = 1.5019572e-09, status = ok
+CUDA memory after cleanup: free 78.689 GiB / total 79.151 GiB
+===== benchmark done =====
+Results: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_1/gpu_syevd_vs_ipt_results.csv
+Summary: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_1/gpu_syevd_vs_ipt_summary.txt

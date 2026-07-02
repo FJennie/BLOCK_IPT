@@ -1,0 +1,2 @@
+method,repeat,time_sec,iterations,matvecs,eigenvalue,relative_residual,status,error,tol,maxiter
+IPT_CUDA_SPARSE,1,0.091095735999999997,45,46,-40.190776252600656,1.3585088150988403e-14,0,,9.9999999999999998e-13,1000

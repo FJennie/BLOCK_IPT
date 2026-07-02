@@ -1,0 +1,65 @@
+===== NH3/STO-6G full FCI IPT sparse benchmark =====
+Mon Jun 29 14:59:37 CST 2026
+gsn7
+SLURM_JOB_ID=3073615
+CUDA_VISIBLE_DEVICES=0
+IPT_REPEATS=5
+IPT_TOL=1e-12
+IPT_MAXITER=100
+IPT_K=1
+IPT_DEBUG_PREPARATION=1
+IPT_DEGENERACY_THRESHOLD=0
+IPT_BLOCK_CLUSTER=1
+IPT_BLOCK_CLUSTER_MAXITER=100
+IPT_BLOCK_CLUSTER_TOL=0
+IPT_BLOCK_CLUSTER_DAMPING=1
+RUN_PRIMME=1
+RUN_WARMUP=1
+IPT_EST_NNZ_PER_COL=600
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+numpy 1.21.5 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/numpy/__init__.py
+scipy 1.7.3 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/scipy/__init__.py
+pyscf 2.0.1 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/pyscf/__init__.py
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+Mon Jun 29 14:59:37 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A800-SXM4-80GB          Off | 00000000:CA:00.0 Off |                    0 |
+| N/A   30C    P0              57W / 400W |      2MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -gencode arch=compute_70,code=sm_70 -gencode arch=compute_80,code=sm_80 -I/fs1/home/nudt_liujie/ftt/primme-3.2.3/include -I/fs1/software/python/3.8_miniconda_4.10.3/include/python3.8 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/benchmark_nh3_sto6g_fci_3136_ipt.cu /fs1/home/nudt_liujie/ftt/primme-3.2.3/lib/libprimme.a -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/benchmark_nh3_sto6g_fci_3136_ipt_cuda -lcublas -lcusparse -lcusolver -lcudart -L/fs1/software/python/3.8_miniconda_4.10.3/lib -lpython3.8 -L/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3 -lopenblas -lpthread -ldl -lutil -lrt -Xlinker -rpath -Xlinker /fs1/software/gcc/12.2.0/lib64 -Xlinker -rpath -Xlinker /fs1/software/python/3.8_miniconda_4.10.3/lib -Xlinker -rpath -Xlinker /fs1/software/cp2k/8.1-gcc8.4-openmpi/lib -lgfortran /fs1/software/gcc/12.2.0/lib64/libstdc++.so -lm
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/benchmark_nh3_sto6g_fci_3136_ipt.cu(899): warning #177-D: function "primme_matvec" was declared but never referenced
+  static void primme_matvec(void *x, int64_t *ldx, void *y, int64_t *ldy,
+              ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/benchmark_nh3_sto6g_fci_3136_ipt.cu(899): warning #177-D: function "primme_matvec" was declared but never referenced
+  static void primme_matvec(void *x, int64_t *ldx, void *y, int64_t *ldy,
+              ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
++ set +x
+===== run =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/run_nh3_sto6g_fci_3136_ipt.sh: line 77: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/benchmark_nh3_sto6g_fci_3136_ipt_cuda: Text file busy

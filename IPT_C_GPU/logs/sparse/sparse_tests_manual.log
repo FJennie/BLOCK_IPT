@@ -1,0 +1,26 @@
+===== IPT_C_GPU sparse CUDA tests =====
+Mon Jun 22 21:07:18 CST 2026
+th-hpc4-ln0
+SLURM_JOB_ID=
+SLURM_JOB_NODELIST=
+CUDA_VISIBLE_DEVICES=
+ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse
+RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+
+test/sparse/run_sparse_tests.sh: line 42: nvidia-smi: command not found
+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/runtests_sparse.cu -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/runtests_sparse_cuda -lcublas -lcusparse
++ set +x
+
+===== run =====
+cudaGetDeviceCount failed: CUDA driver version is insufficient for CUDA runtime version

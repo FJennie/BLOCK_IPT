@@ -1,0 +1,28 @@
+IPT_C mixed precision sweep: FP16/TF32 initial + FP64 refine vs cuSolver Dsyevd
+started_at = 2026-06-13T16:39:12+0800
+ipt_c_root = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results_dir = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_tol_tmp_3012405/e-7
+summary_txt = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-7_summary_3012405.txt
+fp16_tol = 0.001
+fp16_maxiter = 1000
+tf32_tol = 9.9999999999999995e-08
+tf32_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 5
+per_case_warmup = true
+seed = 20260603
+N_values = 26000
+epsilon_values = 0.06
+compute_residuals = true
+append_results = false
+skip_existing = false
+run_fp16 = false
+run_tf32 = true
+cuda_runtime_version = 12020
+cuda_driver_version = 12020
+gpu_name = NVIDIA A100-SXM4-80GB
+
+epsilon=0.06 N=26000 started_at=2026-06-13T16:39:12+0800
+epsilon=0.06 N=26000 initial_precision=tf32 finished_at=2026-06-13T17:21:11+0800 status=ok time_syevd=33.282277940772474 residual_syevd=1.5173825793090459e-08 time_original_ipt=39.695942663867029 residual_original_ipt=2.8008539478741995e-09 original_ipt_iterations=19 original_ipt_fp=4.3051343881675503e-13 time_initial=313.01030405294148 time_fp64=21.865097385831177 time_mixed=334.87540213754403 residual_mixed=3.4650174087554434e-09 initial_iterations=1000 fp64_iterations=10 initial_fp=1.2595560768584242e-07 fp64_fp=6.643154160137638e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_tol_tmp_3012405/e-7/tf32_initial_cusolver_sweep_epsilon_0_06.csv
+finished_at = 2026-06-13T17:21:11+0800

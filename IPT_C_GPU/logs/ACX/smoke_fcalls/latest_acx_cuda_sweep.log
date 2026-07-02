@@ -1,0 +1,68 @@
+===== ACX CUDA sweep job =====
+Wed Jun 17 10:40:01 CST 2026
+gsn0
+SLURM_JOB_ID=3024024
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/ACX
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/ACX
+ACX_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/smoke_fcalls
+ACX_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/smoke_fcalls
+ACX_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/smoke_fcalls/summary.txt
+ACX_SWEEP_NS=64
+ACX_EPSILON_VALUES=0.06
+ACX_TOL=1e-12
+ACX_MAXITER=50
+ACX_REPEATS=1
+ACX_WARMUP_N=128
+ACX_APPEND_RESULTS=false
+ACX_COMPUTE_RESIDUAL=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Wed Jun 17 10:40:01 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:CA:00.0 Off |                    0 |
+| N/A   39C    P0              65W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== ACX CUDA sweep =====
+root=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/smoke_fcalls
+logs=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/smoke_fcalls
+summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/smoke_fcalls/summary.txt
+N values = 64
+epsilon values = 0.06
+tol=9.9999999999999998e-13 maxiter=50 repeats=1 warmup_n=128 seed=20260615 gpu=NVIDIA A100-SXM4-80GB
+GPU memory at start: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=64 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 2.4460256e-05 s
+GPU memory after matrix: free 78.722 GiB / total 79.151 GiB
+ACX warmup for N=64
+  ACX run 1/1: total=0.0011746497 s, iter=0.0011160499 s, finalize=2.2083987e-05 s, max_apply_res=9.1827325e-13, abs_res=2.7422027e-13, fixed_point_res=7.4710231e-14, iters=5, f_calls=11, converged=1, status=ok
+Original IPT warmup for N=64
+  original IPT run 1/1: total=0.001622967 s, fixed_point_res=1.9134821e-13, abs_res=1.4640879e-12, iters=13, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== done failures=0 =====

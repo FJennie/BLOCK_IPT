@@ -1,0 +1,28 @@
+warmup skipped RUN_WARMUP=0
+timing_note=IPT_CUDA_SPARSE time_sec is internal compute time solve_time_sec=iteration_time_sec+rayleigh_ritz_time_sec; it excludes preparation, transfer/setup, final unpermute, and host result copies. PRIMME time_sec remains the dprimme call time.
+
+matrix=co_sto6g_fci
+n=14400
+nnz=8783995
+k=1
+repeats=1
+tol=9.9999999999999998e-13
+ipt_maxiter=1000
+run_primme=0
+primme_max_matvecs=1000
+matrix_inf_norm=118.05738186691855
+integral_generation_time_sec=0.4959039599634707
+pyscf_site_packages=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+basis=sto-6g
+frozen_core_orbitals=0
+norb=10
+active_electrons=14
+neleca=7
+nelecb=7
+na=120
+nb=120
+ecore=22.514187310902322
+nuclear_repulsion=22.514187310902322
+hartree_fock_energy=-112.30332165918836
+
+IPT_CUDA_SPARSE avg_time_sec=0.061995505999999999 std_time_sec=0 avg_iterations=100 avg_matvecs=101 avg_eigenvalue=-62.684620668633386 avg_residual=0.14708655703585657

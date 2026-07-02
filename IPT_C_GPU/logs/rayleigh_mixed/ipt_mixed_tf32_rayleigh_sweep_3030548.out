@@ -1,0 +1,80 @@
+===== IPT mixed TF32 and Rayleigh mixed sweep job =====
+Thu Jun 18 22:40:33 CST 2026
+gsn1
+SLURM_JOB_ID=3030548
+SLURM_JOB_NODELIST=gsn1
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/mixed_precision
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/rayleigh_mixed
+IPT_C_RESULTS_DIR=/tmp/ipt_rayleigh_mixed_smoke/results
+IPT_C_LOG_DIR=/tmp/ipt_rayleigh_mixed_smoke/logs
+IPT_SUMMARY_TXT=/tmp/ipt_rayleigh_mixed_smoke/results/summary.txt
+IPT_SWEEP_NS=128
+IPT_EPSILON_VALUES=0.01
+IPT_TF32_TOL=1e-6
+IPT_TF32_MAXITER=1000
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=1
+IPT_WARMUP_N=64
+IPT_APPEND_RESULTS=false
+IPT_SKIP_EXISTING=false
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Thu Jun 18 22:40:33 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:A4:00.0 Off |                    0 |
+| N/A   29C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== IPT mixed TF32 and Rayleigh mixed sweep =====
+results_dir=/tmp/ipt_rayleigh_mixed_smoke/results logs_dir=/tmp/ipt_rayleigh_mixed_smoke/logs summary=/tmp/ipt_rayleigh_mixed_smoke/results/summary.txt
+N values = 128
+epsilon values = 0.01
+tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 repeats=1 gpu=NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.722 GiB / total 79.151 GiB
+===== warmup N=64 =====
+===== warmup done =====
+
+===== epsilon=0.01 N=128 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 9.2245173e-05 s
+CUDA memory after matrix: free 78.722 GiB / total 79.151 GiB
+Mixed TF32 IPT warmup for N=128
+  mixed tf32 run 1/1: tf32=0.00014486955 s, fp64=0.00067127869 s, total=0.0008162437 s, tf32_fp=2.3981161e-08, fp64_fp=3.37722e-14, abs_res=6.6931169e-14, iters=4/5, status=ok
+Rayleigh mixed QR warmup for N=128
+  rayleigh run 1/1: tf32=0.00015111919 s, orth=0.0020782421 s, transform=3.9621722e-05 s, fp64=0.00042315898 s, back=1.7378014e-05 s, total=0.00270952 s, tf32_fp=2.3981161e-08, fp64_fp=7.934127e-18, abs_res=5.4440818e-13, iters=4/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+===== sweep done failures=0 =====
+
+===== output files =====
+/tmp/ipt_rayleigh_mixed_smoke/logs:
+total 4.0K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.7K Jun 18 22:40 ipt_mixed_tf32_rayleigh_sweep_3030548.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   76 Jun 18 22:40 latest_ipt_mixed_tf32_rayleigh_sweep.log -> /tmp/ipt_rayleigh_mixed_smoke/logs/ipt_mixed_tf32_rayleigh_sweep_3030548.log
+
+/tmp/ipt_rayleigh_mixed_smoke/results:
+total 8.0K
+-rw-r--r-- 1 nudt_liujie nudt_liujie  953 Jun 18 22:40 ipt_mixed_tf32_rayleigh_sweep_epsilon_0_01.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.2K Jun 18 22:40 summary.txt
+finished at: Thu Jun 18 22:40:39 CST 2026

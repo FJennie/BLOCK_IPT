@@ -1,0 +1,70 @@
+===== IPT_C_GPU sparse CUDA tests =====
+Sun Jun 21 14:29:49 CST 2026
+gsn0
+SLURM_JOB_ID=3041621
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse
+RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+
+Sun Jun 21 14:29:49 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:C7:00.0 Off |                    0 |
+| N/A   28C    P0              58W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/runtests_sparse.cu -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/runtests_sparse_cuda -lcublas
++ set +x
+
+===== run =====
+CUDA device 0: NVIDIA A100-SXM4-80GB, compute capability 8.0
+synthetic_banded_k5    n=  64 k=  5 nnz=  190 it=  80 vector_diff=4.337e-18 value_diff=4.441e-16 residual=1.110e-16 PASS
+h20_fci_w_k1           n=  10 k=  1 nnz=  100 it=  80 vector_diff=1.578e-20 value_diff=0.000e+00 residual=2.193e-22 PASS
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/sparse_runtests_summary.txt
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/sparse_runtests_summary.csv
+all sparse CUDA IPT tests passed
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse:
+total 21K
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   72 Jun 21 14:29 latest_sparse_tests.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/sparse_tests_3041621.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 21 14:27 sparse_tests_3041618.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.7K Jun 21 14:27 sparse_tests_3041618.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.7K Jun 21 14:27 sparse_tests_3041618.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 21 14:28 sparse_tests_3041620.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.3K Jun 21 14:29 sparse_tests_3041620.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.3K Jun 21 14:29 sparse_tests_3041620.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 21 14:29 sparse_tests_3041621.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.1K Jun 21 14:29 sparse_tests_3041621.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.1K Jun 21 14:29 sparse_tests_3041621.out
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse:
+total 1.0K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 322 Jun 21 14:29 sparse_runtests_summary.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 277 Jun 21 14:29 sparse_runtests_summary.txt
+finished at: Sun Jun 21 14:29:52 CST 2026

@@ -1,0 +1,72 @@
+===== IPT_C CUDA tests =====
+Fri Jun  5 15:55:59 CST 2026
+gn62
+SLURM_JOB_ID=2984228
+SLURM_JOB_NODELIST=gn62
+CUDA_VISIBLE_DEVICES=0
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.8.1  
+
+Fri Jun  5 15:56:07 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla V100-SXM2-32GB           Off | 00000000:60:00.0 Off |                    0 |
+| N/A   31C    P0              55W / 300W |      0MiB / 32768MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+CUDA error at test/../src/ipt_cuda.cu:303: the provided PTX was compiled with an unsupported toolchain.
+random_k1 failed: CUDA runtime error
+CUDA error at test/../src/ipt_cuda.cu:303: the provided PTX was compiled with an unsupported toolchain.
+random_k5 failed: CUDA runtime error
+CUDA error at test/../src/ipt_cuda.cu:303: the provided PTX was compiled with an unsupported toolchain.
+random_full failed: CUDA runtime error
+CUDA error at test/../src/ipt_cuda.cu:303: the provided PTX was compiled with an unsupported toolchain.
+symmetric_k1 failed: CUDA runtime error
+CUDA error at test/../src/ipt_cuda.cu:303: the provided PTX was compiled with an unsupported toolchain.
+symmetric_k5 failed: CUDA runtime error
+CUDA error at test/../src/ipt_cuda.cu:303: the provided PTX was compiled with an unsupported toolchain.
+symmetric_full failed: CUDA runtime error
+CUDA error at test/../src/ipt_cuda.cu:303: the provided PTX was compiled with an unsupported toolchain.
+random_medium failed: CUDA runtime error
+CUDA error at test/../src/ipt_cuda.cu:303: the provided PTX was compiled with an unsupported toolchain.
+symmetric_medium failed: CUDA runtime error
+CUDA device 0: Tesla V100-SXM2-32GB, compute capability 7.0
+random_k1          n= 32 k=  1 sym=0 vector_diff=inf value_diff=inf residual=inf FAIL
+random_k5          n= 32 k=  5 sym=0 vector_diff=inf value_diff=inf residual=inf FAIL
+random_full        n= 32 k= 32 sym=0 vector_diff=inf value_diff=inf residual=inf FAIL
+symmetric_k1       n= 32 k=  1 sym=1 vector_diff=inf value_diff=inf residual=inf FAIL
+symmetric_k5       n= 32 k=  5 sym=1 vector_diff=inf value_diff=inf residual=inf FAIL
+symmetric_full     n= 32 k= 32 sym=1 vector_diff=inf value_diff=inf residual=inf FAIL
+random_medium      n= 96 k=  5 sym=0 vector_diff=inf value_diff=inf residual=inf FAIL
+symmetric_medium   n= 96 k= 16 sym=1 vector_diff=inf value_diff=inf residual=inf FAIL
+wrote /fs1/home/nudt_liujie/ftt/IPT_C/results/runtests_summary.csv
+8 CUDA IPT test(s) failed
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C/logs:
+total 20K
+-rw-r--r-- 1 nudt_liujie nudt_liujie  424 Jun  5 15:47 build_runtests_cuda.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   66 Jun  5 15:55 latest_run_runtests_cuda.log -> /fs1/home/nudt_liujie/ftt/IPT_C/logs/run_runtests_cuda_2984228.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie   88 Jun  5 15:48 run_runtests_cuda.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.9K Jun  5 15:56 run_runtests_cuda_2984228.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun  5 15:55 runtests_cuda_2984228.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.9K Jun  5 15:56 runtests_cuda_2984228.out
+
+/fs1/home/nudt_liujie/ftt/IPT_C/results:
+total 512
+-rw-r--r-- 1 nudt_liujie nudt_liujie 386 Jun  5 15:56 runtests_summary.csv
+finished at: Fri Jun  5 15:56:13 CST 2026

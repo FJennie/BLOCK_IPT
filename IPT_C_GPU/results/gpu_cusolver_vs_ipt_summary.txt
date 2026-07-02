@@ -1,0 +1,39 @@
+IPT_C GPU benchmark: CUSOLVER SYEVD vs IPT
+started_at = 2026-06-09T23:31:53+0800
+ipt_c_root = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+result_csv = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/gpu_cusolver_vs_ipt_results.csv
+epsilon = 0.01
+ipt_tol = 9.9999999999999998e-13
+ipt_maxiter = 1000
+timing_repeats = 10
+per_N_warmup = true
+seed = 20260603
+N_values = 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+compute_residuals = true
+cuda_runtime_version = 12020
+cuda_driver_version = 12020
+gpu_name = NVIDIA A100-SXM4-80GB
+
+N=32 started_at=2026-06-09T23:31:54+0800
+N=32 finished_at=2026-06-09T23:31:54+0800 status=ok time_syevd=0.00032270033843815325 time_ipt=0.00087525220587849619 ipt_iterations=7 ipt_fixed_point_residual=5.7227122671789302e-14 residual_ipt=2.9925681193454341e-14 timing_repeats=10 per_N_warmup=true
+N=64 started_at=2026-06-09T23:31:54+0800
+N=64 finished_at=2026-06-09T23:31:54+0800 status=ok time_syevd=0.0011496587190777063 time_ipt=0.00088743027299642563 ipt_iterations=7 ipt_fixed_point_residual=1.6181499227397713e-13 residual_ipt=1.9849194095996072e-13 timing_repeats=10 per_N_warmup=true
+N=128 started_at=2026-06-09T23:31:54+0800
+N=128 finished_at=2026-06-09T23:31:54+0800 status=ok time_syevd=0.0026628264226019383 time_ipt=0.00087147364392876621 ipt_iterations=7 ipt_fixed_point_residual=1.7001708547994939e-13 residual_ipt=4.9484580362676255e-13 timing_repeats=10 per_N_warmup=true
+N=256 started_at=2026-06-09T23:31:54+0800
+N=256 finished_at=2026-06-09T23:31:54+0800 status=ok time_syevd=0.004032029118388891 time_ipt=0.0010018449276685715 ipt_iterations=7 ipt_fixed_point_residual=3.7448250465950209e-13 residual_ipt=2.2886265021815504e-12 timing_repeats=10 per_N_warmup=true
+N=512 started_at=2026-06-09T23:31:54+0800
+N=512 finished_at=2026-06-09T23:31:54+0800 status=ok time_syevd=0.0084805617108941085 time_ipt=0.0015259476378560067 ipt_iterations=7 ipt_fixed_point_residual=6.05912004578608e-13 residual_ipt=7.9455426263994381e-12 timing_repeats=10 per_N_warmup=true
+N=1024 started_at=2026-06-09T23:31:54+0800
+N=1024 finished_at=2026-06-09T23:31:54+0800 status=ok time_syevd=0.016076766001060606 time_ipt=0.0030552608892321586 ipt_iterations=7 ipt_fixed_point_residual=7.7068331403131175e-13 residual_ipt=2.1939384773052579e-11 timing_repeats=10 per_N_warmup=true
+N=2048 started_at=2026-06-09T23:31:54+0800
+N=2048 finished_at=2026-06-09T23:31:55+0800 status=ok time_syevd=0.044562335684895517 time_ipt=0.017835339158773424 ipt_iterations=8 ipt_fixed_point_residual=3.7015523904481106e-14 residual_ipt=2.2900670174191955e-12 timing_repeats=10 per_N_warmup=true
+N=4096 started_at=2026-06-09T23:31:55+0800
+N=4096 finished_at=2026-06-09T23:31:59+0800 status=ok time_syevd=0.21467250334098936 time_ipt=0.077076018275693062 ipt_iterations=8 ipt_fixed_point_residual=5.1066880767593383e-14 residual_ipt=6.6285318933848029e-12 timing_repeats=10 per_N_warmup=true
+N=8192 started_at=2026-06-09T23:31:59+0800
+N=8192 finished_at=2026-06-09T23:32:25+0800 status=ok time_syevd=1.4480141817126424 time_ipt=0.56503970613703136 ipt_iterations=8 ipt_fixed_point_residual=6.5213573181514535e-14 residual_ipt=1.758886018181272e-11 timing_repeats=10 per_N_warmup=true
+N=16384 started_at=2026-06-09T23:32:25+0800
+N=16384 finished_at=2026-06-09T23:35:07+0800 status=ok time_syevd=8.886806620284915 time_ipt=4.4512141330633312 ipt_iterations=8 ipt_fixed_point_residual=8.3375732832424321e-14 residual_ipt=4.7611928469720287e-11 timing_repeats=10 per_N_warmup=true
+N=32768 started_at=2026-06-09T23:35:07+0800
+N=32768 finished_at=2026-06-09T23:42:42+0800 status=partial_failed time_syevd=6.5116677433252335e-05 time_ipt=36.126190673559904 ipt_iterations=8 ipt_fixed_point_residual=9.9330191618803195e-14 residual_ipt=1.1665736739565183e-10 timing_repeats=10 per_N_warmup=true
+finished_at = 2026-06-09T23:42:42+0800

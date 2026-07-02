@@ -1,0 +1,91 @@
+===== IPT_C mixed precision FP16 initial + FP64 refine job =====
+Wed Jun 10 11:19:28 CST 2026
+gsn0
+SLURM_JOB_ID=3001507
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/mixed_precision
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/mixed_precision
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/smoke
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/smoke
+IPT_RESULT_CSV=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/smoke/results.csv
+IPT_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/smoke/summary.txt
+IPT_MIXED_N=256
+IPT_EPSILON_VALUES=0.05
+IPT_FP16_TOL=1e-3
+IPT_FP16_MAXITER=1000
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=1
+IPT_SEED=20260603
+IPT_COMPUTE_RESIDUALS=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Wed Jun 10 11:19:28 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:27:00.0 Off |                    0 |
+| N/A   32C    P0              58W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== IPT_C mixed precision benchmark =====
+ROOT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+RESULT_DIR = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/smoke
+RESULT_CSV = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/smoke/results.csv
+SUMMARY_TXT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/smoke/summary.txt
+N = 256
+fp16_tol = 0.001
+fp16_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 1
+seed = 20260603
+epsilon values = 0.050000000000000003
+compute_residuals = true
+gpu_name = NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.722 GiB / total 79.151 GiB
+===== device warmup N=32 =====
+===== device warmup done =====
+
+===== N = 256, epsilon = 0.050000000000000003 =====
+CUDA memory before matrix: free 78.716 GiB / total 79.151 GiB
+host matrix generated in 0.0003688829 s
+CUDA memory after matrix: free 78.716 GiB / total 79.151 GiB
+Mixed precision warmup for N=256 epsilon=0.050000000000000003
+  mixed run 1/1: fp16 = 0.00048733503 s, fp64 = 0.0013167239 s, total = 0.0018042289 s, fp16_fp = 0.00015594321, fp64_fp = 3.0357393e-13, fp16_iters = 3, fp64_iters = 10, residual = 9.7091879e-12, status = ok
+Mixed average: fp16 = 0.00048733503 s, fp64 = 0.0013167239 s, total = 0.0018042289 s, residual = 9.7091879e-12, fp16_fp = 0.00015594321, fp64_fp = 3.0357393e-13, fp16_iters = 3, fp64_iters = 10, status = ok
+CUDA memory after cleanup: free 78.716 GiB / total 79.151 GiB
+===== mixed benchmark done =====
+Results: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/smoke/results.csv
+Summary: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/smoke/summary.txt
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/smoke:
+total 4.5K
+lrwxrwxrwx 1 nudt_liujie nudt_liujie  100 Jun 10 11:19 latest_mixed_precision_fp16_fp64.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/smoke/mixed_precision_fp16_fp64_3001507.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.3K Jun 10 11:19 mixed_precision_fp16_fp64_3001507.log
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/smoke:
+total 1.0K
+-rw-r--r-- 1 nudt_liujie nudt_liujie  514 Jun 10 11:19 results.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.1K Jun 10 11:19 summary.txt
+finished at: Wed Jun 10 11:19:32 CST 2026

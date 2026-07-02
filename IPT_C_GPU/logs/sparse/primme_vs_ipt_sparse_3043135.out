@@ -1,0 +1,49 @@
+===== PRIMME vs IPT sparse H2O benchmark =====
+Mon Jun 22 09:53:39 CST 2026
+gsn0
+SLURM_JOB_ID=3043135
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+PRIMME_ROOT=/fs1/home/nudt_liujie/ftt/primme-3.2.3
+LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse
+RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse
+IPT_SPARSE_MATRIX=/fs1/home/nudt_liujie/hch/matrix_mtx/H2O.mtx
+IPT_NUM_EVALS=1
+IPT_TOL=1e-8
+IPT_MAXITER=1000
+PRIMME_MAX_MATVECS=20000
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+
+Mon Jun 22 09:53:39 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:A4:00.0 Off |                    0 |
+| N/A   28C    P0              62W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 -I/fs1/home/nudt_liujie/ftt/primme-3.2.3/include /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/benchmark_primme_vs_ipt_sparse.cu /fs1/home/nudt_liujie/ftt/primme-3.2.3/lib/libprimme.a -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/benchmark_primme_vs_ipt_sparse_cuda -lcublas -lcusparse -lcudart -L/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse -lopenblas -lgfortran -lm
+/usr/bin/ld: cannot find -lopenblas
+collect2: error: ld returned 1 exit status

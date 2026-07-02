@@ -1,0 +1,62 @@
+===== H2O/sto-6g FCI PySCF PRIMME vs IPT sparse benchmark =====
+Mon Jun 22 14:57:26 CST 2026
+gsn0
+SLURM_JOB_ID=3045534
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+PRIMME_ROOT=/fs1/home/nudt_liujie/ftt/primme-3.2.3
+PYTHON_ROOT=/fs1/software/python/3.8_miniconda_4.10.3
+PYSCF_SITE_PACKAGES=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse
+IPT_REPEATS=5
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+PRIMME_MAX_MATVECS=1000
+OPENBLAS_LIB=/fs1/software/cp2k/8.1-gcc8.4-openmpi/lib/libopenblas.so.0
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+numpy 1.21.5 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/numpy/__init__.py
+scipy 1.7.3 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/scipy/__init__.py
+pyscf 2.0.1 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/pyscf/__init__.py
+
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+
+Mon Jun 22 14:57:28 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:51:00.0 Off |                    0 |
+| N/A   29C    P0              58W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 -I/fs1/home/nudt_liujie/ftt/primme-3.2.3/include -I/fs1/software/python/3.8_miniconda_4.10.3/include/python3.8 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/benchmark_h20_fci_primme_vs_ipt.cu /fs1/home/nudt_liujie/ftt/primme-3.2.3/lib/libprimme.a -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/benchmark_h20_fci_primme_vs_ipt_cuda -lcublas -lcusparse -lcudart -L/fs1/software/python/3.8_miniconda_4.10.3/lib -lpython3.8 -L/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse -lopenblas -lpthread -ldl -lutil -lrt -Xlinker -rpath -Xlinker /fs1/software/python/3.8_miniconda_4.10.3/lib -Xlinker -rpath -Xlinker /fs1/software/cp2k/8.1-gcc8.4-openmpi/lib -lgfortran -lm
++ set +x
+
+===== run =====
+Generating H2O/sto-6g FCI Hamiltonian with PySCF...
+PYSCF_SITE_PACKAGES=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+  File "<string>", line 2
+    def build_h2o_fci_csc():
+    ^
+SyntaxError: invalid syntax
+failed to generate H2O/sto-6g FCI CSC matrix

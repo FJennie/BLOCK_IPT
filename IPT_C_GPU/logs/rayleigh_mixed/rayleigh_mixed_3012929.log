@@ -1,0 +1,76 @@
+===== Rayleigh mixed job =====
+Sat Jun 13 20:19:48 CST 2026
+gsn0
+SLURM_JOB_ID=3012929
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/mixed_precision
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/rayleigh_mixed
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed
+IPT_N=16384
+IPT_EPSILON=0.07
+IPT_TF32_TOL=1e-6
+IPT_TF32_MAXITER=1000
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=1
+IPT_WARMUP_N=128
+IPT_COMPUTE_RESIDUALS=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Sat Jun 13 20:19:48 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:2A:00.0 Off |                    0 |
+| N/A   27C    P0              60W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== rayleigh mixed experiment =====
+N=16384 epsilon=0.07 tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 repeats=1
+results_dir=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed logs_dir=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed gpu=NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.722 GiB / total 79.151 GiB
+===== warmup N=128 =====
+===== warmup done =====
+host matrix generated in 11.464085 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Original IPT run 1/1
+  original: time=10.96742 fp=4.6545121e-13 iters=21 residual=2.1998941e-09 status=ok
+Direct TF32->FP64 run 1/1
+  direct: tf32=0.58531877 fp64=6.9712178 total=7.5565372 tf32_fp=5.0616896e-07 fp64_fp=3.6111889e-13 iters=8/13 residual=1.7328166e-09 status=ok
+Rayleigh mixed run 1/1
+  rayleigh: tf32=nan transform=nan fp64=nan back=nan total=nan tf32_fp=nan fp64_fp=nan iters=0/0 residual=nan status=failed
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed/rayleigh_mixed_N16384_epsilon_0_07.csv
+CUDA memory before cleanup: free 76.722 GiB / total 79.151 GiB
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed:
+total 12K
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   82 Jun 13 20:19 latest_rayleigh_mixed.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed/rayleigh_mixed_3012929.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 13 20:19 rayleigh_mixed_3012929.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.5K Jun 13 20:20 rayleigh_mixed_3012929.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.5K Jun 13 20:20 rayleigh_mixed_3012929.out
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed:
+total 512
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.1K Jun 13 20:20 rayleigh_mixed_N16384_epsilon_0_07.csv
+finished at: Sat Jun 13 20:20:32 CST 2026

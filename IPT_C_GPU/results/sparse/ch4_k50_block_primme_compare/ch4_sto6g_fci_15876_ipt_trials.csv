@@ -1,0 +1,3 @@
+method,k,avg_solve_time_sec,avg_api_total_time_sec,avg_preparation_time_sec,avg_transfer_setup_time_sec,avg_iteration_time_sec,avg_rayleigh_ritz_time_sec,avg_iterations,avg_matvecs,last_first_eigenvalue,last_max_relative_residual,last_relative_fixed_point_residual,eigenvalue_abs_residual,status,error,tol,maxiter
+PRIMME_CUBLAS,50,0.83301183376461263,1.1958890595939011,0,0.36287722582928839,0,0,455.80000000000001,1000.4,-40.190776252600664,nan,nan,0,-3,dprimme returned -3,9.9999999999999998e-13,1000
+IPT_CUDA_BLOCK_CLUSTER,50,nan,5.7199983930680904,0,0,0,0,0,0,nan,nan,nan,nan,1,invalid argument,9.9999999999999998e-13,1000

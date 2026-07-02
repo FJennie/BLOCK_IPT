@@ -1,0 +1,80 @@
+===== ACX mixed Rayleigh TF32/FP64 CUDA sweep job =====
+Thu Jun 18 18:34:42 CST 2026
+gsn0
+SLURM_JOB_ID=3029730
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/ACX
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/ACX/ACX_MIXED_RAYLEIGH
+ACX_MIXED_RAYLEIGH_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH
+ACX_MIXED_RAYLEIGH_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH
+ACX_MIXED_RAYLEIGH_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_tf32_cuda_sweep_summary.txt
+ACX_MIXED_RAYLEIGH_SWEEP_NS=4096,8192,16384
+ACX_MIXED_RAYLEIGH_EPSILON_VALUES=0.06,0.08,0.1,0.12
+ACX_TF32_TOL=1e-12
+ACX_TF32_MAXITER=1000
+ACX_FP64_TOL=1e-12
+ACX_FP64_MAXITER=1000
+ACX_MIXED_RAYLEIGH_REPEATS=5
+ACX_MIXED_RAYLEIGH_WARMUP_N=128
+ACX_MIXED_RAYLEIGH_APPEND_RESULTS=false
+ACX_MIXED_RAYLEIGH_COMPUTE_RESIDUAL=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Thu Jun 18 18:34:42 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:2A:00.0 Off |                    0 |
+| N/A   28C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== ACX mixed Rayleigh TF32/FP64 CUDA sweep =====
+root=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH
+logs=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH
+summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_tf32_cuda_sweep_summary.txt
+N values = 4096, 8192, 16384
+epsilon values = 0.06, 0.08, 0.1, 0.12
+tf32_tol=9.9999999999999998e-13 fp64_tol=9.9999999999999998e-13 tf32_maxiter=1000 fp64_maxiter=1000 repeats=5 warmup_n=128 seed=20260617 gpu=NVIDIA A100-SXM4-80GB
+GPU memory at start: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=4096 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.63497026 s
+GPU memory after matrix: free 78.597 GiB / total 79.151 GiB
+ACX mixed Rayleigh TF32 warmup for N=4096
+  ACX mixed Rayleigh TF32 run 1/5: total=3.6987637 s, tf32=3.3634444 s, orth=0.24950841 s, rayleigh=0.015902159 s, fp64=0.062186046 s, final=0.0071679349 s, back=0.0077226809 s, tf32_res=8.4113009e-08, fp64_res=2.0584423e-15, abs_res=nan, tf32_iters=1000, fp64_iters=2, tf32_calls=2500, fp64_calls=3, tf32_conv=0, fp64_conv=1, status=ok
+  ACX mixed Rayleigh TF32 run 2/5: total=3.7024889 s, tf32=3.3670621 s, orth=0.24942444 s, rayleigh=0.01591403 s, fp64=0.062352059 s, final=0.0071835257 s, back=0.0077362331 s, tf32_res=8.4113009e-08, fp64_res=2.0584423e-15, abs_res=nan, tf32_iters=1000, fp64_iters=2, tf32_calls=2500, fp64_calls=3, tf32_conv=0, fp64_conv=1, status=ok
+  ACX mixed Rayleigh TF32 run 3/5: total=3.711034 s, tf32=3.3751659 s, orth=0.2494001 s, rayleigh=0.015961196 s, fp64=0.062788926 s, final=0.0071815387 s, back=0.007717907 s, tf32_res=8.4113009e-08, fp64_res=2.0584423e-15, abs_res=nan, tf32_iters=1000, fp64_iters=2, tf32_calls=2500, fp64_calls=3, tf32_conv=0, fp64_conv=1, status=ok
+  ACX mixed Rayleigh TF32 run 4/5: total=3.713547 s, tf32=3.3770549 s, orth=0.24991242 s, rayleigh=0.015969574 s, fp64=0.062882859 s, final=0.0071748281 s, back=0.0077272318 s, tf32_res=8.4113009e-08, fp64_res=2.0584423e-15, abs_res=nan, tf32_iters=1000, fp64_iters=2, tf32_calls=2500, fp64_calls=3, tf32_conv=0, fp64_conv=1, status=ok
+  ACX mixed Rayleigh TF32 run 5/5: total=3.7156012 s, tf32=3.3804615 s, orth=0.24922584 s, rayleigh=0.015928006 s, fp64=0.06225638 s, final=0.0071743112 s, back=0.0077295098 s, tf32_res=8.4113009e-08, fp64_res=2.0584423e-15, abs_res=2.151863e-09, tf32_iters=1000, fp64_iters=2, tf32_calls=2500, fp64_calls=3, tf32_conv=0, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=8192 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.2919729 s
+GPU memory after matrix: free 78.222 GiB / total 79.151 GiB
+ACX mixed Rayleigh TF32 warmup for N=8192
+  ACX mixed Rayleigh TF32 run 1/5: total=24.681794 s, tf32=23.43964 s, orth=0.61279738 s, rayleigh=0.12386354 s, fp64=0.44406477 s, final=0.058354573 s, back=0.061428331 s, tf32_res=8.9119665e-08, fp64_res=3.1686495e-15, abs_res=nan, tf32_iters=1000, fp64_iters=2, tf32_calls=2500, fp64_calls=3, tf32_conv=0, fp64_conv=1, status=ok
+  ACX mixed Rayleigh TF32 run 2/5: total=24.725096 s, tf32=23.48133 s, orth=0.61267819 s, rayleigh=0.12487305 s, fp64=0.44512412 s, final=0.058340977 s, back=0.06109004 s, tf32_res=8.9119665e-08, fp64_res=3.1686495e-15, abs_res=nan, tf32_iters=1000, fp64_iters=2, tf32_calls=2500, fp64_calls=3, tf32_conv=0, fp64_conv=1, status=ok
+  ACX mixed Rayleigh TF32 run 3/5: total=24.754562 s, tf32=23.506381 s, orth=0.61296797 s, rayleigh=0.127149 s, fp64=0.44697565 s, final=0.058473345 s, back=0.061088607 s, tf32_res=8.9119665e-08, fp64_res=3.1686495e-15, abs_res=nan, tf32_iters=1000, fp64_iters=2, tf32_calls=2500, fp64_calls=3, tf32_conv=0, fp64_conv=1, status=ok
+  ACX mixed Rayleigh TF32 run 4/5: total=24.758522 s, tf32=23.515911 s, orth=0.61341526 s, rayleigh=0.12576296 s, fp64=0.44265407 s, final=0.058784301 s, back=0.060779309 s, tf32_res=8.9119665e-08, fp64_res=3.1686495e-15, abs_res=nan, tf32_

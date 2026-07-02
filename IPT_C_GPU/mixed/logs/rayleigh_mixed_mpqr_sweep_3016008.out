@@ -1,0 +1,127 @@
+===== Rayleigh mixed MPQR sweep job =====
+Sun Jun 14 21:28:22 CST 2026
+gsn0
+SLURM_JOB_ID=3016008
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed/results
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed/logs
+IPT_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed/results/rayleigh_mixed_mpqr_N16384_epsilon_0_09_to_0_12_summary.txt
+IPT_SWEEP_NS=16384
+IPT_EPSILON_VALUES=0.09,0.10,0.11,0.12
+IPT_TF32_TOL=1e-6
+IPT_TF32_MAXITER=1000
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=5
+IPT_WARMUP_N=128
+IPT_APPEND_RESULTS=true
+IPT_SKIP_EXISTING=false
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Sun Jun 14 21:28:22 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:2A:00.0 Off |                    0 |
+| N/A   28C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== Rayleigh mixed QR sweep =====
+results_dir=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed/results logs_dir=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed/logs summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed/results/rayleigh_mixed_mpqr_N16384_epsilon_0_09_to_0_12_summary.txt
+N values = 16384
+epsilon values = 0.09, 0.1, 0.11, 0.12
+tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 repeats=5 gpu=NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.722 GiB / total 79.151 GiB
+===== warmup N=128 =====
+===== warmup done =====
+
+===== epsilon=0.09 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 15.903537 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Rayleigh mixed MPQR warmup for N=16384
+  rayleigh run 1/5: tf32=0.73277291 s, orth=2.6117768 s, transform=1.0459004 s, fp64=1.9918422 s, back=0.48881271 s, total=6.871105 s, tf32_fp=8.3439031e-07, fp64_fp=7.3943292e-15, abs_res=nan, iters=10/3, status=ok
+  rayleigh run 2/5: tf32=0.73256466 s, orth=2.6146157 s, transform=1.0458848 s, fp64=2.0002437 s, back=0.49139956 s, total=6.8847084 s, tf32_fp=8.3439031e-07, fp64_fp=7.3943292e-15, abs_res=nan, iters=10/3, status=ok
+  rayleigh run 3/5: tf32=0.74271341 s, orth=2.6154285 s, transform=1.0476696 s, fp64=1.9969488 s, back=0.49241 s, total=6.8951703 s, tf32_fp=8.3439031e-07, fp64_fp=7.3943292e-15, abs_res=nan, iters=10/3, status=ok
+  rayleigh run 4/5: tf32=0.73373725 s, orth=2.6249002 s, transform=1.0496028 s, fp64=1.9877445 s, back=0.49320593 s, total=6.8891907 s, tf32_fp=8.3439031e-07, fp64_fp=7.3943292e-15, abs_res=nan, iters=10/3, status=ok
+  rayleigh run 5/5: tf32=0.73584561 s, orth=2.6257188 s, transform=1.0487997 s, fp64=1.9992584 s, back=0.49372263 s, total=6.9033451 s, tf32_fp=8.3439031e-07, fp64_fp=7.3943292e-15, abs_res=3.2777255e-08, iters=10/3, status=ok
+CUDA memory after cleanup: free 78.720 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=16384 =====
+CUDA memory before matrix: free 78.720 GiB / total 79.151 GiB
+host matrix generated in 15.293031 s
+CUDA memory after matrix: free 76.720 GiB / total 79.151 GiB
+Rayleigh mixed MPQR warmup for N=16384
+  rayleigh run 1/5: tf32=0.87683609 s, orth=2.6144653 s, transform=1.0478356 s, fp64=1.9980049 s, back=0.49225318 s, total=7.029395 s, tf32_fp=7.5573085e-07, fp64_fp=1.0014592e-14, abs_res=nan, iters=12/3, status=ok
+  rayleigh run 2/5: tf32=0.87862603 s, orth=2.6192848 s, transform=1.0501104 s, fp64=1.9962535 s, back=0.4900811 s, total=7.0343558 s, tf32_fp=7.5573085e-07, fp64_fp=1.0014592e-14, abs_res=nan, iters=12/3, status=ok
+  rayleigh run 3/5: tf32=0.87830371 s, orth=2.6201068 s, transform=1.0500375 s, fp64=1.9912729 s, back=0.49037102 s, total=7.030092 s, tf32_fp=7.5573085e-07, fp64_fp=1.0014592e-14, abs_res=nan, iters=12/3, status=ok
+  rayleigh run 4/5: tf32=0.88028 s, orth=2.6190157 s, transform=1.0508463 s, fp64=2.0064863 s, back=0.49189724 s, total=7.0485254 s, tf32_fp=7.5573085e-07, fp64_fp=1.0014592e-14, abs_res=nan, iters=12/3, status=ok
+  rayleigh run 5/5: tf32=0.87823213 s, orth=2.6259111 s, transform=1.0508564 s, fp64=2.0061589 s, back=0.50013124 s, total=7.0612898 s, tf32_fp=7.5573085e-07, fp64_fp=1.0014592e-14, abs_res=3.7384786e-08, iters=12/3, status=ok
+CUDA memory after cleanup: free 78.720 GiB / total 79.151 GiB
+
+===== epsilon=0.11 N=16384 =====
+CUDA memory before matrix: free 78.720 GiB / total 79.151 GiB
+host matrix generated in 15.739474 s
+CUDA memory after matrix: free 76.720 GiB / total 79.151 GiB
+Rayleigh mixed MPQR warmup for N=16384
+  rayleigh run 1/5: tf32=1.0222476 s, orth=2.609811 s, transform=1.0475705 s, fp64=1.999439 s, back=0.49149594 s, total=7.1705641 s, tf32_fp=9.1711111e-07, fp64_fp=1.2487736e-14, abs_res=nan, iters=14/3, status=ok
+  rayleigh run 2/5: tf32=1.0234879 s, orth=2.6247485 s, transform=1.0487465 s, fp64=2.0032023 s, back=0.49014443 s, total=7.1903296 s, tf32_fp=9.1711111e-07, fp64_fp=1.2487736e-14, abs_res=nan, iters=14/3, status=ok
+  rayleigh run 3/5: tf32=1.0245379 s, orth=2.6224778 s, transform=1.0514978 s, fp64=2.0035513 s, back=0.49621422 s, total=7.1982791 s, tf32_fp=9.1711111e-07, fp64_fp=1.2487736e-14, abs_res=nan, iters=14/3, status=ok
+  rayleigh run 4/5: tf32=1.0289161 s, orth=2.6247406 s, transform=1.0517949 s, fp64=1.9973572 s, back=0.48928202 s, total=7.1920909 s, tf32_fp=9.1711111e-07, fp64_fp=1.2487736e-14, abs_res=nan, iters=14/3, status=ok
+  rayleigh run 5/5: tf32=1.0254578 s, orth=2.6253784 s, transform=1.0519655 s, fp64=1.9994218 s, back=0.49340697 s, total=7.1956305 s, tf32_fp=9.1711111e-07, fp64_fp=1.2487736e-14, abs_res=4.1549089e-08, iters=14/3, status=ok
+CUDA memory after cleanup: free 78.720 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=16384 =====
+CUDA memory before matrix: free 78.720 GiB / total 79.151 GiB
+host matrix generated in 15.521867 s
+CUDA memory after matrix: free 76.720 GiB / total 79.151 GiB
+Rayleigh mixed MPQR warmup for N=16384
+  rayleigh run 1/5: tf32=1.3091645 s, orth=2.6273268 s, transform=1.0487829 s, fp64=1.9977891 s, back=0.4953665 s, total=7.4784297 s, tf32_fp=9.9463274e-07, fp64_fp=1.5505475e-14, abs_res=nan, iters=18/3, status=ok
+  rayleigh run 2/5: tf32=1.3107882 s, orth=2.6215507 s, transform=1.0491318 s, fp64=2.0048029 s, back=0.49170791 s, total=7.4779814 s, tf32_fp=9.9463274e-07, fp64_fp=1.5505475e-14, abs_res=nan, iters=18/3, status=ok
+  rayleigh run 3/5: tf32=1.3119281 s, orth=2.6257963 s, transform=1.0499182 s, fp64=2.0061548 s, back=0.49513927 s, total=7.4889366 s, tf32_fp=9.9463274e-07, fp64_fp=1.5505475e-14, abs_res=nan, iters=18/3, status=ok
+  rayleigh run 4/5: tf32=1.3143522 s, orth=2.6302756 s, transform=1.0575055 s, fp64=2.0106232 s, back=0.49253917 s, total=7.5052957 s, tf32_fp=9.9463274e-07, fp64_fp=1.5505475e-14, abs_res=nan, iters=18/3, status=ok
+  rayleigh run 5/5: tf32=1.3143668 s, orth=2.6297198 s, transform=1.0519387 s, fp64=1.9975064 s, back=0.49203867 s, total=7.4855702 s, tf32_fp=9.9463274e-07, fp64_fp=1.5505475e-14, abs_res=4.5364495e-08, iters=18/3, status=ok
+CUDA memory after cleanup: free 78.720 GiB / total 79.151 GiB
+===== sweep done failures=0 =====
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed/logs:
+total 44K
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   84 Jun 14 21:28 latest_rayleigh_mixed_mpqr_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed/logs/rayleigh_mixed_mpqr_sweep_3016008.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 14 21:20 rayleigh_mixed_mpqr_sweep_3015992.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 9.8K Jun 14 21:21 rayleigh_mixed_mpqr_sweep_3015992.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 9.8K Jun 14 21:21 rayleigh_mixed_mpqr_sweep_3015992.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 14 21:28 rayleigh_mixed_mpqr_sweep_3016008.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 8.6K Jun 14 21:32 rayleigh_mixed_mpqr_sweep_3016008.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 8.6K Jun 14 21:32 rayleigh_mixed_mpqr_sweep_3016008.out
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/mixed/results:
+total 24K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.3K Jun 14 21:32 rayleigh_mixed_mpqr_N16384_epsilon_0_09_to_0_12_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie  992 Jun 14 21:29 rayleigh_mixed_mpqr_sweep_epsilon_0_09.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  990 Jun 14 21:30 rayleigh_mixed_mpqr_sweep_epsilon_0_1.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  992 Jun 14 21:31 rayleigh_mixed_mpqr_sweep_epsilon_0_11.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  990 Jun 14 21:32 rayleigh_mixed_mpqr_sweep_epsilon_0_12.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.3K Jun 14 21:21 rayleigh_mixed_mpqr_sweep_summary.txt
+finished at: Sun Jun 14 21:32:25 CST 2026

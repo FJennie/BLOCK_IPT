@@ -1,0 +1,22 @@
+IPT_C mixed precision benchmark: FP32 initial + FP64 refine
+started_at = 2026-06-10T12:44:08+0800
+ipt_c_root = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+result_csv = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/smoke_fp32/results.csv
+N = 256
+warmup_n = 32
+fp32_tol = 9.9999999999999995e-07
+fp32_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 1
+per_epsilon_warmup = true
+seed = 20260603
+epsilon_values = 0.050000000000000003
+compute_residuals = true
+cuda_runtime_version = 12020
+cuda_driver_version = 12020
+gpu_name = NVIDIA A100-SXM4-80GB
+
+N=256 epsilon=0.050000000000000003 started_at=2026-06-10T12:44:08+0800
+N=256 epsilon=0.050000000000000003 finished_at=2026-06-10T12:44:08+0800 status=ok time_fp32=0.00079536577686667442 time_fp64=0.00097136897966265678 time_total=0.001766872126609087 fp32_iterations=6 fp64_iterations=7 fp32_fp=2.2111324040326212e-07 fp64_fp=3.0886609535608616e-13 final_residual=9.8759940651773604e-12 repeats=1 per_epsilon_warmup=true
+finished_at = 2026-06-10T12:44:08+0800

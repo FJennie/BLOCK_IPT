@@ -1,0 +1,2 @@
+method,repeat,time_sec,iterations,matvecs,eigenvalue,relative_residual,status,error,tol,maxiter
+IPT_CUDA_SPARSE,1,1.24480269709602,0,0,nan,nan,1,invalid argument,9.9999999999999998e-13,1000

@@ -1,0 +1,4 @@
+N,first_epsilon_rayleigh_slower_than_cusolver,rayleigh_total_sec,cusolver_sec,cusolver_source,speedup_cusolver_over_rayleigh,original_fp64_ipt_sec,tf32_mixed_ipt_sec,original_fp64_iterations,tf32_mixed_initial_iterations,tf32_mixed_fp64_iterations,rayleigh_tf32_iterations,rayleigh_fp64_iterations,note
+8192,0.13,9.96809686459601,1.4486937963869422,median_reference,0.14533303759640534,,,,,,1000,3,estimated_needs_exact_baseline
+16384,0.13,77.85313987089322,8.901861068047584,median_reference,0.1143417090538657,,,,,,1000,3,estimated_needs_exact_baseline
+26000,0.13,331.8498263041489,33.28798687816598,median_reference,0.10031039415900336,,,,,,1000,3,estimated_needs_exact_baseline

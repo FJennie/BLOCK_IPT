@@ -1,0 +1,204 @@
+===== CH4/STO-6G full FCI IPT sparse benchmark =====
+Thu Jul  2 00:17:25 CST 2026
+gsn0
+SLURM_JOB_ID=3082255
+CUDA_VISIBLE_DEVICES=0
+IPT_REPEATS=1
+IPT_TOL=1e-12
+IPT_MAXITER=500
+IPT_K=30
+IPT_BLOCK_CLUSTER=1
+IPT_BLOCK_CLUSTER_OVERSAMPLE=0
+IPT_BLOCK_CLUSTER_QR=1
+IPT_CH4_MATRIX_CACHE=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ch4_sto6g_fci_15876_csc.bin
+IPT_SAVE_MATRIX=0
+IPT_LOAD_MATRIX=1
+IPT_DUMP_DIAG_GAPS=0
+IPT_DUMP_PAIR_RESIDUALS=0
+IPT_DUMP_COUPLING_GAP=0
+IPT_RITZ_CHECK_INTERVAL=0
+RUN_PRIMME=0
+RUN_WARMUP=0
+IPT_EST_NNZ_PER_COL=800
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+numpy 1.21.5 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/numpy/__init__.py
+scipy 1.7.3 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/scipy/__init__.py
+pyscf 2.0.1 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/pyscf/__init__.py
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+Thu Jul  2 00:17:25 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:2A:00.0 Off |                    0 |
+| N/A   28C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 -I/fs1/home/nudt_liujie/ftt/primme-3.2.3/include -I/fs1/software/python/3.8_miniconda_4.10.3/include/python3.8 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu /fs1/home/nudt_liujie/ftt/primme-3.2.3/lib/libprimme.a -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt_cuda -lcublas -lcusparse -lcusolver -lcudart -L/fs1/software/python/3.8_miniconda_4.10.3/lib -lpython3.8 -L/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4 -lopenblas -lpthread -ldl -lutil -lrt -Xlinker -rpath -Xlinker /fs1/software/gcc/12.2.0/lib64 -Xlinker -rpath -Xlinker /fs1/software/python/3.8_miniconda_4.10.3/lib -Xlinker -rpath -Xlinker /fs1/software/cp2k/8.1-gcc8.4-openmpi/lib -lgfortran /fs1/software/gcc/12.2.0/lib64/libstdc++.so -lm
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(892): warning #177-D: function "primme_matvec" was declared but never referenced
+  static void primme_matvec(void *x, int64_t *ldx, void *y, int64_t *ldy,
+              ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
++ set +x
+===== run =====
+Loaded fixed CH4 CSC matrix cache from /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ch4_sto6g_fci_15876_csc.bin
+[IPT preparation] union target=1 row=2 gap=4.2632564145606011e-14 gap_floor=3.9309432876539061e-11 coupling=0.044409939892022458 coupling_gap_ratio=1129752749.9697793 ratio_tol=0.20000000000000001 allowed_gap=0.22204969946011227
+[IPT preparation] union target=1 row=3 gap=0.00026550808436809348 gap_floor=3.9309432876539061e-11 coupling=0.029968772471882558 coupling_gap_ratio=112.8732955277348 ratio_tol=0.20000000000000001 allowed_gap=0.14984386235941277
+[IPT preparation] union target=1 row=4 gap=0.00026550808441072604 gap_floor=3.9309432876539061e-11 coupling=0.0019331270552735095 coupling_gap_ratio=7.2808594870620622 ratio_tol=0.20000000000000001 allowed_gap=0.0096656352763675474
+[IPT preparation] union target=1 row=5 gap=0.0024572225507526468 gap_floor=3.9309432876539061e-11 coupling=0.019448391137400264 coupling_gap_ratio=7.9147862009662999 ratio_tol=0.20000000000000001 allowed_gap=0.097241955687001308
+[IPT preparation] union target=1 row=6 gap=0.0024572225507668577 gap_floor=3.9309432876539061e-11 coupling=0.0029699629006379857 coupling_gap_ratio=1.2086666304243017 ratio_tol=0.20000000000000001 allowed_gap=0.014849814503189928
+[IPT preparation] union target=1 row=7 gap=0.0027227306351136349 gap_floor=3.9309432876539061e-11 coupling=0.0081186370802997492 coupling_gap_ratio=2.9817995859002457 ratio_tol=0.20000000000000001 allowed_gap=0.040593185401498741
+[IPT preparation] union target=1 row=8 gap=0.0027227306351420566 gap_floor=3.9309432876539061e-11 coupling=0.00069815673292591171 coupling_gap_ratio=0.2564178490207078 ratio_tol=0.20000000000000001 allowed_gap=0.0034907836646295583
+[IPT preparation] union target=1 row=10 gap=0.0063394253405917311 gap_floor=3.9309432876539061e-11 coupling=0.017526870497740873 coupling_gap_ratio=2.7647412117176047 ratio_tol=0.20000000000000001 allowed_gap=0.087634352488704353
+[IPT preparation] union target=1 row=11 gap=0.00879664789129464 gap_floor=3.9309432876539061e-11 coupling=0.0024728603064396656 coupling_gap_ratio=0.28111393533062334 ratio_tol=0.20000000000000001 allowed_gap=0.012364301532198328
+[IPT preparation] union target=1 row=13 gap=0.0092530641886696685 gap_floor=3.9309432876539061e-11 coupling=0.0023934884376315144 coupling_gap_ratio=0.25866981886522838 ratio_tol=0.20000000000000001 allowed_gap=0.011967442188157571
+[IPT preparation] union target=1 row=14 gap=0.0092530641886909848 gap_floor=3.9309432876539061e-11 coupling=0.0057050658481220618 coupling_gap_ratio=0.61655963168338812 ratio_tol=0.20000000000000001 allowed_gap=0.028525329240610308
+[IPT preparation] union target=1 row=15 gap=0.009518572273037762 gap_floor=3.9309432876539061e-11 coupling=0.0030201877802471622 coupling_gap_ratio=0.31729420060213481 ratio_tol=0.20000000000000001 allowed_gap=0.015100938901235809
+[IPT preparation] union target=1 row=16 gap=0.0095185722730448674 gap_floor=3.9309432876539061e-11 coupling=0.0027405652090999374 coupling_gap_ratio=0.28791767614779756 ratio_tol=0.20000000000000001 allowed_gap=0.013702826045499687
+[IPT preparation] union target=1 row=18 gap=0.015592489529204556 gap_floor=3.9309432876539061e-11 coupling=0.018313519116833151 coupling_gap_ratio=1.1745089892497371 ratio_tol=0.20000000000000001 allowed_gap=0.091567595584165745
+[IPT preparation] union target=1 row=20 gap=0.051191478695578496 gap_floor=3.9309432876539061e-11 coupling=0.022172871849995463 coupling_gap_ratio=0.43313599089120619 ratio_tol=0.20000000000000001 allowed_gap=0.11086435924997731
+[IPT preparation] union target=1 row=21 gap=0.051191478695585602 gap_floor=3.9309432876539061e-11 coupling=0.026221670067535667 coupling_gap_ratio=0.51222724437137312 ratio_tol=0.20000000000000001 allowed_gap=0.13110835033767831
+[IPT preparation] union target=2 row=1 gap=4.2632564145606011e-14 gap_floor=3.9309432876539061e-11 coupling=0.044409939892022458 coupling_gap_ratio=1129752749.9697793 ratio_tol=0.20000000000000001 allowed_gap=0.22204969946011227
+[IPT preparation] union target=2 row=3 gap=0.00026550808432546091 gap_floor=3.9309432876539022e-11 coupling=0.0019331270552735095 coupling_gap_ratio=7.2808594894002336 ratio_tol=0.20000000000000001 allowed_gap=0.0096656352763675474
+[IPT preparation] union target=2 row=4 gap=0.00026550808436809348 gap_floor=3.9309432876539022e-11 coupling=0.029968772471882548 coupling_gap_ratio=112.87329552773475 ratio_tol=0.20000000000000001 allowed_gap=0.14984386235941274
+[IPT preparation] union target=2 row=5 gap=0.0024572225507100143 gap_floor=3.9309432876539022e-11 coupling=0.0029699629006379857 coupling_gap_ratio=1.2086666304522622 ratio_tol=0.20000000000000001 allowed_gap=0.014849814503189928
+[IPT preparation] union target=2 row=6 gap=0.0024572225507242251 gap_floor=3.9309432876539022e-11 coupling=0.019448391137400253 coupling_gap_ratio=7.9147862010578436 ratio_tol=0.20000000000000001 allowed_gap=0.097241955687001266
+[IPT preparation] union target=2 row=7 gap=0.0027227306350710023 gap_floor=3.9309432876539022e-11 coupling=0.00069815673292586899 coupling_gap_ratio=0.25641784902738374 ratio_tol=0.20000000000000001 allowed_gap=0.003490783664629345
+[IPT preparation] union target=2 row=8 gap=0.002722730635099424 gap_floor=3.9309432876539022e-11 coupling=0.0081186370802997492 coupling_gap_ratio=2.9817995859158084 ratio_tol=0.20000000000000001 allowed_gap=0.040593185401498741
+[IPT preparation] union target=2 row=9 gap=0.006339425340506466 gap_floor=3.9309432876539022e-11 coupling=0.017526870497740873 coupling_gap_ratio=2.7647412117547905 ratio_tol=0.20000000000000001 allowed_gap=0.087634352488704353
+[IPT preparation] union target=2 row=12 gap=0.0087966478912520074 gap_floor=3.9309432876539022e-11 coupling=0.0024728603064396362 coupling_gap_ratio=0.28111393533198242 ratio_tol=0.20000000000000001 allowed_gap=0.012364301532198181
+[IPT preparation] union target=2 row=13 gap=0.0092530641886270359 gap_floor=3.9309432876539022e-11 coupling=0.005705065848122054 coupling_gap_ratio=0.61655963168764838 ratio_tol=0.20000000000000001 allowed_gap=0.02852532924061027
+[IPT preparation] union target=2 row=14 gap=0.0092530641886483522 gap_floor=3.9309432876539022e-11 coupling=0.0023934884376315148 coupling_gap_ratio=0.2586698188658243 ratio_tol=0.20000000000000001 allowed_gap=0.011967442188157573
+[IPT preparation] union target=2 row=15 gap=0.0095185722729951294 gap_floor=3.9309432876539022e-11 coupling=0.0027405652090999339 coupling_gap_ratio=0.28791767614930164 ratio_tol=0.20000000000000001 allowed_gap=0.01370282604549967
+[IPT preparation] union target=2 row=16 gap=0.0095185722730022349 gap_floor=3.9309432876539022e-11 coupling=0.0030201877802471652 coupling_gap_ratio=0.31729420060331942 ratio_tol=0.20000000000000001 allowed_gap=0.015100938901235825
+[IPT preparation] union target=2 row=17 gap=0.015592489529140607 gap_floor=3.9309432876539022e-11 coupling=0.01831351911683312 coupling_gap_ratio=1.1745089892545519 ratio_tol=0.20000000000000001 allowed_gap=0.091567595584165593
+[IPT preparation] union target=2 row=20 gap=0.051191478695535864 gap_floor=3.9309432876539022e-11 coupling=0.026221670067535667 coupling_gap_ratio=0.51222724437187084 ratio_tol=0.20000000000000001 allowed_gap=0.13110835033767831
+[IPT preparation] union target=2 row=21 gap=0.051191478695542969 gap_floor=3.9309432876539022e-11 coupling=0.022172871849995474 coupling_gap_ratio=0.43313599089150701 ratio_tol=0.20000000000000001 allowed_gap=0.11086435924997737
+[IPT preparation] union target=3 row=1 gap=0.00026550808436809348 gap_floor=3.9309432876539061e-11 coupling=0.029968772471882558 coupling_gap_ratio=112.8732955277348 ratio_tol=0.20000000000000001 allowed_gap=0.14984386235941277
+[IPT preparation] union target=3 row=2 gap=0.00026550808432546091 gap_floor=3.9309432876539022e-11 coupling=0.0019331270552735095 coupling_gap_ratio=7.2808594894002336 ratio_tol=0.20000000000000001 allowed_gap=0.0096656352763675474
+[IPT preparation] union target=3 row=4 gap=4.2632564145606011e-14 gap_floor=3.9309167368454694e-11 coupling=0.049792195802663003 coupling_gap_ratio=1266681518.2308049 ratio_tol=0.20000000000000001 allowed_gap=0.24896097901331501
+[IPT preparation] union target=3 row=5 gap=0.0021917144663845534 gap_floor=3.9309167368454694e-11 coupling=0.0015235340602773942 coupling_gap_ratio=0.69513345996689624 ratio_tol=0.20000000000000001 allowed_gap=0.0076176703013869709
+[IPT preparation] union target=3 row=6 gap=0.0021917144663987642 gap_floor=3.9309167368454694e-11 coupling=0.0087925343992272809 coupling_gap_ratio=4.0117152731461472 ratio_tol=0.20000000000000001 allowed_gap=0.043962671996136404
+[IPT preparation] union target=3 row=7 gap=0.0024572225507455414 gap_floor=3.9309167368454694e-11 coupling=0.0043135425963630458 coupling_gap_ratio=1.7554545863394757 ratio_tol=0.20000000000000001 allowed_gap=0.021567712981815229
+[IPT preparation] union target=3 row=8 gap=0.0024572225507739631 gap_floor=3.9309167368454694e-11 coupling=0.020291619756286721 coupling_gap_ratio=8.2579495088450052 ratio_tol=0.20000000000000001 allowed_gap=0.10145809878143359
+[IPT preparation] union target=3 row=9 gap=0.0060739172561810051 gap_floor=3.9309167368454694e-11 coupling=0.012562494741458071 coupling_gap_ratio=2.0682689953792321 ratio_tol=0.20000000000000001 allowed_gap=0.062812473707290345
+[IPT preparation] union target=3 row=10 gap=0.0060739172562236377 gap_floor=3.9309167368454694e-11 coupling=0.0022647328424801778 coupling_gap_ratio=0.37286198460468323 ratio_tol=0.20000000000000001 allowed_gap=0.011323664212400889
+[IPT preparation] union target=3 row=11 gap=0.0085311398069265465 gap_floor=3.9309167368454694e-11 coupling=0.015369567039069477 coupling_gap_ratio=1.8015842416028303 ratio_tol=0.20000000000000001 allowed_gap=0.07684783519534738
+[IPT preparation] union target=3 row=12 gap=0.0085311398069265465 gap_floor=3.9309167368454694e-11 coupling=0.0024961903231868559 coupling_gap_ratio=0.29259751682420743 ratio_tol=0.20000000000000001 allowed_gap=0.012480951615934278
+[IPT preparation] union target=3 row=13 gap=0.008987556104301575 gap_floor=3.9309167368454694e-11 coupling=0.0048638291878937865 coupling_gap_ratio=0.54117372191600421 ratio_tol=0.20000000000000001 allowed_gap=0.02431914593946893
+[IPT preparation] union target=3 row=14 gap=0.0089875561043228913 gap_floor=3.9309167368454694e-11 coupling=0.0032810616837313598 coupling_gap_ratio=0.36506717128065702 ratio_tol=0.20000000000000001 allowed_gap=0.016405308418656797
+[IPT preparation] union target=3 row=15 gap=0.0092530641886696685 gap_floor=3.9309167368454694e-11 coupling=0.0037917380560703587 coupling_gap_ratio=0.40978188184551051 ratio_tol=0.20000000000000001 allowed_gap=0.018958690280351791
+[IPT preparation] union target=3 row=16 gap=0.0092530641886767739 gap_floor=3.9309167368454694e-11 coupling=0.0033462623631896008 coupling_gap_ratio=0.36163829569933309 ratio_tol=0.20000000000000001 allowed_gap=0.016731311815948002
+[IPT preparation] union target=3 row=17 gap=0.015326981444815146 gap_floor=3.9309167368454694e-11 coupling=0.023840763067513111 coupling_gap_ratio=1.555476735804233 ratio_tol=0.20000000000000001 allowed_gap=0.11920381533756555
+[IPT preparation] union target=3 row=20 gap=0.050925970611210403 gap_floor=3.9309167368454694e-11 coupling=0.010642502555316317 coupling_gap_ratio=0.20897986680637892 ratio_tol=0.20000000000000001 allowed_gap=0.05321251277658158
+[IPT preparation] union target=3 row=22 gap=0.050925970611224614 gap_floor=3.9309167368454694e-11 coupling=0.021237511142250282 coupling_gap_ratio=0.41702712559727462 ratio_tol=0.20000000000000001 allowed_gap=0.10618755571125141
+[IPT preparation] union target=3 row=23 gap=0.050925970611231719 gap_floor=3.9309167368454694e-11 coupling=0.011704169243519255 coupling_gap_ratio=0.22982712166389033 ratio_tol=0.20000000000000001 allowed_gap=0.058520846217596276
+[IPT preparation] union target=3 row=24 gap=0.050925970611231719 gap_floor=3.9309167368454694e-11 coupling=0.025115511152328341 coupling_gap_ratio=0.49317687715880504 ratio_tol=0.20000000000000001 allowed_gap=0.1255775557616417
+[IPT preparation] union target=4 row=1 gap=0.00026550808441072604 gap_floor=3.9309432876539061e-11 coupling=0.0019331270552735095 coupling_gap_ratio=7.2808594870620622 ratio_tol=0.20000000000000001 allowed_gap=0.0096656352763675474
+[IPT preparation] union target=4 row=2 gap=0.00026550808436809348 gap_floor=3.9309432876539022e-11 coupling=0.029968772471882548 coupling_gap_ratio=112.87329552773475 ratio_tol=0.20000000000000001 allowed_gap=0.14984386235941274
+[IPT preparation] union target=4 row=3 gap=4.2632564145606011e-14 gap_floor=3.9309167368454694e-11 coupling=0.049792195802663003 coupling_gap_ratio=1266681518.2308049 ratio_tol=0.20000000000000001 allowed_gap=0.24896097901331501
+[IPT preparation] union target=4 row=5 gap=0.0021917144663419208 gap_floor=3.9309167368454649e-11 coupling=0.0087925343992272878 coupling_gap_ratio=4.0117152732501964 ratio_tol=0.20000000000000001 allowed_gap=0.043962671996136439
+[IPT preparation] union target=4 row=6 gap=0.0021917144663561317 gap_floor=3.9309167368454649e-11 coupling=0.0015235340602773838 coupling_gap_ratio=0.69513345997590581 ratio_tol=0.20000000000000001 allowed_gap=0.0076176703013869189
+[IPT preparation] union target=4 row=7 gap=0.0024572225507029088 gap_floor=3.9309167368454649e-11 coupling=0.020291619756286711 coupling_gap_ratio=8.257949509083792 ratio_tol=0.20000000000000001 allowed_gap=0.10145809878143355
+[IPT preparation] union target=4 row=8 gap=0.0024572225507313306 gap_floor=3.9309167368454649e-11 coupling=0.0043135425963630458 coupling_gap_ratio=1.755454586349628 ratio_tol=0.20000000000000001 allowed_gap=0.021567712981815229
+[IPT preparation] union target=4 row=9 gap=0.0060739172561383725 gap_floor=3.9309167368454649e-11 coupling=0.0022647328424801778 coupling_gap_ratio=0.37286198460991743 ratio_tol=0.20000000000000001 allowed_gap=0.011323664212400889
+[IPT preparation] union target=4 row=10 gap=0.0060739172561810051 gap_floor=3.9309167368454649e-11 coupling=0.012562494741458107 coupling_gap_ratio=2.0682689953792384 ratio_tol=0.20000000000000001 allowed_gap=0.062812473707290525
+[IPT preparation] union target=4 row=11 gap=0.0085311398068839139 gap_floor=3.9309167368454649e-11 coupling=0.002496190323186855 coupling_gap_ratio=0.29259751682566953 ratio_tol=0.20000000000000001 allowed_gap=0.012480951615934275
+[IPT preparation] union target=4 row=12 gap=0.0085311398068839139 gap_floor=3.9309167368454649e-11 coupling=0.015369567039069477 coupling_gap_ratio=1.8015842416118333 ratio_tol=0.20000000000000001 allowed_gap=0.07684783519534738
+[IPT preparation] union target=4 row=13 gap=0.0089875561042589425 gap_floor=3.9309167368454649e-11 coupling=0.0032810616837314244 coupling_gap_ratio=0.36506717128326177 ratio_tol=0.20000000000000001 allowed_gap=0.01640530841865712
+[IPT preparation] target_vs_all_candidates=837 unions=453 max_coupling_gap_ratio=2008587984.2659941 at target=11 row=12 gap=0 coupling=0.078938785702870717
+[IPT preparation] union log truncated after 64 pairs
+CH4/STO-6G full FCI CSC benchmark: n=15876 nnz=8905697 k=30 repeats=1 tol=1.000e-12 run_primme=0
+Matrix/integral generation time 0.000000 sec is excluded from PRIMME/IPT timings.
+[IPT preparation] union target=1 row=2 gap=4.2632564145606011e-14 gap_floor=3.9309432876539061e-11 coupling=0.044409939892022458 coupling_gap_ratio=1129752749.9697793 ratio_tol=0.20000000000000001 allowed_gap=0.22204969946011227
+[IPT preparation] union target=1 row=3 gap=0.00026550808436809348 gap_floor=3.9309432876539061e-11 coupling=0.029968772471882558 coupling_gap_ratio=112.8732955277348 ratio_tol=0.20000000000000001 allowed_gap=0.14984386235941277
+[IPT preparation] union target=1 row=4 gap=0.00026550808441072604 gap_floor=3.9309432876539061e-11 coupling=0.0019331270552735095 coupling_gap_ratio=7.2808594870620622 ratio_tol=0.20000000000000001 allowed_gap=0.0096656352763675474
+[IPT preparation] union target=1 row=5 gap=0.0024572225507526468 gap_floor=3.9309432876539061e-11 coupling=0.019448391137400264 coupling_gap_ratio=7.9147862009662999 ratio_tol=0.20000000000000001 allowed_gap=0.097241955687001308
+[IPT preparation] union target=1 row=6 gap=0.0024572225507668577 gap_floor=3.9309432876539061e-11 coupling=0.0029699629006379857 coupling_gap_ratio=1.2086666304243017 ratio_tol=0.20000000000000001 allowed_gap=0.014849814503189928
+[IPT preparation] union target=1 row=7 gap=0.0027227306351136349 gap_floor=3.9309432876539061e-11 coupling=0.0081186370802997492 coupling_gap_ratio=2.9817995859002457 ratio_tol=0.20000000000000001 allowed_gap=0.040593185401498741
+[IPT preparation] union target=1 row=8 gap=0.0027227306351420566 gap_floor=3.9309432876539061e-11 coupling=0.00069815673292591171 coupling_gap_ratio=0.2564178490207078 ratio_tol=0.20000000000000001 allowed_gap=0.0034907836646295583
+[IPT preparation] union target=1 row=10 gap=0.0063394253405917311 gap_floor=3.9309432876539061e-11 coupling=0.017526870497740873 coupling_gap_ratio=2.7647412117176047 ratio_tol=0.20000000000000001 allowed_gap=0.087634352488704353
+[IPT preparation] union target=1 row=11 gap=0.00879664789129464 gap_floor=3.9309432876539061e-11 coupling=0.0024728603064396656 coupling_gap_ratio=0.28111393533062334 ratio_tol=0.20000000000000001 allowed_gap=0.012364301532198328
+[IPT preparation] union target=1 row=13 gap=0.0092530641886696685 gap_floor=3.9309432876539061e-11 coupling=0.0023934884376315144 coupling_gap_ratio=0.25866981886522838 ratio_tol=0.20000000000000001 allowed_gap=0.011967442188157571
+[IPT preparation] union target=1 row=14 gap=0.0092530641886909848 gap_floor=3.9309432876539061e-11 coupling=0.0057050658481220618 coupling_gap_ratio=0.61655963168338812 ratio_tol=0.20000000000000001 allowed_gap=0.028525329240610308
+[IPT preparation] union target=1 row=15 gap=0.009518572273037762 gap_floor=3.9309432876539061e-11 coupling=0.0030201877802471622 coupling_gap_ratio=0.31729420060213481 ratio_tol=0.20000000000000001 allowed_gap=0.015100938901235809
+[IPT preparation] union target=1 row=16 gap=0.0095185722730448674 gap_floor=3.9309432876539061e-11 coupling=0.0027405652090999374 coupling_gap_ratio=0.28791767614779756 ratio_tol=0.20000000000000001 allowed_gap=0.013702826045499687
+[IPT preparation] union target=1 row=18 gap=0.015592489529204556 gap_floor=3.9309432876539061e-11 coupling=0.018313519116833151 coupling_gap_ratio=1.1745089892497371 ratio_tol=0.20000000000000001 allowed_gap=0.091567595584165745
+[IPT preparation] union target=1 row=20 gap=0.051191478695578496 gap_floor=3.9309432876539061e-11 coupling=0.022172871849995463 coupling_gap_ratio=0.43313599089120619 ratio_tol=0.20000000000000001 allowed_gap=0.11086435924997731
+[IPT preparation] union target=1 row=21 gap=0.051191478695585602 gap_floor=3.9309432876539061e-11 coupling=0.026221670067535667 coupling_gap_ratio=0.51222724437137312 ratio_tol=0.20000000000000001 allowed_gap=0.13110835033767831
+[IPT preparation] union target=2 row=1 gap=4.2632564145606011e-14 gap_floor=3.9309432876539061e-11 coupling=0.044409939892022458 coupling_gap_ratio=1129752749.9697793 ratio_tol=0.20000000000000001 allowed_gap=0.22204969946011227
+[IPT preparation] union target=2 row=3 gap=0.00026550808432546091 gap_floor=3.9309432876539022e-11 coupling=0.0019331270552735095 coupling_gap_ratio=7.2808594894002336 ratio_tol=0.20000000000000001 allowed_gap=0.0096656352763675474
+[IPT preparation] union target=2 row=4 gap=0.00026550808436809348 gap_floor=3.9309432876539022e-11 coupling=0.029968772471882548 coupling_gap_ratio=112.87329552773475 ratio_tol=0.20000000000000001 allowed_gap=0.14984386235941274
+[IPT preparation] union target=2 row=5 gap=0.0024572225507100143 gap_floor=3.9309432876539022e-11 coupling=0.0029699629006379857 coupling_gap_ratio=1.2086666304522622 ratio_tol=0.20000000000000001 allowed_gap=0.014849814503189928
+[IPT preparation] union target=2 row=6 gap=0.0024572225507242251 gap_floor=3.9309432876539022e-11 coupling=0.019448391137400253 coupling_gap_ratio=7.9147862010578436 ratio_tol=0.20000000000000001 allowed_gap=0.097241955687001266
+[IPT preparation] union target=2 row=7 gap=0.0027227306350710023 gap_floor=3.9309432876539022e-11 coupling=0.00069815673292586899 coupling_gap_ratio=0.25641784902738374 ratio_tol=0.20000000000000001 allowed_gap=0.003490783664629345
+[IPT preparation] union target=2 row=8 gap=0.002722730635099424 gap_floor=3.9309432876539022e-11 coupling=0.0081186370802997492 coupling_gap_ratio=2.9817995859158084 ratio_tol=0.20000000000000001 allowed_gap=0.040593185401498741
+[IPT preparation] union target=2 row=9 gap=0.006339425340506466 gap_floor=3.9309432876539022e-11 coupling=0.017526870497740873 coupling_gap_ratio=2.7647412117547905 ratio_tol=0.20000000000000001 allowed_gap=0.087634352488704353
+[IPT preparation] union target=2 row=12 gap=0.0087966478912520074 gap_floor=3.9309432876539022e-11 coupling=0.0024728603064396362 coupling_gap_ratio=0.28111393533198242 ratio_tol=0.20000000000000001 allowed_gap=0.012364301532198181
+[IPT preparation] union target=2 row=13 gap=0.0092530641886270359 gap_floor=3.9309432876539022e-11 coupling=0.005705065848122054 coupling_gap_ratio=0.61655963168764838 ratio_tol=0.20000000000000001 allowed_gap=0.02852532924061027
+[IPT preparation] union target=2 row=14 gap=0.0092530641886483522 gap_floor=3.9309432876539022e-11 coupling=0.0023934884376315148 coupling_gap_ratio=0.2586698188658243 ratio_tol=0.20000000000000001 allowed_gap=0.011967442188157573
+[IPT preparation] union target=2 row=15 gap=0.0095185722729951294 gap_floor=3.9309432876539022e-11 coupling=0.0027405652090999339 coupling_gap_ratio=0.28791767614930164 ratio_tol=0.20000000000000001 allowed_gap=0.01370282604549967
+[IPT preparation] union target=2 row=16 gap=0.0095185722730022349 gap_floor=3.9309432876539022e-11 coupling=0.0030201877802471652 coupling_gap_ratio=0.31729420060331942 ratio_tol=0.20000000000000001 allowed_gap=0.015100938901235825
+[IPT preparation] union target=2 row=17 gap=0.015592489529140607 gap_floor=3.9309432876539022e-11 coupling=0.01831351911683312 coupling_gap_ratio=1.1745089892545519 ratio_tol=0.20000000000000001 allowed_gap=0.091567595584165593
+[IPT preparation] union target=2 row=20 gap=0.051191478695535864 gap_floor=3.9309432876539022e-11 coupling=0.026221670067535667 coupling_gap_ratio=0.51222724437187084 ratio_tol=0.20000000000000001 allowed_gap=0.13110835033767831
+[IPT preparation] union target=2 row=21 gap=0.051191478695542969 gap_floor=3.9309432876539022e-11 coupling=0.022172871849995474 coupling_gap_ratio=0.43313599089150701 ratio_tol=0.20000000000000001 allowed_gap=0.11086435924997737
+[IPT preparation] union target=3 row=1 gap=0.00026550808436809348 gap_floor=3.9309432876539061e-11 coupling=0.029968772471882558 coupling_gap_ratio=112.8732955277348 ratio_tol=0.20000000000000001 allowed_gap=0.14984386235941277
+[IPT preparation] union target=3 row=2 gap=0.00026550808432546091 gap_floor=3.9309432876539022e-11 coupling=0.0019331270552735095 coupling_gap_ratio=7.2808594894002336 ratio_tol=0.20000000000000001 allowed_gap=0.0096656352763675474
+[IPT preparation] union target=3 row=4 gap=4.2632564145606011e-14 gap_floor=3.9309167368454694e-11 coupling=0.049792195802663003 coupling_gap_ratio=1266681518.2308049 ratio_tol=0.20000000000000001 allowed_gap=0.24896097901331501
+[IPT preparation] union target=3 row=5 gap=0.0021917144663845534 gap_floor=3.9309167368454694e-11 coupling=0.0015235340602773942 coupling_gap_ratio=0.69513345996689624 ratio_tol=0.20000000000000001 allowed_gap=0.0076176703013869709
+[IPT preparation] union target=3 row=6 gap=0.0021917144663987642 gap_floor=3.9309167368454694e-11 coupling=0.0087925343992272809 coupling_gap_ratio=4.0117152731461472 ratio_tol=0.20000000000000001 allowed_gap=0.043962671996136404
+[IPT preparation] union target=3 row=7 gap=0.0024572225507455414 gap_floor=3.9309167368454694e-11 coupling=0.0043135425963630458 coupling_gap_ratio=1.7554545863394757 ratio_tol=0.20000000000000001 allowed_gap=0.021567712981815229
+[IPT preparation] union target=3 row=8 gap=0.0024572225507739631 gap_floor=3.9309167368454694e-11 coupling=0.020291619756286721 coupling_gap_ratio=8.2579495088450052 ratio_tol=0.20000000000000001 allowed_gap=0.10145809878143359
+[IPT preparation] union target=3 row=9 gap=0.0060739172561810051 gap_floor=3.9309167368454694e-11 coupling=0.012562494741458071 coupling_gap_ratio=2.0682689953792321 ratio_tol=0.20000000000000001 allowed_gap=0.062812473707290345
+[IPT preparation] union target=3 row=10 gap=0.0060739172562236377 gap_floor=3.9309167368454694e-11 coupling=0.0022647328424801778 coupling_gap_ratio=0.37286198460468323 ratio_tol=0.20000000000000001 allowed_gap=0.011323664212400889
+[IPT preparation] union target=3 row=11 gap=0.0085311398069265465 gap_floor=3.9309167368454694e-11 coupling=0.015369567039069477 coupling_gap_ratio=1.8015842416028303 ratio_tol=0.20000000000000001 allowed_gap=0.07684783519534738
+[IPT preparation] union target=3 row=12 gap=0.0085311398069265465 gap_floor=3.9309167368454694e-11 coupling=0.0024961903231868559 coupling_gap_ratio=0.29259751682420743 ratio_tol=0.20000000000000001 allowed_gap=0.012480951615934278
+[IPT preparation] union target=3 row=13 gap=0.008987556104301575 gap_floor=3.9309167368454694e-11 coupling=0.0048638291878937865 coupling_gap_ratio=0.54117372191600421 ratio_tol=0.20000000000000001 allowed_gap=0.02431914593946893
+[IPT preparation] union target=3 row=14 gap=0.0089875561043228913 gap_floor=3.9309167368454694e-11 coupling=0.0032810616837313598 coupling_gap_ratio=0.36506717128065702 ratio_tol=0.20000000000000001 allowed_gap=0.016405308418656797
+[IPT preparation] union target=3 row=15 gap=0.0092530641886696685 gap_floor=3.9309167368454694e-11 coupling=0.0037917380560703587 coupling_gap_ratio=0.40978188184551051 ratio_tol=0.20000000000000001 allowed_gap=0.018958690280351791
+[IPT preparation] union target=3 row=16 gap=0.0092530641886767739 gap_floor=3.9309167368454694e-11 coupling=0.0033462623631896008 coupling_gap_ratio=0.36163829569933309 ratio_tol=0.20000000000000001 allowed_gap=0.016731311815948002
+[IPT preparation] union target=3 row=17 gap=0.015326981444815146 gap_floor=3.9309167368454694e-11 coupling=0.023840763067513111 coupling_gap_ratio=1.555476735804233 ratio_tol=0.20000000000000001 allowed_gap=0.11920381533756555
+[IPT preparation] union target=3 row=20 gap=0.050925970611210403 gap_floor=3.9309167368454694e-11 coupling=0.010642502555316317 coupling_gap_ratio=0.20897986680637892 ratio_tol=0.20000000000000001 allowed_gap=0.05321251277658158
+[IPT preparation] union target=3 row=22 gap=0.050925970611224614 gap_floor=3.9309167368454694e-11 coupling=0.021237511142250282 coupling_gap_ratio=0.41702712559727462 ratio_tol=0.20000000000000001 allowed_gap=0.10618755571125141
+[IPT preparation] union target=3 row=23 gap=0.050925970611231719 gap_floor=3.9309167368454694e-11 coupling=0.011704169243519255 coupling_gap_ratio=0.22982712166389033 ratio_tol=0.20000000000000001 allowed_gap=0.058520846217596276
+[IPT preparation] union target=3 row=24 gap=0.050925970611231719 gap_floor=3.9309167368454694e-11 coupling=0.025115511152328341 coupling_gap_ratio=0.49317687715880504 ratio_tol=0.20000000000000001 allowed_gap=0.1255775557616417
+[IPT preparation] union target=4 row=1 gap=0.00026550808441072604 gap_floor=3.9309432876539061e-11 coupling=0.0019331270552735095 coupling_gap_ratio=7.2808594870620622 ratio_tol=0.20000000000000001 allowed_gap=0.0096656352763675474
+[IPT preparation] union target=4 row=2 gap=0.00026550808436809348 gap_floor=3.9309432876539022e-11 coupling=0.029968772471882548 coupling_gap_ratio=112.87329552773475 ratio_tol=0.20000000000000001 allowed_gap=0.14984386235941274
+[IPT preparation] union target=4 row=3 gap=4.2632564145606011e-14 gap_floor=3.9309167368454694e-11 coupling=0.049792195802663003 coupling_gap_ratio=1266681518.2308049 ratio_tol=0.20000000000000001 allowed_gap=0.24896097901331501
+[IPT preparation] union target=4 row=5 gap=0.0021917144663419208 gap_floor=3.9309167368454649e-11 coupling=0.0087925343992272878 coupling_gap_ratio=4.0117152732501964 ratio_tol=0.20000000000000001 allowed_gap=0.043962671996136439
+[IPT preparation] union target=4 row=6 gap=0.0021917144663561317 gap_floor=3.9309167368454649e-11 coupling=0.0015235340602773838 coupling_gap_ratio=0.69513345997590581 ratio_tol=0.20000000000000001 allowed_gap=0.0076176703013869189
+[IPT preparation] union target=4 row=7 gap=0.0024572225507029088 gap_floor=3.9309167368454649e-11 coupling=0.020291619756286711 coupling_gap_ratio=8.257949509083792 ratio_tol=0.20000000000000001 allowed_gap=0.10145809878143355
+[IPT preparation] union target=4 row=8 gap=0.0024572225507313306 gap_floor=3.9309167368454649e-11 coupling=0.0043135425963630458 coupling_gap_ratio=1.755454586349628 ratio_tol=0.20000000000000001 allowed_gap=0.021567712981815229
+[IPT preparation] union target=4 row=9 gap=0.0060739172561383725 gap_floor=3.9309167368454649e-11 coupling=0.0022647328424801778 coupling_gap_ratio=0.37286198460991743 ratio_tol=0.20000000000000001 allowed_gap=0.011323664212400889
+[IPT preparation] union target=4 row=10 gap=0.0060739172561810051 gap_floor=3.9309167368454649e-11 coupling=0.012562494741458107 coupling_gap_ratio=2.0682689953792384 ratio_tol=0.20000000000000001 allowed_gap=0.062812473707290525
+[IPT preparation] union target=4 row=11 gap=0.0085311398068839139 gap_floor=3.9309167368454649e-11 coupling=0.002496190323186855 coupling_gap_ratio=0.29259751682566953 ratio_tol=0.20000000000000001 allowed_gap=0.012480951615934275
+[IPT preparation] union target=4 row=12 gap=0.0085311398068839139 gap_floor=3.9309167368454649e-11 coupling=0.015369567039069477 coupling_gap_ratio=1.8015842416118333 ratio_tol=0.20000000000000001 allowed_gap=0.07684783519534738
+[IPT preparation] union target=4 row=13 gap=0.0089875561042589425 gap_floor=3.9309167368454649e-11 coupling=0.0032810616837314244 coupling_gap_ratio=0.36506717128326177 ratio_tol=0.20000000000000001 allowed_gap=0.01640530841865712
+[IPT preparation] target_vs_all_candidates=837 unions=453 max_coupling_gap_ratio=2008587984.2659941 at target=11 row=12 gap=0 coupling=0.078938785702870717
+[IPT preparation] union log truncated after 64 pairs
+IPT block-cluster: clusters=2 basis_cols=31 requested_k=30 basis_target_k=30 oversample=0 maxiter=500 tol=0.000e+00 damping=1.000e+00
+IPT block-cluster: block[0]=0:0 size=1
+IPT block-cluster: block[1]=1:30 size=30
+repeat 1 IPT_GPU_BLOCK requested_k=30 basis_cols=31 returned_k=30 solve=2.866772e+00 preparation=4.536661e+00 setup=3.993651e-01 iteration=2.793371e+00 rr=7.340124e-02 api_total=7.811415e+00 relative_fixed_point_residual=5.136e+00 max_relative_eigen_residual=2.512e-02 status=failed
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/B_load_cache/ch4_sto6g_fci_15876_ipt_relative_trials.csv
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/B_load_cache/ch4_sto6g_fci_15876_ipt_relative_summary.txt
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/B_load_cache/ch4_sto6g_fci_15876_pair_residuals.csv

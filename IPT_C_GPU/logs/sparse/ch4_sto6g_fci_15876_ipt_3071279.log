@@ -1,0 +1,436 @@
+===== CH4/STO-6G full FCI IPT sparse benchmark =====
+Mon Jun 29 00:03:08 CST 2026
+gn33
+SLURM_JOB_ID=3071279
+CUDA_VISIBLE_DEVICES=0
+IPT_REPEATS=1
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_K=30
+RUN_PRIMME=0
+RUN_WARMUP=0
+IPT_EST_NNZ_PER_COL=800
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+numpy 1.21.5 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/numpy/__init__.py
+scipy 1.7.3 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/scipy/__init__.py
+pyscf 2.0.1 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/pyscf/__init__.py
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+Mon Jun 29 00:03:11 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100 80GB PCIe          Off | 00000000:4B:00.0 Off |                    0 |
+| N/A   39C    P0              64W / 300W |      4MiB / 81920MiB |     24%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 -I/fs1/home/nudt_liujie/ftt/primme-3.2.3/include -I/fs1/software/python/3.8_miniconda_4.10.3/include/python3.8 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu /fs1/home/nudt_liujie/ftt/primme-3.2.3/lib/libprimme.a -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt_cuda -lcublas -lcusparse -lcusolver -lcudart -L/fs1/software/python/3.8_miniconda_4.10.3/lib -lpython3.8 -L/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4 -lopenblas -lpthread -ldl -lutil -lrt -Xlinker -rpath -Xlinker /fs1/software/gcc/12.2.0/lib64 -Xlinker -rpath -Xlinker /fs1/software/python/3.8_miniconda_4.10.3/lib -Xlinker -rpath -Xlinker /fs1/software/cp2k/8.1-gcc8.4-openmpi/lib -lgfortran /fs1/software/gcc/12.2.0/lib64/libstdc++.so -lm
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(845): warning #177-D: function "primme_matvec" was declared but never referenced
+  static void primme_matvec(void *x, int64_t *ldx, void *y, int64_t *ldy,
+              ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
++ set +x
+===== run =====
+Generating CH4/STO-6G full FCI integrals with PySCF...
+PYSCF_SITE_PACKAGES=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+Generated CI strings: na=126 nb=126 n=15876
+Link counts per string: one=25 two=600
+CSC generation progress 5000/15876 columns nnz=2802867 elapsed=0.44 sec
+CSC generation progress 10000/15876 columns nnz=5606123 elapsed=0.88 sec
+CSC generation progress 15000/15876 columns nnz=8409069 elapsed=1.31 sec
+CSC generation progress 15876/15876 columns nnz=8900116 elapsed=1.39 sec
+CH4/STO-6G full FCI CSC benchmark: n=15876 nnz=8900116 k=30 repeats=1 tol=1.000e-12 run_primme=0
+Matrix/integral generation time 0.495241 sec is excluded from PRIMME/IPT timings.
+[IPT preparation] union target=1 row=2 gap=2.8421709430404007e-14 gap_floor=3.9309878998389698e-11 coupling=0.044539571134767038 coupling_gap_ratio=1133037604.5317152 ratio_tol=0.20000000000000001 allowed_gap=0.22269785567383518
+[IPT preparation] union target=1 row=3 gap=0.0010482873262347425 gap_floor=3.9309878998389698e-11 coupling=0.0031266125365626111 coupling_gap_ratio=2.982591183080344 ratio_tol=0.20000000000000001 allowed_gap=0.015633062682813056
+[IPT preparation] union target=1 row=4 gap=0.0010482873262347425 gap_floor=3.9309878998389698e-11 coupling=0.032980969576742611 coupling_gap_ratio=31.461765063214354 ratio_tol=0.20000000000000001 allowed_gap=0.16490484788371304
+[IPT preparation] union target=1 row=5 gap=0.0021563985593999746 gap_floor=3.9309878998389698e-11 coupling=0.0020725701694110747 coupling_gap_ratio=0.96112574383641514 ratio_tol=0.20000000000000001 allowed_gap=0.010362850847055374
+[IPT preparation] union target=1 row=6 gap=0.0021563985594355017 gap_floor=3.9309878998389698e-11 coupling=0.025844212550669998 coupling_gap_ratio=11.984896037695114 ratio_tol=0.20000000000000001 allowed_gap=0.12922106275334999
+[IPT preparation] union target=1 row=7 gap=0.0032046858856560334 gap_floor=3.9309878998389698e-11 coupling=0.00080590977817174964 coupling_gap_ratio=0.25147855575454359 ratio_tol=0.20000000000000001 allowed_gap=0.0040295488908587479
+[IPT preparation] union target=1 row=8 gap=0.0032046858856560334 gap_floor=3.9309878998389698e-11 coupling=0.0076208940341880547 coupling_gap_ratio=2.378047117909023 ratio_tol=0.20000000000000001 allowed_gap=0.03810447017094027
+[IPT preparation] union target=1 row=10 gap=0.007826654527775645 gap_floor=3.9309878998389698e-11 coupling=0.0044986056119945749 coupling_gap_ratio=0.57478014342267003 ratio_tol=0.20000000000000001 allowed_gap=0.022493028059972872
+[IPT preparation] union target=1 row=12 gap=0.0086222453029094481 gap_floor=3.9309878998389698e-11 coupling=0.0052136059488846215 coupling_gap_ratio=0.60466917441160806 ratio_tol=0.20000000000000001 allowed_gap=0.026068029744423106
+[IPT preparation] union target=1 row=15 gap=0.010778643862330739 gap_floor=3.9309878998389698e-11 coupling=0.004136740129785964 coupling_gap_ratio=0.38379040838737283 ratio_tol=0.20000000000000001 allowed_gap=0.020683700648929819
+[IPT preparation] union target=1 row=18 gap=0.016448899830642461 gap_floor=3.9309878998389698e-11 coupling=0.00542245966359151 coupling_gap_ratio=0.32965485348084339 ratio_tol=0.20000000000000001 allowed_gap=0.027112298317957549
+[IPT preparation] union target=1 row=19 gap=0.051637600546236229 gap_floor=3.9309878998389698e-11 coupling=0.026990933162737971 coupling_gap_ratio=0.522699212922768 ratio_tol=0.20000000000000001 allowed_gap=0.13495466581368984
+[IPT preparation] union target=1 row=22 gap=0.051637600546250439 gap_floor=3.9309878998389698e-11 coupling=0.010535200322026619 coupling_gap_ratio=0.20402187961058565 ratio_tol=0.20000000000000001 allowed_gap=0.05267600161013309
+[IPT preparation] union target=1 row=23 gap=0.051637600546250439 gap_floor=3.9309878998389698e-11 coupling=0.022823355666812213 coupling_gap_ratio=0.44199101866419865 ratio_tol=0.20000000000000001 allowed_gap=0.11411677833406106
+[IPT preparation] union target=2 row=1 gap=2.8421709430404007e-14 gap_floor=3.9309878998389698e-11 coupling=0.044539571134767038 coupling_gap_ratio=1133037604.5317152 ratio_tol=0.20000000000000001 allowed_gap=0.22269785567383518
+[IPT preparation] union target=2 row=3 gap=0.0010482873262063208 gap_floor=3.9309878998389672e-11 coupling=0.032980969576742618 coupling_gap_ratio=31.461765064067368 ratio_tol=0.20000000000000001 allowed_gap=0.16490484788371307
+[IPT preparation] union target=2 row=4 gap=0.0010482873262063208 gap_floor=3.9309878998389672e-11 coupling=0.0031266125365626077 coupling_gap_ratio=2.982591183161206 ratio_tol=0.20000000000000001 allowed_gap=0.015633062682813038
+[IPT preparation] union target=2 row=5 gap=0.0021563985593715529 gap_floor=3.9309878998389672e-11 coupling=0.025844212550670015 coupling_gap_ratio=11.98489603805054 ratio_tol=0.20000000000000001 allowed_gap=0.12922106275335007
+[IPT preparation] union target=2 row=6 gap=0.00215639855940708 gap_floor=3.9309878998389672e-11 coupling=0.0020725701694110765 coupling_gap_ratio=0.961125743833249 ratio_tol=0.20000000000000001 allowed_gap=0.010362850847055382
+[IPT preparation] union target=2 row=7 gap=0.0032046858856276117 gap_floor=3.9309878998389672e-11 coupling=0.0076208940341880556 coupling_gap_ratio=2.3780471179301137 ratio_tol=0.20000000000000001 allowed_gap=0.038104470170940277
+[IPT preparation] union target=2 row=8 gap=0.0032046858856276117 gap_floor=3.9309878998389672e-11 coupling=0.00080590977817173153 coupling_gap_ratio=0.25147855575676825 ratio_tol=0.20000000000000001 allowed_gap=0.0040295488908586577
+[IPT preparation] union target=2 row=9 gap=0.0078266545277045907 gap_floor=3.9309878998389672e-11 coupling=0.0044986056119945793 coupling_gap_ratio=0.57478014342788875 ratio_tol=0.20000000000000001 allowed_gap=0.022493028059972896
+[IPT preparation] union target=2 row=11 gap=0.0086222453028810264 gap_floor=3.9309878998389672e-11 coupling=0.005213605948884612 coupling_gap_ratio=0.60466917441360013 ratio_tol=0.20000000000000001 allowed_gap=0.026068029744423057
+[IPT preparation] union target=2 row=16 gap=0.010778643862323634 gap_floor=3.9309878998389672e-11 coupling=0.0041367401297859518 coupling_gap_ratio=0.38379040838762468 ratio_tol=0.20000000000000001 allowed_gap=0.020683700648929756
+[IPT preparation] union target=2 row=17 gap=0.016448899830592723 gap_floor=3.9309878998389672e-11 coupling=0.0054224596635914874 coupling_gap_ratio=0.32965485348183882 ratio_tol=0.20000000000000001 allowed_gap=0.027112298317957435
+[IPT preparation] union target=2 row=19 gap=0.051637600546207807 gap_floor=3.9309878998389672e-11 coupling=0.02282335566681222 coupling_gap_ratio=0.4419910186645637 ratio_tol=0.20000000000000001 allowed_gap=0.1141167783340611
+[IPT preparation] union target=2 row=23 gap=0.051637600546222018 gap_floor=3.9309878998389672e-11 coupling=0.026990933162738227 coupling_gap_ratio=0.52269921292291677 ratio_tol=0.20000000000000001 allowed_gap=0.13495466581369112
+[IPT preparation] union target=2 row=24 gap=0.051637600546236229 gap_floor=3.9309878998389672e-11 coupling=0.010535200322026619 coupling_gap_ratio=0.2040218796106418 ratio_tol=0.20000000000000001 allowed_gap=0.05267600161013309
+[IPT preparation] union target=3 row=1 gap=0.0010482873262347425 gap_floor=3.9309878998389698e-11 coupling=0.0031266125365626111 coupling_gap_ratio=2.982591183080344 ratio_tol=0.20000000000000001 allowed_gap=0.015633062682813056
+[IPT preparation] union target=3 row=2 gap=0.0010482873262063208 gap_floor=3.9309878998389672e-11 coupling=0.032980969576742618 coupling_gap_ratio=31.461765064067368 ratio_tol=0.20000000000000001 allowed_gap=0.16490484788371307
+[IPT preparation] union target=3 row=4 gap=0 gap_floor=3.9308830711063461e-11 coupling=0.036984169649498924 coupling_gap_ratio=940861607.44256735 ratio_tol=0.20000000000000001 allowed_gap=0.18492084824749461
+[IPT preparation] union target=3 row=5 gap=0.0011081112331652321 gap_floor=3.9308830711063461e-11 coupling=0.0017699356786277354 coupling_gap_ratio=1.5972545225194172 ratio_tol=0.20000000000000001 allowed_gap=0.0088496783931386758
+[IPT preparation] union target=3 row=6 gap=0.0011081112332007592 gap_floor=3.9308830711063461e-11 coupling=0.014567231097709535 coupling_gap_ratio=13.146000745459778 ratio_tol=0.20000000000000001 allowed_gap=0.072836155488547674
+[IPT preparation] union target=3 row=7 gap=0.0021563985594212909 gap_floor=3.9308830711063461e-11 coupling=0.0009051209998697865 coupling_gap_ratio=0.41973734211392366 ratio_tol=0.20000000000000001 allowed_gap=0.0045256049993489325
+[IPT preparation] union target=3 row=8 gap=0.0021563985594212909 gap_floor=3.9308830711063461e-11 coupling=0.014296944037700534 coupling_gap_ratio=6.6300100114782961 ratio_tol=0.20000000000000001 allowed_gap=0.071484720188502673
+[IPT preparation] union target=3 row=10 gap=0.0067783672015409024 gap_floor=3.9308830711063461e-11 coupling=0.0063383191490531251 coupling_gap_ratio=0.93508052316968859 ratio_tol=0.20000000000000001 allowed_gap=0.031691595745265623
+[IPT preparation] union target=3 row=12 gap=0.0075739579766747056 gap_floor=3.9308830711063461e-11 coupling=0.0055808803219994782 coupling_gap_ratio=0.73685123936345442 ratio_tol=0.20000000000000001 allowed_gap=0.027904401609997388
+[IPT preparation] union target=3 row=14 gap=0.0078266545277898558 gap_floor=3.9308830711063461e-11 coupling=0.0069891728670857627 coupling_gap_ratio=0.89299621470061397 ratio_tol=0.20000000000000001 allowed_gap=0.03494586433542881
+[IPT preparation] union target=3 row=15 gap=0.0097303565360959965 gap_floor=3.9308830711063461e-11 coupling=0.0093375525646294151 coupling_gap_ratio=0.95963108134738695 ratio_tol=0.20000000000000001 allowed_gap=0.046687762823147072
+[IPT preparation] union target=3 row=19 gap=0.050589313220001486 gap_floor=3.9308830711063461e-11 coupling=0.024273284285818278 coupling_gap_ratio=0.47981051215815584 ratio_tol=0.20000000000000001 allowed_gap=0.12136642142909139
+[IPT preparation] union target=3 row=23 gap=0.050589313220015697 gap_floor=3.9308830711063461e-11 coupling=0.020525329640018179 coupling_gap_ratio=0.40572461521176212 ratio_tol=0.20000000000000001 allowed_gap=0.10262664820009089
+[IPT preparation] union target=4 row=1 gap=0.0010482873262347425 gap_floor=3.9309878998389698e-11 coupling=0.032980969576742611 coupling_gap_ratio=31.461765063214354 ratio_tol=0.20000000000000001 allowed_gap=0.16490484788371304
+[IPT preparation] union target=4 row=2 gap=0.0010482873262063208 gap_floor=3.9309878998389672e-11 coupling=0.0031266125365626077 coupling_gap_ratio=2.982591183161206 ratio_tol=0.20000000000000001 allowed_gap=0.015633062682813038
+[IPT preparation] union target=4 row=3 gap=0 gap_floor=3.9308830711063461e-11 coupling=0.036984169649498924 coupling_gap_ratio=940861607.44256735 ratio_tol=0.20000000000000001 allowed_gap=0.18492084824749461
+[IPT preparation] union target=4 row=5 gap=0.0011081112331652321 gap_floor=3.9308830711063461e-11 coupling=0.014567231097709524 coupling_gap_ratio=13.146000745881242 ratio_tol=0.20000000000000001 allowed_gap=0.072836155488547619
+[IPT preparation] union target=4 row=6 gap=0.0011081112332007592 gap_floor=3.9308830711063461e-11 coupling=0.001769935678627671 coupling_gap_ratio=1.5972545224681496 ratio_tol=0.20000000000000001 allowed_gap=0.0088496783931383549
+[IPT preparation] union target=4 row=7 gap=0.0021563985594212909 gap_floor=3.9308830711063461e-11 coupling=0.014296944037700529 coupling_gap_ratio=6.6300100114782943 ratio_tol=0.20000000000000001 allowed_gap=0.071484720188502646
+[IPT preparation] union target=4 row=8 gap=0.0021563985594212909 gap_floor=3.9308830711063461e-11 coupling=0.00090512099986978824 coupling_gap_ratio=0.41973734211392444 ratio_tol=0.20000000000000001 allowed_gap=0.0045256049993489412
+[IPT preparation] union target=4 row=9 gap=0.0067783672014982699 gap_floor=3.9308830711063461e-11 coupling=0.0063383191490531234 coupling_gap_ratio=0.93508052317556956 ratio_tol=0.20000000000000001 allowed_gap=0.031691595745265616
+[IPT preparation] union target=4 row=11 gap=0.0075739579766747056 gap_floor=3.9308830711063461e-11 coupling=0.0055808803219994678 coupling_gap_ratio=0.73685123936345298 ratio_tol=0.20000000000000001 allowed_gap=0.027904401609997336
+[IPT preparation] union target=4 row=13 gap=0.0078266545277330124 gap_floor=3.9308830711063461e-11 coupling=0.0069891728670857722 coupling_gap_ratio=0.89299621470710089 ratio_tol=0.20000000000000001 allowed_gap=0.034945864335428858
+[IPT preparation] union target=4 row=16 gap=0.0097303565361173128 gap_floor=3.9308830711063461e-11 coupling=0.0093375525646294307 coupling_gap_ratio=0.9596310813452863 ratio_tol=0.20000000000000001 allowed_gap=0.046687762823147148
+[IPT preparation] union target=4 row=19 gap=0.050589313220001486 gap_floor=3.9308830711063461e-11 coupling=0.020525329640018183 coupling_gap_ratio=0.40572461521187614 ratio_tol=0.20000000000000001 allowed_gap=0.1026266482000909
+[IPT preparation] union target=4 row=23 gap=0.050589313220015697 gap_floor=3.9308830711063461e-11 coupling=0.024273284285818278 coupling_gap_ratio=0.47981051215802106 ratio_tol=0.20000000000000001 allowed_gap=0.12136642142909139
+[IPT preparation] union target=5 row=1 gap=0.0021563985593999746 gap_floor=3.9309878998389698e-11 coupling=0.0020725701694110747 coupling_gap_ratio=0.96112574383641514 ratio_tol=0.20000000000000001 allowed_gap=0.010362850847055374
+[IPT preparation] union target=5 row=2 gap=0.0021563985593715529 gap_floor=3.9309878998389672e-11 coupling=0.025844212550670015 coupling_gap_ratio=11.98489603805054 ratio_tol=0.20000000000000001 allowed_gap=0.12922106275335007
+[IPT preparation] union target=5 row=3 gap=0.0011081112331652321 gap_floor=3.9308830711063461e-11 coupling=0.0017699356786277354 coupling_gap_ratio=1.5972545225194172 ratio_tol=0.20000000000000001 allowed_gap=0.0088496783931386758
+[IPT preparation] union target=5 row=4 gap=0.0011081112331652321 gap_floor=3.9308830711063461e-11 coupling=0.014567231097709524 coupling_gap_ratio=13.146000745881242 ratio_tol=0.20000000000000001 allowed_gap=0.072836155488547619
+[IPT preparation] union target=5 row=6 gap=3.5527136788005009e-14 gap_floor=3.93077225998303e-11 coupling=0.025925548908477553 coupling_gap_ratio=659553573.54102933 ratio_tol=0.20000000000000001 allowed_gap=0.12962774454238776
+[IPT preparation] union target=5 row=7 gap=0.0010482873262560588 gap_floor=3.93077225998303e-11 coupling=0.00031516841843922576 coupling_gap_ratio=0.30065079539294315 ratio_tol=0.20000000000000001 allowed_gap=0.0015758420921961288
+[IPT preparation] union target=5 row=8 gap=0.0010482873262560588 gap_floor=3.93077225998303e-11 coupling=0.0045707072126018123 coupling_gap_ratio=4.3601664334968344 ratio_tol=0.20000000000000001 allowed_gap=0.02285353606300906
+[IPT preparation] union target=5 row=10 gap=0.0056702559683756704 gap_floor=3.93077225998303e-11 coupling=0.0045964189008941446 coupling_gap_ratio=0.81061929594174165 ratio_tol=0.20000000000000001 allowed_gap=0.02298209450447072
+[IPT preparation] union target=5 row=12 gap=0.0064658467435094735 gap_floor=3.93077225998303e-11 coupling=0.010062436748016287 coupling_gap_ratio=1.556244239490695 ratio_tol=0.20000000000000001 allowed_gap=0.05031218374008143
+[IPT preparation] union target=5 row=14 gap=0.0067185432946246237 gap_floor=3.93077225998303e-11 coupling=0.0039150929010379823 coupling_gap_ratio=0.58272942948367579 ratio_tol=0.20000000000000001 allowed_gap=0.019575464505189911
+[IPT preparation] target_vs_all_candidates=1601 unions=405 max_coupling_gap_ratio=3005877955.9023485 at target=17 row=18 gap=2.1316282072803006e-14 coupling=0.11811125534504857
+[IPT preparation] union log truncated after 64 pairs
+IPT block-cluster: clusters=2 basis_cols=31 maxiter=2000 tol=1.000e-12 damping=1.000e+00
+IPT block-cluster: block[0]=0:0 size=1
+IPT block-cluster: block[1]=1:30 size=30
+repeat 1 IPT_GPU_BLOCK k=30 solve=1.023735e+01 preparation=4.001004e+00 setup=2.200574e+00 iteration=1.018385e+01 rr=5.349466e-02 api_total=1.646167e+01 fp_residual=1.908e+00 max_abs_residual=1.182e+00 first_eigenvalue=-40.1907762526008 status=0
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/ch4_k30_ipt_iter2000_abs/ch4_sto6g_fci_15876_ipt_trials.csv
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/ch4_k30_ipt_iter2000_abs/ch4_sto6g_fci_15876_ipt_summary.txt
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse:
+total 4.4M
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:54 ch4_sto6g_fci_15876_ipt_3049212.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.3K Jun 23 14:54 ch4_sto6g_fci_15876_ipt_3049212.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.3K Jun 23 14:54 ch4_sto6g_fci_15876_ipt_3049212.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:57 ch4_sto6g_fci_15876_ipt_3049229.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 23 14:57 ch4_sto6g_fci_15876_ipt_3049229.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 23 14:57 ch4_sto6g_fci_15876_ipt_3049229.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:58 ch4_sto6g_fci_15876_ipt_3049237.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  20K Jun 23 14:59 ch4_sto6g_fci_15876_ipt_3049237.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  20K Jun 23 14:59 ch4_sto6g_fci_15876_ipt_3049237.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 19:57 ch4_sto6g_fci_15876_ipt_3070461.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  27K Jun 28 19:57 ch4_sto6g_fci_15876_ipt_3070461.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  27K Jun 28 19:57 ch4_sto6g_fci_15876_ipt_3070461.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 20:00 ch4_sto6g_fci_15876_ipt_3070476.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  28K Jun 28 20:01 ch4_sto6g_fci_15876_ipt_3070476.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  28K Jun 28 20:01 ch4_sto6g_fci_15876_ipt_3070476.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 20:13 ch4_sto6g_fci_15876_ipt_3070522.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  28K Jun 28 20:14 ch4_sto6g_fci_15876_ipt_3070522.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  28K Jun 28 20:14 ch4_sto6g_fci_15876_ipt_3070522.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 20:13 ch4_sto6g_fci_15876_ipt_3070525.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  30K Jun 28 20:14 ch4_sto6g_fci_15876_ipt_3070525.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  30K Jun 28 20:14 ch4_sto6g_fci_15876_ipt_3070525.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 20:39 ch4_sto6g_fci_15876_ipt_3070595.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 104K Jun 28 20:40 ch4_sto6g_fci_15876_ipt_3070595.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 104K Jun 28 20:40 ch4_sto6g_fci_15876_ipt_3070595.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 20:54 ch4_sto6g_fci_15876_ipt_3070722.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  30K Jun 28 20:54 ch4_sto6g_fci_15876_ipt_3070722.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  30K Jun 28 20:54 ch4_sto6g_fci_15876_ipt_3070722.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 20:57 ch4_sto6g_fci_15876_ipt_3070731.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  31K Jun 28 20:58 ch4_sto6g_fci_15876_ipt_3070731.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  31K Jun 28 20:58 ch4_sto6g_fci_15876_ipt_3070731.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 21:11 ch4_sto6g_fci_15876_ipt_3070753.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  31K Jun 28 21:11 ch4_sto6g_fci_15876_ipt_3070753.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  31K Jun 28 21:11 ch4_sto6g_fci_15876_ipt_3070753.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 21:11 ch4_sto6g_fci_15876_ipt_3070754.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  31K Jun 28 21:12 ch4_sto6g_fci_15876_ipt_3070754.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  31K Jun 28 21:12 ch4_sto6g_fci_15876_ipt_3070754.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 21:18 ch4_sto6g_fci_15876_ipt_3070766.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  31K Jun 28 21:20 ch4_sto6g_fci_15876_ipt_3070766.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  31K Jun 28 21:20 ch4_sto6g_fci_15876_ipt_3070766.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 21:21 ch4_sto6g_fci_15876_ipt_3070772.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  31K Jun 28 21:22 ch4_sto6g_fci_15876_ipt_3070772.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  31K Jun 28 21:22 ch4_sto6g_fci_15876_ipt_3070772.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 22:25 ch4_sto6g_fci_15876_ipt_3070890.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  45K Jun 28 22:26 ch4_sto6g_fci_15876_ipt_3070890.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  45K Jun 28 22:26 ch4_sto6g_fci_15876_ipt_3070890.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 22:27 ch4_sto6g_fci_15876_ipt_3070896.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  45K Jun 28 22:27 ch4_sto6g_fci_15876_ipt_3070896.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  45K Jun 28 22:27 ch4_sto6g_fci_15876_ipt_3070896.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 22:32 ch4_sto6g_fci_15876_ipt_3070911.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  32K Jun 28 22:34 ch4_sto6g_fci_15876_ipt_3070911.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  32K Jun 28 22:34 ch4_sto6g_fci_15876_ipt_3070911.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 23:02 ch4_sto6g_fci_15876_ipt_3071015.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  46K Jun 28 23:02 ch4_sto6g_fci_15876_ipt_3071015.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  46K Jun 28 23:02 ch4_sto6g_fci_15876_ipt_3071015.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 23:15 ch4_sto6g_fci_15876_ipt_3071109.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  46K Jun 28 23:15 ch4_sto6g_fci_15876_ipt_3071109.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  46K Jun 28 23:15 ch4_sto6g_fci_15876_ipt_3071109.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 23:17 ch4_sto6g_fci_15876_ipt_3071116.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  46K Jun 28 23:18 ch4_sto6g_fci_15876_ipt_3071116.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  46K Jun 28 23:18 ch4_sto6g_fci_15876_ipt_3071116.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 23:19 ch4_sto6g_fci_15876_ipt_3071125.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  47K Jun 28 23:20 ch4_sto6g_fci_15876_ipt_3071125.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  47K Jun 28 23:20 ch4_sto6g_fci_15876_ipt_3071125.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 28 23:28 ch4_sto6g_fci_15876_ipt_3071153.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  47K Jun 28 23:28 ch4_sto6g_fci_15876_ipt_3071153.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  47K Jun 28 23:28 ch4_sto6g_fci_15876_ipt_3071153.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 23:59 ch4_sto6g_fci_15876_ipt_3071204.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  47K Jun 28 23:59 ch4_sto6g_fci_15876_ipt_3071204.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  47K Jun 28 23:59 ch4_sto6g_fci_15876_ipt_3071204.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 29 00:03 ch4_sto6g_fci_15876_ipt_3071279.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  20K Jun 29 00:03 ch4_sto6g_fci_15876_ipt_3071279.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  20K Jun 29 00:03 ch4_sto6g_fci_15876_ipt_3071279.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:54 co_sto6g_fci_14400_ipt_3049214.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.3K Jun 23 14:54 co_sto6g_fci_14400_ipt_3049214.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.3K Jun 23 14:54 co_sto6g_fci_14400_ipt_3049214.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:57 co_sto6g_fci_14400_ipt_3049231.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.8K Jun 23 14:57 co_sto6g_fci_14400_ipt_3049231.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.0K Jun 23 14:57 co_sto6g_fci_14400_ipt_3049231.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:58 co_sto6g_fci_14400_ipt_3049239.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  20K Jun 23 14:59 co_sto6g_fci_14400_ipt_3049239.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  20K Jun 23 14:59 co_sto6g_fci_14400_ipt_3049239.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 19:57 co_sto6g_fci_14400_ipt_3070463.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  27K Jun 28 19:57 co_sto6g_fci_14400_ipt_3070463.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  27K Jun 28 19:57 co_sto6g_fci_14400_ipt_3070463.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 20:13 co_sto6g_fci_14400_ipt_3070524.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  28K Jun 28 20:13 co_sto6g_fci_14400_ipt_3070524.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  28K Jun 28 20:13 co_sto6g_fci_14400_ipt_3070524.out
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 24 15:32 debug
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 12:45 h20_fci_primme_vs_ipt_3044994.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.8K Jun 22 12:45 h20_fci_primme_vs_ipt_3044994.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.8K Jun 22 12:45 h20_fci_primme_vs_ipt_3044994.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 13:14 h2o_631g_cas10e10o_fci_63504_primme_vs_ipt_3048878.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  16K Jun 23 13:15 h2o_631g_cas10e10o_fci_63504_primme_vs_ipt_3048878.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  16K Jun 23 13:15 h2o_631g_cas10e10o_fci_63504_primme_vs_ipt_3048878.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 13:16 h2o_631g_cas10e10o_fci_63504_primme_vs_ipt_3048880.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  16K Jun 23 13:16 h2o_631g_cas10e10o_fci_63504_primme_vs_ipt_3048880.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  16K Jun 23 13:16 h2o_631g_cas10e10o_fci_63504_primme_vs_ipt_3048880.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 23:11 h2o_631g_fc_fci_245025_primme_vs_ipt_3046899.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  17K Jun 22 23:13 h2o_631g_fc_fci_245025_primme_vs_ipt_3046899.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  17K Jun 22 23:13 h2o_631g_fc_fci_245025_primme_vs_ipt_3046899.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 23:17 h2o_631g_fc_fci_245025_primme_vs_ipt_3046908.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  18K Jun 22 23:18 h2o_631g_fc_fci_245025_primme_vs_ipt_3046908.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  18K Jun 22 23:18 h2o_631g_fc_fci_245025_primme_vs_ipt_3046908.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 23:21 h2o_631g_fc_fci_245025_primme_vs_ipt_3046918.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  18K Jun 22 23:22 h2o_631g_fc_fci_245025_primme_vs_ipt_3046918.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  18K Jun 22 23:22 h2o_631g_fc_fci_245025_primme_vs_ipt_3046918.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 23:21 h2o_631g_fc_fci_245025_primme_vs_ipt_3046919.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  18K Jun 22 23:22 h2o_631g_fc_fci_245025_primme_vs_ipt_3046919.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  18K Jun 22 23:22 h2o_631g_fc_fci_245025_primme_vs_ipt_3046919.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.7K Jun 22 23:10 h2o_631g_fc_fci_245025_primme_vs_ipt_manual.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 14:57 h2o_fci_pyscf_441_primme_vs_ipt_3045534.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.0K Jun 22 14:57 h2o_fci_pyscf_441_primme_vs_ipt_3045534.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.0K Jun 22 14:57 h2o_fci_pyscf_441_primme_vs_ipt_3045534.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 14:58 h2o_fci_pyscf_441_primme_vs_ipt_3045539.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 9.7K Jun 22 14:58 h2o_fci_pyscf_441_primme_vs_ipt_3045539.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 9.7K Jun 22 14:58 h2o_fci_pyscf_441_primme_vs_ipt_3045539.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 17:32 h2o_fci_pyscf_441_primme_vs_ipt_3046000.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 22 17:32 h2o_fci_pyscf_441_primme_vs_ipt_3046000.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 22 17:32 h2o_fci_pyscf_441_primme_vs_ipt_3046000.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 17:34 h2o_fci_pyscf_441_primme_vs_ipt_3046008.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  11K Jun 22 17:34 h2o_fci_pyscf_441_primme_vs_ipt_3046008.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  11K Jun 22 17:34 h2o_fci_pyscf_441_primme_vs_ipt_3046008.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 19:37 h2o_fci_pyscf_441_primme_vs_ipt_3046277.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  11K Jun 22 19:38 h2o_fci_pyscf_441_primme_vs_ipt_3046277.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  11K Jun 22 19:38 h2o_fci_pyscf_441_primme_vs_ipt_3046277.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 21:11 h2o_fci_pyscf_441_primme_vs_ipt_3046551.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 22 21:11 h2o_fci_pyscf_441_primme_vs_ipt_3046551.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 22 21:11 h2o_fci_pyscf_441_primme_vs_ipt_3046551.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 24 14:50 h2o_fci_pyscf_441_primme_vs_ipt_3052571.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  26K Jun 24 14:50 h2o_fci_pyscf_441_primme_vs_ipt_3052571.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  26K Jun 24 14:50 h2o_fci_pyscf_441_primme_vs_ipt_3052571.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 24 14:51 h2o_fci_pyscf_441_primme_vs_ipt_3052577.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  26K Jun 24 14:51 h2o_fci_pyscf_441_primme_vs_ipt_3052577.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  26K Jun 24 14:51 h2o_fci_pyscf_441_primme_vs_ipt_3052577.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie  21K Jun 24 15:42 h2o_fci_pyscf_441_primme_vs_ipt_manual.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   83 Jun 29 00:03 latest_ch4_sto6g_fci_15876_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/ch4_sto6g_fci_15876_ipt_3071279.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   82 Jun 28 20:13 latest_co_sto6g_fci_14400_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/co_sto6g_fci_14400_ipt_3070524.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   81 Jun 22 12:45 latest_h20_fci_primme_vs_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/h20_fci_primme_vs_ipt_3044994.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie  102 Jun 23 13:16 latest_h2o_631g_cas10e10o_fci_63504_primme_vs_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/h2o_631g_cas10e10o_fci_63504_primme_vs_ipt_3048880.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   96 Jun 22 23:21 latest_h2o_631g_fc_fci_245025_primme_vs_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/h2o_631g_fc_fci_245025_primme_vs_ipt_3046919.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   90 Jun 24 15:41 latest_h2o_fci_pyscf_441_primme_vs_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/h2o_fci_pyscf_441_primme_vs_ipt_manual.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   82 Jun 28 20:13 latest_n2_sto6g_fci_14400_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/n2_sto6g_fci_14400_ipt_3070523.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   82 Jun 28 17:41 latest_nh3_sto6g_fci_3136_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/nh3_sto6g_fci_3136_ipt_3069863.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   80 Jun 22 10:56 latest_primme_vs_ipt_sparse.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/primme_vs_ipt_sparse_3044611.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   72 Jun 22 21:11 latest_sparse_tests.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/sparse_tests_3046550.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:54 n2_sto6g_fci_14400_ipt_3049213.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.3K Jun 23 14:54 n2_sto6g_fci_14400_ipt_3049213.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.3K Jun 23 14:54 n2_sto6g_fci_14400_ipt_3049213.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:57 n2_sto6g_fci_14400_ipt_3049230.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 23 14:57 n2_sto6g_fci_14400_ipt_3049230.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 23 14:57 n2_sto6g_fci_14400_ipt_3049230.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:58 n2_sto6g_fci_14400_ipt_3049238.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  20K Jun 23 14:59 n2_sto6g_fci_14400_ipt_3049238.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  20K Jun 23 14:59 n2_sto6g_fci_14400_ipt_3049238.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 19:57 n2_sto6g_fci_14400_ipt_3070462.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  27K Jun 28 19:57 n2_sto6g_fci_14400_ipt_3070462.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  27K Jun 28 19:57 n2_sto6g_fci_14400_ipt_3070462.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 20:13 n2_sto6g_fci_14400_ipt_3070523.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  29K Jun 28 20:14 n2_sto6g_fci_14400_ipt_3070523.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  29K Jun 28 20:14 n2_sto6g_fci_14400_ipt_3070523.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:54 nh3_sto6g_fci_3136_ipt_3049211.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.3K Jun 23 14:54 nh3_sto6g_fci_3136_ipt_3049211.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.3K Jun 23 14:54 nh3_sto6g_fci_3136_ipt_3049211.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:57 nh3_sto6g_fci_3136_ipt_3049228.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 23 14:57 nh3_sto6g_fci_3136_ipt_3049228.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 23 14:57 nh3_sto6g_fci_3136_ipt_3049228.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 14:58 nh3_sto6g_fci_3136_ipt_3049236.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  20K Jun 23 14:59 nh3_sto6g_fci_3136_ipt_3049236.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  20K Jun 23 14:59 nh3_sto6g_fci_3136_ipt_3049236.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 16:10 nh3_sto6g_fci_3136_ipt_3049472.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  20K Jun 23 16:11 nh3_sto6g_fci_3136_ipt_3049472.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  20K Jun 23 16:11 nh3_sto6g_fci_3136_ipt_3049472.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 16:41 nh3_sto6g_fci_3136_ipt_3049583.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  22K Jun 23 16:42 nh3_sto6g_fci_3136_ipt_3049583.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  22K Jun 23 16:42 nh3_sto6g_fci_3136_ipt_3049583.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 16:43 nh3_sto6g_fci_3136_ipt_3049587.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  23K Jun 23 16:43 nh3_sto6g_fci_3136_ipt_3049587.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  23K Jun 23 16:43 nh3_sto6g_fci_3136_ipt_3049587.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 23 16:45 nh3_sto6g_fci_3136_ipt_3049597.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  24K Jun 23 16:45 nh3_sto6g_fci_3136_ipt_3049597.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  24K Jun 23 16:45 nh3_sto6g_fci_3136_ipt_3049597.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 24 14:04 nh3_sto6g_fci_3136_ipt_3052140.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  24K Jun 24 14:05 nh3_sto6g_fci_3136_ipt_3052140.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  24K Jun 24 14:05 nh3_sto6g_fci_3136_ipt_3052140.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 27 21:16 nh3_sto6g_fci_3136_ipt_3066052.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  24K Jun 27 21:17 nh3_sto6g_fci_3136_ipt_3066052.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  24K Jun 27 21:17 nh3_sto6g_fci_3136_ipt_3066052.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 27 21:17 nh3_sto6g_fci_3136_ipt_3066056.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  25K Jun 27 21:17 nh3_sto6g_fci_3136_ipt_3066056.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  25K Jun 27 21:17 nh3_sto6g_fci_3136_ipt_3066056.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 27 21:19 nh3_sto6g_fci_3136_ipt_3066064.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  25K Jun 27 21:19 nh3_sto6g_fci_3136_ipt_3066064.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  25K Jun 27 21:19 nh3_sto6g_fci_3136_ipt_3066064.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 27 21:20 nh3_sto6g_fci_3136_ipt_3066077.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  25K Jun 27 21:20 nh3_sto6g_fci_3136_ipt_3066077.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  25K Jun 27 21:20 nh3_sto6g_fci_3136_ipt_3066077.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 27 22:09 nh3_sto6g_fci_3136_ipt_3066324.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  30K Jun 27 22:09 nh3_sto6g_fci_3136_ipt_3066324.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  30K Jun 27 22:09 nh3_sto6g_fci_3136_ipt_3066324.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 27 22:12 nh3_sto6g_fci_3136_ipt_3066327.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  30K Jun 27 22:13 nh3_sto6g_fci_3136_ipt_3066327.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  30K Jun 27 22:13 nh3_sto6g_fci_3136_ipt_3066327.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 27 22:13 nh3_sto6g_fci_3136_ipt_3066340.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  30K Jun 27 22:14 nh3_sto6g_fci_3136_ipt_3066340.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  30K Jun 27 22:14 nh3_sto6g_fci_3136_ipt_3066340.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 27 22:15 nh3_sto6g_fci_3136_ipt_3066355.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  31K Jun 27 22:16 nh3_sto6g_fci_3136_ipt_3066355.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  31K Jun 27 22:16 nh3_sto6g_fci_3136_ipt_3066355.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 12:44 nh3_sto6g_fci_3136_ipt_3068790.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  31K Jun 28 12:46 nh3_sto6g_fci_3136_ipt_3068790.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  31K Jun 28 12:46 nh3_sto6g_fci_3136_ipt_3068790.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 12:48 nh3_sto6g_fci_3136_ipt_3068796.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  33K Jun 28 12:48 nh3_sto6g_fci_3136_ipt_3068796.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  33K Jun 28 12:48 nh3_sto6g_fci_3136_ipt_3068796.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 12:50 nh3_sto6g_fci_3136_ipt_3068807.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  32K Jun 28 12:50 nh3_sto6g_fci_3136_ipt_3068807.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  32K Jun 28 12:50 nh3_sto6g_fci_3136_ipt_3068807.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 12:51 nh3_sto6g_fci_3136_ipt_3068809.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  32K Jun 28 12:52 nh3_sto6g_fci_3136_ipt_3068809.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  32K Jun 28 12:52 nh3_sto6g_fci_3136_ipt_3068809.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 12:53 nh3_sto6g_fci_3136_ipt_3068812.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  32K Jun 28 12:53 nh3_sto6g_fci_3136_ipt_3068812.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  32K Jun 28 12:53 nh3_sto6g_fci_3136_ipt_3068812.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 12:59 nh3_sto6g_fci_3136_ipt_3068829.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  32K Jun 28 13:00 nh3_sto6g_fci_3136_ipt_3068829.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  32K Jun 28 13:00 nh3_sto6g_fci_3136_ipt_3068829.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 13:17 nh3_sto6g_fci_3136_ipt_3068934.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  32K Jun 28 13:17 nh3_sto6g_fci_3136_ipt_3068934.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  32K Jun 28 13:17 nh3_sto6g_fci_3136_ipt_3068934.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 13:19 nh3_sto6g_fci_3136_ipt_3068946.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  29K Jun 28 13:20 nh3_sto6g_fci_3136_ipt_3068946.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  29K Jun 28 13:20 nh3_sto6g_fci_3136_ipt_3068946.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 13:22 nh3_sto6g_fci_3136_ipt_3068954.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  28K Jun 28 13:22 nh3_sto6g_fci_3136_ipt_3068954.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  28K Jun 28 13:22 nh3_sto6g_fci_3136_ipt_3068954.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 13:24 nh3_sto6g_fci_3136_ipt_3068962.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  29K Jun 28 13:24 nh3_sto6g_fci_3136_ipt_3068962.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  29K Jun 28 13:24 nh3_sto6g_fci_3136_ipt_3068962.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 28 17:41 nh3_sto6g_fci_3136_ipt_3069863.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  53K Jun 28 17:42 nh3_sto6g_fci_3136_ipt_3069863.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  53K Jun 28 17:42 nh3_sto6g_fci_3136_ipt_3069863.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie  22K Jun 27 21:13 nh3_sto6g_fci_3136_ipt_manual.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 09:53 primme_vs_ipt_sparse_3043135.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.0K Jun 22 09:53 primme_vs_ipt_sparse_3043135.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.0K Jun 22 09:53 primme_vs_ipt_sparse_3043135.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 22 10:39 primme_vs_ipt_sparse_3044569.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:39 primme_vs_ipt_sparse_3044569.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:39 primme_vs_ipt_sparse_3044569.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 22 10:40 primme_vs_ipt_sparse_3044570.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:40 primme_vs_ipt_sparse_3044570.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:40 primme_vs_ipt_sparse_3044570.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 22 10:42 primme_vs_ipt_sparse_3044572.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:42 primme_vs_ipt_sparse_3044572.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:42 primme_vs_ipt_sparse_3044572.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 22 10:42 primme_vs_ipt_sparse_3044574.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:42 primme_vs_ipt_sparse_3044574.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:42 primme_vs_ipt_sparse_3044574.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 22 10:42 primme_vs_ipt_sparse_3044575.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:42 primme_vs_ipt_sparse_3044575.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:42 primme_vs_ipt_sparse_3044575.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 22 10:53 primme_vs_ipt_sparse_3044594.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:53 primme_vs_ipt_sparse_3044594.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:53 primme_vs_ipt_sparse_3044594.out
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 22 10:56 primme_vs_ipt_sparse_3044611.err
+-rw-rw-r-- 1 nudt_liujie nudt_liujie    0 Jun 22 10:56 primme_vs_ipt_sparse_3044611.log
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  128 Jun 22 10:56 primme_vs_ipt_sparse_3044611.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie  103 Jun 22 21:14 q_gpu_test_3046563.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 21:14 q_gpu_test_3046563.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie  102 Jun 22 21:15 q_gpu_test_3046565.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 21:15 q_gpu_test_3046565.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie  141 Jun 22 21:16 q_gpu_test_3046570.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 21:16 q_gpu_test_3046570.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 21:17 q_gpu_test_3046575.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  185 Jun 22 21:17 q_gpu_test_3046575.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 21 14:27 sparse_tests_3041618.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.7K Jun 21 14:27 sparse_tests_3041618.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.7K Jun 21 14:27 sparse_tests_3041618.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 21 14:28 sparse_tests_3041620.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.3K Jun 21 14:29 sparse_tests_3041620.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.3K Jun 21 14:29 sparse_tests_3041620.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 21 14:29 sparse_tests_3041621.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.2K Jun 21 14:29 sparse_tests_3041621.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.2K Jun 21 14:29 sparse_tests_3041621.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 17:35 sparse_tests_3046009.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 9.0K Jun 22 17:35 sparse_tests_3046009.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 9.0K Jun 22 17:35 sparse_tests_3046009.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 19:36 sparse_tests_3046276.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 9.3K Jun 22 19:36 sparse_tests_3046276.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 9.3K Jun 22 19:36 sparse_tests_3046276.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 22 21:11 sparse_tests_3046550.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  11K Jun 22 21:11 sparse_tests_3046550.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  11K Jun 22 21:11 sparse_tests_3046550.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie  977 Jun 22 21:07 sparse_tests_manual.log
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/ch4_k30_ipt_iter2000_abs:
+total 1.0K
+-rw-rw-r-- 1 nudt_liujie nudt_liujie 1.4K Jun 29 00:03 ch4_sto6g_fci_15876_ipt_summary.txt
+-rw-rw-r-- 1 nudt_liujie nudt_liujie  553 Jun 29 00:03 ch4_sto6g_fci_15876_ipt_trials.csv
+finished at: Mon Jun 29 00:03:38 CST 2026

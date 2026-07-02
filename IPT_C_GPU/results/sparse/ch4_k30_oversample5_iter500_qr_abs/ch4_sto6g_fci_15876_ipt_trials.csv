@@ -1,0 +1,2 @@
+method,k,avg_solve_time_sec,avg_api_total_time_sec,avg_preparation_time_sec,avg_transfer_setup_time_sec,avg_iteration_time_sec,avg_rayleigh_ritz_time_sec,avg_iterations,avg_matvecs,last_first_eigenvalue,last_max_absolute_residual,last_relative_fixed_point_residual,eigenvalue_abs_residual,status,error,tol,maxiter
+IPT_CUDA_BLOCK_CLUSTER,30,nan,6.2479037474840879,0,0,0,0,0,0,nan,nan,nan,nan,1,invalid argument,9.9999999999999998e-13,1000

@@ -1,0 +1,28 @@
+warmup skipped RUN_WARMUP=0
+
+matrix=nh3_sto6g_fci
+n=3136
+nnz=990976
+k=10
+repeats=5
+tol=9.9999999999999998e-13
+ipt_maxiter=1000
+run_primme=1
+primme_max_matvecs=5000
+matrix_inf_norm=58.717725351702505
+integral_generation_time_sec=2.8604470188729465
+pyscf_site_packages=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+basis=sto-6g
+frozen_core_orbitals=0
+norb=8
+active_electrons=10
+neleca=5
+nelecb=5
+na=56
+nb=56
+ecore=11.954178476436654
+nuclear_repulsion=11.954178476436654
+hartree_fock_energy=-55.988398491054809
+
+PRIMME_CUBLAS avg_time_sec=0.60880734277889137 std_time_sec=0.11901983682724004 avg_iterations=295.80000000000001 avg_matvecs=1294.4000000000001 avg_first_eigenvalue=-56.054516870360793 last_first_eigenvalue=-56.054516870360779 last_max_residual=1.0441692705218305e-12 last_relative_fixed_point_residual=nan eigenvalue_abs_residual=0 avg_api_total_time_sec=0.61102529903873803 avg_preparation_time_sec=0 avg_transfer_setup_time_sec=0.0022179562598466872 avg_iteration_time_sec=0 avg_rayleigh_ritz_time_sec=0
+IPT_CUDA_BLOCK_CLUSTER avg_time_sec=0.25255042580000003 std_time_sec=0.39178372768127362 avg_iterations=100 avg_matvecs=1866 avg_first_eigenvalue=-56.054516870360814 last_first_eigenvalue=-56.054516870360821 last_max_residual=4.1814484692040546e-13 last_relative_fixed_point_residual=2.0488664908909353 eigenvalue_abs_residual=4.2632564145606011e-14 avg_api_total_time_sec=1.0919715560041368 avg_preparation_time_sec=0.26763196519999999 avg_transfer_setup_time_sec=0.43753072119999992 avg_iteration_time_sec=0.1088317942 avg_rayleigh_ritz_time_sec=0.14371863160000001

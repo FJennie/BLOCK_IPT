@@ -1,0 +1,196 @@
+===== CH4/STO-6G full FCI IPT sparse benchmark =====
+Tue Jun 23 14:57:13 CST 2026
+gsn0
+SLURM_JOB_ID=3049229
+CUDA_VISIBLE_DEVICES=0
+IPT_REPEATS=1
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+RUN_PRIMME=0
+RUN_WARMUP=0
+IPT_EST_NNZ_PER_COL=800
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+numpy 1.21.5 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/numpy/__init__.py
+scipy 1.7.3 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/scipy/__init__.py
+pyscf 2.0.1 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/pyscf/__init__.py
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+Tue Jun 23 14:57:13 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:C7:00.0 Off |                    0 |
+| N/A   28C    P0              59W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 -I/fs1/home/nudt_liujie/ftt/primme-3.2.3/include -I/fs1/software/python/3.8_miniconda_4.10.3/include/python3.8 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu /fs1/home/nudt_liujie/ftt/primme-3.2.3/lib/libprimme.a -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt_cuda -lcublas -lcusparse -lcudart -L/fs1/software/python/3.8_miniconda_4.10.3/lib -lpython3.8 -L/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4 -lopenblas -lpthread -ldl -lutil -lrt -Xlinker -rpath -Xlinker /fs1/software/gcc/12.2.0/lib64 -Xlinker -rpath -Xlinker /fs1/software/python/3.8_miniconda_4.10.3/lib -Xlinker -rpath -Xlinker /fs1/software/cp2k/8.1-gcc8.4-openmpi/lib -lgfortran /fs1/software/gcc/12.2.0/lib64/libstdc++.so -lm
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu:1095:22: warning: missing terminating " character
+ 1095 |     fprintf(summary, "warmup skipped RUN_WARMUP=0
+      |                      ^
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu:1097:1: warning: missing terminating " character
+ 1097 | ");
+      | ^
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1095): error: missing closing quote
+      fprintf(summary, "warmup skipped RUN_WARMUP=0
+                       ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1097): error: missing closing quote
+  ");
+  ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1099): error: expected a ")"
+      for (int repeat = 1; repeat <= repeats; ++repeat) {
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1116): warning #12-D: parsing restarts here after previous syntax error
+                      );
+                       ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1119): error: this declaration has no storage class or type specifier
+      fprintf(summary,
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1119): error: declaration is incompatible with "int fprintf(FILE *, const char *, ...)" (declared at line 326 of /usr/include/stdio.h)
+      fprintf(summary,
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1119): error: identifier "summary" is undefined
+      fprintf(summary,
+              ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1129): error: identifier "matrix" is undefined
+              matrix.n, matrix.nnz, repeats, tol, ipt_maxiter, run_primme,
+              ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1129): error: identifier "repeats" is undefined
+              matrix.n, matrix.nnz, repeats, tol, ipt_maxiter, run_primme,
+                                    ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1129): error: identifier "tol" is undefined
+              matrix.n, matrix.nnz, repeats, tol, ipt_maxiter, run_primme,
+                                             ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1129): error: identifier "ipt_maxiter" is undefined
+              matrix.n, matrix.nnz, repeats, tol, ipt_maxiter, run_primme,
+                                                  ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1129): error: identifier "run_primme" is undefined
+              matrix.n, matrix.nnz, repeats, tol, ipt_maxiter, run_primme,
+                                                               ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1130): error: identifier "run_warmup" is undefined
+              run_warmup, primme_max_matvecs, matrix_norm, active.generation_time_sec,
+              ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1130): error: identifier "primme_max_matvecs" is undefined
+              run_warmup, primme_max_matvecs, matrix_norm, active.generation_time_sec,
+                          ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1130): error: identifier "matrix_norm" is undefined
+              run_warmup, primme_max_matvecs, matrix_norm, active.generation_time_sec,
+                                              ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1130): error: identifier "active" is undefined
+              run_warmup, primme_max_matvecs, matrix_norm, active.generation_time_sec,
+                                                           ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1120): error: too many initializer values
+              "matrix=ch4_sto6g_fci\nn=%d\nnnz=%d\n"
+              ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1135): error: expected a declaration
+      if (run_primme) {
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1138): warning #12-D: parsing restarts here after previous syntax error
+      write_summary(summary, "IPT_CUDA_SPARSE", ipt_results);
+                                                            ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1140): error: this declaration has no storage class or type specifier
+      fclose(csv);
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1140): error: declaration is incompatible with "int fclose(FILE *)" (declared at line 213 of /usr/include/stdio.h)
+      fclose(csv);
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1140): error: identifier "csv" is undefined
+      fclose(csv);
+             ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1141): error: this declaration has no storage class or type specifier
+      fclose(summary);
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1141): error: variable "fclose" has already been defined
+      fclose(summary);
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1143): error: this declaration has no storage class or type specifier
+      printf("wrote %s\n", csv_path);
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1143): error: declaration is incompatible with "int printf(const char *, ...)" (declared at line 332 of /usr/include/stdio.h)
+      printf("wrote %s\n", csv_path);
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1143): error: identifier "csv_path" is undefined
+      printf("wrote %s\n", csv_path);
+                           ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1143): error: too many initializer values
+      printf("wrote %s\n", csv_path);
+                           ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1143): error: a value of type "const char *" cannot be used to initialize an entity of type "int"
+      printf("wrote %s\n", csv_path);
+             ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1144): error: this declaration has no storage class or type specifier
+      printf("wrote %s\n", summary_path);
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1144): error: variable "printf" has already been defined
+      printf("wrote %s\n", summary_path);
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1144): error: identifier "summary_path" is undefined
+      printf("wrote %s\n", summary_path);
+                           ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1144): error: too many initializer values
+      printf("wrote %s\n", summary_path);
+                           ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1144): error: a value of type "const char *" cannot be used to initialize an entity of type "int"
+      printf("wrote %s\n", summary_path);
+             ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1145): error: expected a declaration
+      return 0;
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu(1146): error: expected a declaration
+  }
+  ^
+
+34 errors detected in the compilation of "/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/benchmark_ch4_sto6g_fci_15876_ipt.cu".

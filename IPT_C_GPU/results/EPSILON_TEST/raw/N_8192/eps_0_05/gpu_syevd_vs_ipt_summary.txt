@@ -1,0 +1,19 @@
+IPT_C GPU benchmark: CUSOLVER SYEVD vs IPT
+started_at = 2026-06-09T17:59:45+0800
+ipt_c_root = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+result_csv = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_05/gpu_syevd_vs_ipt_results.csv
+epsilon = 0.050000000000000003
+ipt_tol = 9.9999999999999998e-13
+ipt_maxiter = 1000
+timing_repeats = 1
+per_N_warmup = true
+seed = 20260603
+N_values = 8192
+compute_residuals = true
+cuda_runtime_version = 12020
+cuda_driver_version = 12020
+gpu_name = NVIDIA A100-SXM4-80GB
+
+N=8192 started_at=2026-06-09T17:59:45+0800
+N=8192 finished_at=2026-06-09T17:59:54+0800 status=ok time_syevd=1.4523532348684967 time_ipt=0.99955762503668666 ipt_iterations=15 ipt_fixed_point_residual=8.3251961475136182e-13 residual_ipt=1.2961296323436134e-09 timing_repeats=1 per_N_warmup=true
+finished_at = 2026-06-09T17:59:54+0800

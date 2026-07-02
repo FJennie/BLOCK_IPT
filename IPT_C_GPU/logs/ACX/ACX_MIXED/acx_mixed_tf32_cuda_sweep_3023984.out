@@ -1,0 +1,223 @@
+===== ACX mixed TF32/FP64 CUDA sweep job =====
+Wed Jun 17 10:22:01 CST 2026
+gsn0
+SLURM_JOB_ID=3023984
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/ACX
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/ACX/ACX_MIXED
+ACX_MIXED_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED
+ACX_MIXED_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED
+ACX_MIXED_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED/acx_mixed_tf32_cuda_sweep_summary.txt
+ACX_MIXED_SWEEP_NS=4096,8192,16384
+ACX_MIXED_EPSILON_VALUES=0.06,0.08,0.1,0.12
+ACX_TF32_TOL=1e-6
+ACX_TF32_MAXITER=1000
+ACX_FP64_TOL=1e-12
+ACX_FP64_MAXITER=1000
+ACX_MIXED_REPEATS=5
+ACX_MIXED_WARMUP_N=128
+ACX_MIXED_APPEND_RESULTS=false
+ACX_MIXED_COMPUTE_RESIDUAL=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Wed Jun 17 10:22:02 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:CA:00.0 Off |                    0 |
+| N/A   39C    P0              65W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== ACX mixed TF32/FP64 CUDA sweep =====
+root=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED
+logs=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED
+summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED/acx_mixed_tf32_cuda_sweep_summary.txt
+N values = 4096, 8192, 16384
+epsilon values = 0.06, 0.08, 0.1, 0.12
+tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 tf32_maxiter=1000 fp64_maxiter=1000 repeats=5 warmup_n=128 seed=20260617 gpu=NVIDIA A100-SXM4-80GB
+GPU memory at start: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=4096 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.66649322 s
+GPU memory after matrix: free 78.597 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=4096
+  ACX mixed TF32 run 1/5: total=0.18205723 s, tf32=0.017913315 s, fp64=0.16414242 s, final=0.0071768411 s, tf32_res=3.2082333e-07, fp64_res=1.1953498e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=0.17280964 s, tf32=0.016529713 s, fp64=0.15627971 s, final=0.0071766912 s, tf32_res=3.2082333e-07, fp64_res=1.1953498e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=0.17223945 s, tf32=0.016518748 s, fp64=0.15572047 s, final=0.0071785077 s, tf32_res=3.2082333e-07, fp64_res=1.1953498e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=0.1714195 s, tf32=0.015490784 s, fp64=0.1559285 s, final=0.0071779303 s, tf32_res=3.2082333e-07, fp64_res=1.1953498e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=0.17074452 s, tf32=0.015563112 s, fp64=0.15518122 s, final=0.0071774879 s, tf32_res=3.2082333e-07, fp64_res=1.1953498e-13, abs_res=3.8794704e-11, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=8192 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.4494511 s
+GPU memory after matrix: free 78.222 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=8192
+  ACX mixed TF32 run 1/5: total=1.1329734 s, tf32=0.063228345 s, fp64=1.0697431 s, final=0.057643389 s, tf32_res=3.2596553e-07, fp64_res=8.3789573e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=1.1339951 s, tf32=0.063501707 s, fp64=1.0704928 s, final=0.057958601 s, tf32_res=3.2596553e-07, fp64_res=8.3789573e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=1.133362 s, tf32=0.063453198 s, fp64=1.0699072 s, final=0.058084164 s, tf32_res=3.2596553e-07, fp64_res=8.3789573e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=1.1329513 s, tf32=0.063752547 s, fp64=1.0691985 s, final=0.058014385 s, tf32_res=3.2596553e-07, fp64_res=8.3789573e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=1.1315767 s, tf32=0.063436638 s, fp64=1.0681386 s, final=0.057939693 s, tf32_res=3.2596553e-07, fp64_res=8.3789573e-13, abs_res=1.9400375e-09, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=16384 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 12.123214 s
+GPU memory after matrix: free 76.722 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=16384
+  ACX mixed TF32 run 1/5: total=7.684682 s, tf32=0.45945209 s, fp64=7.2252283 s, final=0.48079917 s, tf32_res=3.1616681e-07, fp64_res=9.7905314e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=7.6830014 s, tf32=0.46156568 s, fp64=7.221434 s, final=0.48062562 s, tf32_res=3.1616681e-07, fp64_res=9.7905314e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=7.6832611 s, tf32=0.46211809 s, fp64=7.2211411 s, final=0.48255019 s, tf32_res=3.1616681e-07, fp64_res=9.7905314e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=7.6845239 s, tf32=0.46149756 s, fp64=7.2230244 s, final=0.48158031 s, tf32_res=3.1616681e-07, fp64_res=9.7905314e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=7.6850075 s, tf32=0.46303906 s, fp64=7.221968 s, final=0.48098116 s, tf32_res=3.1616681e-07, fp64_res=9.7905314e-13, abs_res=4.5281389e-09, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.08 N=4096 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.7243526 s
+GPU memory after matrix: free 78.597 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=4096
+  ACX mixed TF32 run 1/5: total=0.17096511 s, tf32=0.015614675 s, fp64=0.15535018 s, final=0.0071580913 s, tf32_res=9.8418946e-07, fp64_res=9.5241525e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=0.17175114 s, tf32=0.016631671 s, fp64=0.15511924 s, final=0.0071775359 s, tf32_res=9.8418946e-07, fp64_res=9.5241525e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=0.17142056 s, tf32=0.015518701 s, fp64=0.15590162 s, final=0.0071774712 s, tf32_res=9.8418946e-07, fp64_res=9.5241525e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=0.17056611 s, tf32=0.01551924 s, fp64=0.15504664 s, final=0.0071781301 s, tf32_res=9.8418946e-07, fp64_res=9.5241525e-13, abs_res=nan, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=0.17128409 s, tf32=0.015607682 s, fp64=0.15567621 s, final=0.0071771881 s, tf32_res=9.8418946e-07, fp64_res=9.5241525e-13, abs_res=1.8569307e-10, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.08 N=8192 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.7190781 s
+GPU memory after matrix: free 78.222 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=8192
+  ACX mixed TF32 run 1/5: total=1.5356966 s, tf32=0.08325888 s, fp64=1.4524374 s, final=0.057549243 s, tf32_res=3.0480821e-07, fp64_res=4.6073547e-14, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=1.5349752 s, tf32=0.08329119 s, fp64=1.4516836 s, final=0.058153111 s, tf32_res=3.0480821e-07, fp64_res=4.6073547e-14, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=1.5306316 s, tf32=0.081527643 s, fp64=1.4491036 s, final=0.058282999 s, tf32_res=3.0480821e-07, fp64_res=4.6073547e-14, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=1.5349468 s, tf32=0.083616865 s, fp64=1.4513297 s, final=0.058172342 s, tf32_res=3.0480821e-07, fp64_res=4.6073547e-14, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=1.5360596 s, tf32=0.081782834 s, fp64=1.4542766 s, final=0.059032496 s, tf32_res=3.0480821e-07, fp64_res=4.6073547e-14, abs_res=3.4815883e-11, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.08 N=16384 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 12.640442 s
+GPU memory after matrix: free 76.722 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=16384
+  ACX mixed TF32 run 1/5: total=12.03875 s, tf32=0.63300891 s, fp64=11.405739 s, final=0.48518282 s, tf32_res=2.9161985e-07, fp64_res=4.1584025e-14, abs_res=nan, tf32_iters=4, fp64_iters=6, tf32_calls=8, fp64_calls=13, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=12.059495 s, tf32=0.61631503 s, fp64=11.44318 s, final=0.48785707 s, tf32_res=2.9161985e-07, fp64_res=4.1584025e-14, abs_res=nan, tf32_iters=4, fp64_iters=6, tf32_calls=8, fp64_calls=13, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=12.036093 s, tf32=0.6110825 s, fp64=11.425009 s, final=0.48212823 s, tf32_res=2.9161985e-07, fp64_res=4.1584025e-14, abs_res=nan, tf32_iters=4, fp64_iters=6, tf32_calls=8, fp64_calls=13, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=12.032183 s, tf32=0.61275001 s, fp64=11.419433 s, final=0.48108398 s, tf32_res=2.9161985e-07, fp64_res=4.1584025e-14, abs_res=nan, tf32_iters=4, fp64_iters=6, tf32_calls=8, fp64_calls=13, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=12.039588 s, tf32=0.61420391 s, fp64=11.425383 s, final=0.48396994 s, tf32_res=2.9161985e-07, fp64_res=4.1584025e-14, abs_res=5.9701092e-11, tf32_iters=4, fp64_iters=6, tf32_calls=8, fp64_calls=13, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=4096 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.70704835 s
+GPU memory after matrix: free 78.597 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=4096
+  ACX mixed TF32 run 1/5: total=0.26001856 s, tf32=0.04071359 s, fp64=0.21930443 s, final=0.0071805133 s, tf32_res=6.1826175e-07, fp64_res=5.5758668e-13, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=0.24559452 s, tf32=0.032779226 s, fp64=0.21281486 s, final=0.007172008 s, tf32_res=6.1826175e-07, fp64_res=5.5758668e-13, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=0.22818052 s, tf32=0.019157106 s, fp64=0.20902314 s, final=0.007173934 s, tf32_res=6.1826175e-07, fp64_res=5.5758668e-13, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=0.2266662 s, tf32=0.018221167 s, fp64=0.20844481 s, final=0.0071736048 s, tf32_res=6.1826175e-07, fp64_res=5.5758668e-13, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=0.228209 s, tf32=0.019266686 s, fp64=0.20894211 s, final=0.0071736588 s, tf32_res=6.1826175e-07, fp64_res=5.5758668e-13, abs_res=6.0197301e-11, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=8192 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.70806 s
+GPU memory after matrix: free 78.222 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=8192
+  ACX mixed TF32 run 1/5: total=1.7909005 s, tf32=0.082935353 s, fp64=1.7079648 s, final=0.058059853 s, tf32_res=7.1430778e-07, fp64_res=4.2903905e-13, abs_res=nan, tf32_iters=4, fp64_iters=6, tf32_calls=8, fp64_calls=13, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=1.7872625 s, tf32=0.083950195 s, fp64=1.703312 s, final=0.058322756 s, tf32_res=7.1430778e-07, fp64_res=4.2903905e-13, abs_res=nan, tf32_iters=4, fp64_iters=6, tf32_calls=8, fp64_calls=13, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=1.7848336 s, tf32=0.083533811 s, fp64=1.7012995 s, final=0.057988594 s, tf32_res=7.1430778e-07, fp64_res=4.2903905e-13, abs_res=nan, tf32_iters=4, fp64_iters=6, tf32_calls=8, fp64_calls=13, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=1.7857435 s, tf32=0.083536732 s, fp64=1.7022063 s, final=0.057965111 s, tf32_res=7.1430778e-07, fp64_res=4.2903905e-13, abs_res=nan, tf32_iters=4, fp64_iters=6, tf32_calls=8, fp64_calls=13, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=1.7868526 s, tf32=0.083168618 s, fp64=1.7036836 s, final=0.058055597 s, tf32_res=7.1430778e-07, fp64_res=4.2903905e-13, abs_res=1.1907718e-10, tf32_iters=4, fp64_iters=6, tf32_calls=8, fp64_calls=13, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=16384 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 13.423149 s
+GPU memory after matrix: free 76.722 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=16384
+  ACX mixed TF32 run 1/5: total=10.349522 s, tf32=0.61048669 s, fp64=9.7390355 s, final=0.48077017 s, tf32_res=6.8484904e-07, fp64_res=5.3640329e-13, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=10.340969 s, tf32=0.610644 s, fp64=9.7303248 s, final=0.4807359 s, tf32_res=6.8484904e-07, fp64_res=5.3640329e-13, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=10.351453 s, tf32=0.61233254 s, fp64=9.7391199 s, final=0.48486517 s, tf32_res=6.8484904e-07, fp64_res=5.3640329e-13, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=10.348171 s, tf32=0.61200365 s, fp64=9.7361673 s, final=0.48512153 s, tf32_res=6.8484904e-07, fp64_res=5.3640329e-13, abs_res=nan, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=10.328036 s, tf32=0.61079272 s, fp64=9.7172427 s, final=0.48082601 s, tf32_res=6.8484904e-07, fp64_res=5.3640329e-13, abs_res=1.4657866e-09, tf32_iters=4, fp64_iters=5, tf32_calls=8, fp64_calls=11, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=4096 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.66908651 s
+GPU memory after matrix: free 78.597 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=4096
+  ACX mixed TF32 run 1/5: total=0.32197018 s, tf32=0.024755329 s, fp64=0.29721439 s, final=0.007171391 s, tf32_res=6.8968637e-07, fp64_res=6.8105024e-14, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=0.32379867 s, tf32=0.024841215 s, fp64=0.29895729 s, final=0.0071714618 s, tf32_res=6.8968637e-07, fp64_res=6.8105024e-14, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=0.32232799 s, tf32=0.02477689 s, fp64=0.29755068 s, final=0.0071670376 s, tf32_res=6.8968637e-07, fp64_res=6.8105024e-14, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=0.32362759 s, tf32=0.025792014 s, fp64=0.29783536 s, final=0.0071691219 s, tf32_res=6.8968637e-07, fp64_res=6.8105024e-14, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=0.3226165 s, tf32=0.024757885 s, fp64=0.2978584 s, final=0.00716636 s, tf32_res=6.8968637e-07, fp64_res=6.8105024e-14, abs_res=1.450547e-10, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=8192 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 3.4356064 s
+GPU memory after matrix: free 78.222 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=8192
+  ACX mixed TF32 run 1/5: total=2.2196336 s, tf32=0.13084064 s, fp64=2.0887926 s, final=0.058498706 s, tf32_res=6.6294374e-07, fp64_res=4.7689836e-13, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=2.2137704 s, tf32=0.13045347 s, fp64=2.0833166 s, final=0.057544863 s, tf32_res=6.6294374e-07, fp64_res=4.7689836e-13, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=2.2275078 s, tf32=0.13890925 s, fp64=2.0885982 s, final=0.058306932 s, tf32_res=6.6294374e-07, fp64_res=4.7689836e-13, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=2.2134669 s, tf32=0.13010432 s, fp64=2.0833623 s, final=0.058292248 s, tf32_res=6.6294374e-07, fp64_res=4.7689836e-13, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=2.2127799 s, tf32=0.12994935 s, fp64=2.0828303 s, final=0.058392314 s, tf32_res=6.6294374e-07, fp64_res=4.7689836e-13, abs_res=2.8256959e-10, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=16384 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 11.998386 s
+GPU memory after matrix: free 76.722 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=16384
+  ACX mixed TF32 run 1/5: total=14.923556 s, tf32=0.98740975 s, fp64=13.936146 s, final=0.48108468 s, tf32_res=6.8062584e-07, fp64_res=7.006196e-14, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 2/5: total=14.926898 s, tf32=0.9875461 s, fp64=13.93935 s, final=0.48107241 s, tf32_res=6.8062584e-07, fp64_res=7.006196e-14, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 3/5: total=14.923478 s, tf32=0.98916574 s, fp64=13.934312 s, final=0.48101063 s, tf32_res=6.8062584e-07, fp64_res=7.006196e-14, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 4/5: total=14.911696 s, tf32=0.9897903 s, fp64=13.921905 s, final=0.48673593 s, tf32_res=6.8062584e-07, fp64_res=7.006196e-14, abs_res=nan, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+  ACX mixed TF32 run 5/5: total=14.933761 s, tf32=0.98688222 s, fp64=13.946878 s, final=0.48066009 s, tf32_res=6.8062584e-07, fp64_res=7.006196e-14, abs_res=8.6394609e-11, tf32_iters=6, fp64_iters=7, tf32_calls=13, fp64_calls=16, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== done failures=0 =====
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED:
+total 56K
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 17 10:22 acx_mixed_tf32_cuda_sweep_3023984.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  22K Jun 17 10:28 acx_mixed_tf32_cuda_sweep_3023984.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  22K Jun 17 10:28 acx_mixed_tf32_cuda_sweep_3023984.out
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   92 Jun 17 10:22 latest_acx_mixed_tf32_cuda_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED/acx_mixed_tf32_cuda_sweep_3023984.log
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 17 10:21 smoke
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED:
+total 28K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.3K Jun 17 10:23 acx_mixed_tf32_cuda_sweep_epsilon_0_06.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.3K Jun 17 10:24 acx_mixed_tf32_cuda_sweep_epsilon_0_08.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.3K Jun 17 10:26 acx_mixed_tf32_cuda_sweep_epsilon_0_1.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.3K Jun 17 10:28 acx_mixed_tf32_cuda_sweep_epsilon_0_12.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.3K Jun 17 10:28 acx_mixed_tf32_cuda_sweep_summary.txt
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 17 10:21 smoke
+finished at: Wed Jun 17 10:28:33 CST 2026

@@ -1,0 +1,82 @@
+===== ACX mixed TF32/FP64 CUDA sweep job =====
+Wed Jun 17 10:21:04 CST 2026
+gsn0
+SLURM_JOB_ID=3023978
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/ACX
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/ACX/ACX_MIXED
+ACX_MIXED_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED/smoke
+ACX_MIXED_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED/smoke
+ACX_MIXED_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED/smoke/summary.txt
+ACX_MIXED_SWEEP_NS=64
+ACX_MIXED_EPSILON_VALUES=0.06
+ACX_TF32_TOL=1e-6
+ACX_TF32_MAXITER=50
+ACX_FP64_TOL=1e-12
+ACX_FP64_MAXITER=50
+ACX_MIXED_REPEATS=1
+ACX_MIXED_WARMUP_N=128
+ACX_MIXED_APPEND_RESULTS=false
+ACX_MIXED_COMPUTE_RESIDUAL=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Wed Jun 17 10:21:04 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:CA:00.0 Off |                    0 |
+| N/A   39C    P0              65W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== ACX mixed TF32/FP64 CUDA sweep =====
+root=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED/smoke
+logs=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED/smoke
+summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED/smoke/summary.txt
+N values = 64
+epsilon values = 0.06
+tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 tf32_maxiter=50 fp64_maxiter=50 repeats=1 warmup_n=128 seed=20260617 gpu=NVIDIA A100-SXM4-80GB
+GPU memory at start: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=64 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 2.3751054e-05 s
+GPU memory after matrix: free 78.722 GiB / total 79.151 GiB
+ACX mixed TF32 warmup for N=64
+  ACX mixed TF32 run 1/1: total=0.0012413291 s, tf32=0.00030616811 s, fp64=0.00093499804 s, final=2.2120308e-05 s, tf32_res=2.5502141e-07, fp64_res=2.9365282e-14, abs_res=4.3934237e-14, tf32_iters=3, fp64_iters=4, tf32_calls=6, fp64_calls=8, tf32_conv=1, fp64_conv=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== done failures=0 =====
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED/smoke:
+total 12K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.8K Jun 17 10:21 acx_mixed_tf32_cuda_sweep_3023978.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   98 Jun 17 10:21 latest_acx_mixed_tf32_cuda_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED/smoke/acx_mixed_tf32_cuda_sweep_3023978.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 17 10:21 smoke_3023978.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.8K Jun 17 10:21 smoke_3023978.out
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED/smoke:
+total 1.0K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 670 Jun 17 10:21 acx_mixed_tf32_cuda_sweep_epsilon_0_06.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 827 Jun 17 10:21 summary.txt
+finished at: Wed Jun 17 10:21:10 CST 2026

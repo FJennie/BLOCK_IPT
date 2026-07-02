@@ -1,0 +1,105 @@
+===== IPT_C FP16 initial sweep vs cuSolver job =====
+Wed Jun 10 13:16:05 CST 2026
+gsn0
+SLURM_JOB_ID=3001770
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/mixed_precision
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/mixed_precision
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision
+IPT_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/fp16_cusolver_sweep_summary.txt
+IPT_SWEEP_NS=4096,8192,16384,32768
+IPT_EPSILON_VALUES=0.01,0.02,0.03,0.04,0.05,0.06
+IPT_FP16_TOL=1e-3
+IPT_FP16_MAXITER=1000
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=5
+IPT_SEED=20260603
+IPT_COMPUTE_RESIDUALS=true
+IPT_WARMUP_N=128
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Wed Jun 10 13:16:05 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:27:00.0 Off |                    0 |
+| N/A   32C    P0              58W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== IPT_C mixed precision FP16 sweep vs cuSolver =====
+ROOT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+RESULT_DIR = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision
+SUMMARY_TXT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/fp16_cusolver_sweep_summary.txt
+N values = 4096, 8192, 16384, 32768
+epsilon values = 0.01, 0.02, 0.029999999999999999, 0.040000000000000001, 0.050000000000000003, 0.059999999999999998
+fp16_tol = 0.001
+fp16_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 5
+seed = 20260603
+compute_residuals = true
+gpu_name = NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.691 GiB / total 79.151 GiB
+===== device warmup N=128 =====
+===== device warmup done =====
+
+===== epsilon = 0.01, N = 4096 =====
+CUDA memory before matrix: free 78.683 GiB / total 79.151 GiB
+host matrix generated in 0.55436188 s
+CUDA memory after matrix: free 78.558 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.01 N=4096
+CUSOLVER SYEVD warmup for N=4096
+  CUSOLVER SYEVD run 1/5: time = 0.21607033 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/5: time = 0.2133412 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/5: time = 0.21586936 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/5: time = 0.21346668 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/5: time = 0.21591463 s, residual = 4.0306763e-10, status = ok
+Running mixed FP16->FP64 for epsilon=0.01 N=4096
+Mixed FP16->FP64 warmup for N=4096
+  mixed run 1/5: fp16 = 0.0097806328 s, fp64 = 0.061430016 s, total = 0.071211378 s, fp16_fp = 9.955095e-05, fp64_fp = 4.9934977e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 2/5: fp16 = 0.0097359908 s, fp64 = 0.060898617 s, total = 0.070634928 s, fp16_fp = 9.955095e-05, fp64_fp = 4.9934977e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 3/5: fp16 = 0.0097892759 s, fp64 = 0.061429015 s, total = 0.071218722 s, fp16_fp = 9.955095e-05, fp64_fp = 4.9934977e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 4/5: fp16 = 0.0097803492 s, fp64 = 0.061174811 s, total = 0.070955521 s, fp16_fp = 9.955095e-05, fp64_fp = 4.9934977e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 5/5: fp16 = 0.0097913677 s, fp64 = 0.061108712 s, total = 0.070900287 s, fp16_fp = 9.955095e-05, fp64_fp = 4.9934977e-14, fp16_iters = 2, fp64_iters = 6, residual = 6.4471041e-12, status = ok
+Averages: syevd = 0.21493244 s, mixed_total = 0.070984167 s, mixed_residual = 6.4471041e-12, fp16_fp = 9.955095e-05, fp64_fp = 4.9934977e-14, fp16_iters = 2, fp64_iters = 6, status = ok
+CUDA memory after cleanup: free 78.683 GiB / total 79.151 GiB
+
+===== epsilon = 0.01, N = 8192 =====
+CUDA memory before matrix: free 78.683 GiB / total 79.151 GiB
+host matrix generated in 3.5435929 s
+CUDA memory after matrix: free 78.183 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.01 N=8192
+CUSOLVER SYEVD warmup for N=8192
+  CUSOLVER SYEVD run 1/5: time = 1.4509689 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/5: time = 1.4480368 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/5: time = 1.4507614 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/5: time = 1.4475066 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/5: time = 1.4511847 s, residual = 1.5276216e-09, status = ok
+Running mixed FP16->FP64 for epsilon=0.01 N=8192
+Mixed FP16->FP64 warmup for N=8192
+  mixed run 1/5: fp16 = 0.020609648 s, fp64 = 0.43805439 s, total = 0.45866452 s, fp16_fp = 9.9812047e-05, fp64_fp = 6.1913086e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 2/5: fp16 = 0.021574721 s, fp64 = 0.43836777 s, total = 0.45994278 s, fp16_fp = 9.9812047e-05, fp64_fp = 6.1913086e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 3/5: fp16 = 0.020644902 s, fp64 = 0.43858799 s, total = 0.45923333 s, fp16_fp = 9.9812047e-05, fp64_fp = 6.1913086e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 4/5: fp16 = 0.020437486 s, fp64 = 0.43978055 s, total = 

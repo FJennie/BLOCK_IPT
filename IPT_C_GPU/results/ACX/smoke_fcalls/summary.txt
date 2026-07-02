@@ -1,0 +1,6 @@
+started_at=2026-06-17T10:40:05+0800
+epsilon=0.06 N=64 started_at=2026-06-17T10:40:05+0800
+epsilon=0.06 N=64 method=acx_gpu_fp64 finished_at=2026-06-17T10:40:05+0800 status=ok time=0.0011746496893465519 iter_time=0.0011160499416291714 final_time=2.2083986550569534e-05 abs_residual=2.7422027396023894e-13 max_apply_residual=9.182732461354309e-13 fixed_point_residual=7.471023134192856e-14 iterations=5 f_calls=11 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/smoke_fcalls/acx_cuda_sweep_epsilon_0_06.csv
+epsilon=0.06 N=64 method=original_ipt_gpu_fp64 finished_at=2026-06-17T10:40:05+0800 status=ok time=0.0016229669563472271 iter_time=0.0016229669563472271 final_time=0 abs_residual=1.4640878627556304e-12 max_apply_residual=nan fixed_point_residual=1.9134821468397956e-13 iterations=13 f_calls=13 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/smoke_fcalls/acx_cuda_sweep_epsilon_0_06.csv
+epsilon=0.06 N=64 f_calls_comparison acx_iterations=5 acx_f_calls=11 acx_f_calls_per_iteration=2.2000000000000002 original_ipt_iterations=13 original_ipt_f_calls=13 original_ipt_f_calls_per_iteration=1 acx_minus_original_f_calls=-2 acx_over_original_f_calls=0.84615384615384615 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/smoke_fcalls/acx_cuda_sweep_epsilon_0_06.csv
+finished_at=2026-06-17T10:40:05+0800 failures=0

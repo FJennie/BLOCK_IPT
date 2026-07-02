@@ -1,0 +1,96 @@
+===== H2O/6-31G frozen-core CAS(8e,12o) PRIMME vs IPT sparse benchmark =====
+Mon Jun 22 23:08:33 CST 2026
+th-hpc4-ln0
+SLURM_JOB_ID=
+SLURM_JOB_NODELIST=
+CUDA_VISIBLE_DEVICES=
+ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+PRIMME_ROOT=/fs1/home/nudt_liujie/ftt/primme-3.2.3
+PYTHON_ROOT=/fs1/software/python/3.8_miniconda_4.10.3
+PYSCF_SITE_PACKAGES=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse
+IPT_REPEATS=1
+IPT_TOL=1e-10
+IPT_MAXITER=1
+RUN_PRIMME=0
+PRIMME_MAX_MATVECS=300
+IPT_EST_NNZ_PER_COL=1500
+OPENBLAS_LIB=/fs1/software/cp2k/8.1-gcc8.4-openmpi/lib/libopenblas.so.0
+GCC_LIB_DIR=/fs1/software/gcc/12.2.0/lib64
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+numpy 1.21.5 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/numpy/__init__.py
+scipy 1.7.3 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/scipy/__init__.py
+pyscf 2.0.1 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/pyscf/__init__.py
+
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+
+test/sparse/H2O_FCI/run_h20_631g_fc_primme_vs_ipt.sh: line 87: nvidia-smi: command not found
+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 -I/fs1/home/nudt_liujie/ftt/primme-3.2.3/include -I/fs1/software/python/3.8_miniconda_4.10.3/include/python3.8 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/H2O_FCI/benchmark_h20_631g_fc_primme_vs_ipt.cu /fs1/home/nudt_liujie/ftt/primme-3.2.3/lib/libprimme.a -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/H2O_FCI/benchmark_h20_631g_fc_primme_vs_ipt_cuda -lcublas -lcusparse -lcudart -L/fs1/software/python/3.8_miniconda_4.10.3/lib -lpython3.8 -L/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/H2O_FCI -lopenblas -lpthread -ldl -lutil -lrt -Xlinker -rpath -Xlinker /fs1/software/gcc/12.2.0/lib64 -Xlinker -rpath -Xlinker /fs1/software/python/3.8_miniconda_4.10.3/lib -Xlinker -rpath -Xlinker /fs1/software/cp2k/8.1-gcc8.4-openmpi/lib -lgfortran /fs1/software/gcc/12.2.0/lib64/libstdc++.so -lm
++ set +x
+
+===== run =====
+Generating H2O/6-31G frozen-core CAS(8e,12o) integrals with PySCF...
+PYSCF_SITE_PACKAGES=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+Generated CI strings: na=495 nb=495 n=245025
+Link counts per string: one=36 two=1080
+CSC generation progress 5000/245025 columns nnz=7125000 elapsed=1.01 sec
+CSC generation progress 10000/245025 columns nnz=14250000 elapsed=2.01 sec
+CSC generation progress 15000/245025 columns nnz=21375000 elapsed=3.03 sec
+CSC generation progress 20000/245025 columns nnz=28500000 elapsed=4.04 sec
+CSC generation progress 25000/245025 columns nnz=35625000 elapsed=5.01 sec
+CSC generation progress 30000/245025 columns nnz=42750000 elapsed=5.93 sec
+CSC generation progress 35000/245025 columns nnz=49875000 elapsed=6.81 sec
+CSC generation progress 40000/245025 columns nnz=57000000 elapsed=7.70 sec
+CSC generation progress 45000/245025 columns nnz=64125000 elapsed=8.63 sec
+CSC generation progress 50000/245025 columns nnz=71250000 elapsed=9.59 sec
+CSC generation progress 55000/245025 columns nnz=78375000 elapsed=10.48 sec
+CSC generation progress 60000/245025 columns nnz=85500000 elapsed=11.48 sec
+CSC generation progress 65000/245025 columns nnz=92625000 elapsed=12.46 sec
+CSC generation progress 70000/245025 columns nnz=99750000 elapsed=13.37 sec
+CSC generation progress 75000/245025 columns nnz=106875000 elapsed=14.24 sec
+CSC generation progress 80000/245025 columns nnz=114000000 elapsed=15.23 sec
+CSC generation progress 85000/245025 columns nnz=121125000 elapsed=16.25 sec
+CSC generation progress 90000/245025 columns nnz=128250000 elapsed=17.28 sec
+CSC generation progress 95000/245025 columns nnz=135375000 elapsed=18.27 sec
+CSC generation progress 100000/245025 columns nnz=142500000 elapsed=19.19 sec
+CSC generation progress 105000/245025 columns nnz=149625000 elapsed=20.07 sec
+CSC generation progress 110000/245025 columns nnz=156750000 elapsed=20.98 sec
+CSC generation progress 115000/245025 columns nnz=163875000 elapsed=21.91 sec
+CSC generation progress 120000/245025 columns nnz=171000000 elapsed=22.81 sec
+CSC generation progress 125000/245025 columns nnz=178125000 elapsed=23.71 sec
+CSC generation progress 130000/245025 columns nnz=185250000 elapsed=24.58 sec
+CSC generation progress 135000/245025 columns nnz=192375000 elapsed=25.56 sec
+CSC generation progress 140000/245025 columns nnz=199500000 elapsed=26.49 sec
+CSC generation progress 145000/245025 columns nnz=206625000 elapsed=27.44 sec
+CSC generation progress 150000/245025 columns nnz=213750000 elapsed=28.36 sec
+CSC generation progress 155000/245025 columns nnz=220875000 elapsed=29.36 sec
+CSC generation progress 160000/245025 columns nnz=228000000 elapsed=30.37 sec
+CSC generation progress 165000/245025 columns nnz=235125000 elapsed=31.38 sec
+CSC generation progress 170000/245025 columns nnz=242250000 elapsed=32.32 sec
+CSC generation progress 175000/245025 columns nnz=249375000 elapsed=33.17 sec
+CSC generation progress 180000/245025 columns nnz=256500000 elapsed=34.08 sec
+CSC generation progress 185000/245025 columns nnz=263625000 elapsed=34.95 sec
+CSC generation progress 190000/245025 columns nnz=270750000 elapsed=35.90 sec
+CSC generation progress 195000/245025 columns nnz=277875000 elapsed=36.80 sec
+CSC generation progress 200000/245025 columns nnz=285000000 elapsed=37.68 sec
+CSC generation progress 205000/245025 columns nnz=292125000 elapsed=38.62 sec
+CSC generation progress 210000/245025 columns nnz=299250000 elapsed=39.47 sec
+CSC generation progress 215000/245025 columns nnz=306375000 elapsed=40.35 sec
+CSC generation progress 220000/245025 columns nnz=313500000 elapsed=41.28 sec
+CSC generation progress 225000/245025 columns nnz=320625000 elapsed=42.26 sec
+CSC generation progress 230000/245025 columns nnz=327750000 elapsed=43.28 sec
+CSC generation progress 235000/245025 columns nnz=334875000 elapsed=44.32 sec
+CSC generation progress 240000/245025 columns nnz=342000000 elapsed=45.33 sec
+CSC generation progress 245000/245025 columns nnz=349125000 elapsed=46.27 sec
+CSC generation progress 245025/245025 columns nnz=349160625 elapsed=46.27 sec
+H2O/6-31G frozen-core CAS(8e,12o) FCI CSC benchmark: n=245025 nnz=349160625 repeats=1 tol=1.000e-10 run_primme=0
+Matrix/integral generation time 1.623746 sec is excluded from PRIMME/IPT timings.
+CUDA error at /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/H2O_FCI/../../../src/ipt_cuda.cu:1165: CUDA driver version is insufficient for CUDA runtime version

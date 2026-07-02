@@ -1,0 +1,2 @@
+N,epsilon,fp16_tol,fp64_tol,fp16_maxiter,fp64_maxiter,repeats,time_fp16_initial_sec,time_fp64_refine_sec,time_total_sec,final_residual,fp16_fixed_point_residual,fp64_fixed_point_residual,fp16_iterations,fp64_iterations,fp16_converged,fp64_converged,gpu_name,status,error
+256,0.050000000000000003,0.001,9.9999999999999998e-13,1000,1000,1,0.00048733502626419067,0.0013167238794267178,0.0018042288720607758,9.7091879117610326e-12,0.00015594320863308912,3.0357393000931868e-13,3,10,true,true,NVIDIA A100-SXM4-80GB,ok,

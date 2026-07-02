@@ -1,0 +1,69 @@
+===== IPT_C GPU epsilon sweep =====
+Tue Jun  9 17:56:43 CST 2026
+gsn0
+SLURM_JOB_ID=2998953
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+OUT_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test
+N_VALUES=8192
+EPS_VALUES=0.005 0.01 0.02 0.05 0.08 0.1
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=1
+IPT_COMPUTE_RESIDUALS=true
+RUN_TIMEOUT_SECONDS=900
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Tue Jun  9 17:56:44 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:27:00.0 Off |                    0 |
+| N/A   32C    P0              58W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+
+===== N=8192 EPSILON=0.005 =====
+8192,0.005,9.9999999999999998e-13,1000,1,ok,true,false,1.4576184400357306,0.43627863703295588,3.3410263907229178,6.0383199736775519e-13,6,1.528452837852571e-09,6.9682748977002158e-11,NVIDIA A100-SXM4-80GB,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_005,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_005/run.log
+
+===== N=8192 EPSILON=0.01 =====
+8192,0.01,9.9999999999999998e-13,1000,1,ok,true,false,1.4519391180947423,0.56098462967202067,2.5881976818930275,6.5213573181514535e-14,8,1.5276216379040918e-09,1.758886018181272e-11,NVIDIA A100-SXM4-80GB,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_01,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_01/run.log
+
+===== N=8192 EPSILON=0.02 =====
+8192,0.02,9.9999999999999998e-13,1000,1,ok,true,false,1.450306030921638,0.6863735499791801,2.1129981348576594,1.2992641821644529e-13,10,1.5152054460334111e-09,7.5912844519161209e-11,NVIDIA A100-SXM4-80GB,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_02,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_02/run.log
+
+===== N=8192 EPSILON=0.05 =====
+8192,0.05,9.9999999999999998e-13,1000,1,ok,true,false,1.4523394759744406,0.99975914414972067,1.4526893647065686,8.3251961475136182e-13,15,1.5334153144502299e-09,1.2961296323436134e-09,NVIDIA A100-SXM4-80GB,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_05,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_05/run.log
+
+===== N=8192 EPSILON=0.08 =====
+8192,0.08,9.9999999999999998e-13,1000,1,ok,true,true,1.4508108198642731,1.4992495100013912,0.9676913750419881,4.4946264117304971e-13,23,1.5282001565034158e-09,1.1079829277395257e-09,NVIDIA A100-SXM4-80GB,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_08,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_08/run.log
+
+===== N=8192 EPSILON=0.1 =====
+8192,0.1,9.9999999999999998e-13,1000,1,ok,true,true,1.4537336626090109,1.9361252277158201,0.7508469192997812,4.9747898528375013e-13,30,1.525190418232376e-09,1.5019572404750926e-09,NVIDIA A100-SXM4-80GB,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_1,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/raw/N_8192/eps_0_1/run.log
+
+===== epsilon sweep done =====
+summary_csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/epsilon_sweep_summary.csv
+thresholds=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/epsilon_sweep_thresholds.txt
+IPT_C GPU EPSILON sweep thresholds
+summary_csv = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/epsilon_sweep_summary.csv
+
+N = 8192
+  largest tested converged epsilon = 0.1 (iters=30, fp=4.9747898528375013e-13, ipt_time=1.9361252277158201, syevd_time=1.4537336626090109)
+  no non-converged epsilon in tested range
+  first tested slower-than-SYEVD epsilon = 0.08 (ipt_time=1.4992495100013912, syevd_time=1.4508108198642731, speedup=0.9676913750419881)
+

@@ -1,0 +1,24 @@
+warmup PRIMME status=0 time_sec=0.14924213895574212 eigenvalue=-75.731617400685565 residual=1.139895612038646e-12 error=
+warmup IPT status=0 time_sec=0.074897863000000009 eigenvalue=-75.731617400685749 residual=2.5120707456484512e-15 error=
+
+matrix=h2o_sto6g_fci_generated_by_embedded_pyscf
+n=441
+nnz=62181
+k=10
+repeats=5
+tol=9.9999999999999998e-13
+ipt_maxiter=100
+primme_max_matvecs=5000
+matrix_inf_norm=77.231996065475755
+matrix_generation_time_sec=0.65881920303218067
+matrix_generation_excluded_from_timings=true
+pyscf_site_packages=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+norb=7
+nelec=10
+na=21
+nb=21
+nuclear_repulsion=9.0843645119760303
+hartree_fock_energy=-75.679997365380359
+
+PRIMME_DYNAMIC avg_time_sec=0.14302671160548924 std_time_sec=0.0039669442933501662 avg_iterations=644.39999999999998 avg_matvecs=986.79999999999995 avg_eigenvalue=-75.731617400685565 avg_residual=1.0136271013823145e-12
+IPT_CUDA_SPARSE avg_time_sec=0.035260026600000001 std_time_sec=4.6028159405303844e-05 avg_iterations=100 avg_matvecs=1313 avg_eigenvalue=-75.731617400685778 avg_residual=2.3336249986299846e-15

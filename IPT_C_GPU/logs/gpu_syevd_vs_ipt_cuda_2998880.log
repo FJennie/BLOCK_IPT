@@ -1,0 +1,81 @@
+===== IPT_C GPU benchmark job =====
+Tue Jun  9 17:32:19 CST 2026
+gsn0
+SLURM_JOB_ID=2998880
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs
+IPT_BENCH_NS=32
+IPT_EPSILON=0.01
+IPT_TOL=1e-10
+IPT_MAXITER=1000
+IPT_REPEATS=1
+IPT_SEED=20260603
+IPT_COMPUTE_RESIDUALS=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Tue Jun  9 17:32:19 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:27:00.0 Off |                    0 |
+| N/A   32C    P0              58W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+./test/benchmark_gpu_syevd_vs_ipt_cuda: error while loading shared libraries: libcublas.so.11: cannot open shared object file: No such file or directory
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs:
+total 157K
+-rw-r--r-- 1 nudt_liujie nudt_liujie  237 Jun  5 22:21 build_gpu_syevd_vs_ipt_cuda.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  237 Jun  5 15:58 build_runtests_cuda.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun  5 19:17 gpu_syevd_vs_ipt_cuda_2984855.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.4K Jun  5 19:17 gpu_syevd_vs_ipt_cuda_2984855.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.4K Jun  5 19:17 gpu_syevd_vs_ipt_cuda_2984855.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun  5 19:20 gpu_syevd_vs_ipt_cuda_2984858.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 8.9K Jun  5 19:20 gpu_syevd_vs_ipt_cuda_2984858.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 8.9K Jun  5 19:20 gpu_syevd_vs_ipt_cuda_2984858.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun  5 22:22 gpu_syevd_vs_ipt_cuda_2985522.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.0K Jun  5 22:22 gpu_syevd_vs_ipt_cuda_2985522.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.0K Jun  5 22:22 gpu_syevd_vs_ipt_cuda_2985522.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun  5 22:24 gpu_syevd_vs_ipt_cuda_2985524.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  25K Jun  5 22:27 gpu_syevd_vs_ipt_cuda_2985524.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  25K Jun  5 22:27 gpu_syevd_vs_ipt_cuda_2985524.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun  9 17:32 gpu_syevd_vs_ipt_cuda_2998880.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.4K Jun  9 17:32 gpu_syevd_vs_ipt_cuda_2998880.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.4K Jun  9 17:32 gpu_syevd_vs_ipt_cuda_2998880.out
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   74 Jun  9 17:32 latest_gpu_syevd_vs_ipt_cuda.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/gpu_syevd_vs_ipt_cuda_2998880.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   66 Jun  5 16:00 latest_run_runtests_cuda.log -> /fs1/home/nudt_liujie/ftt/IPT_C/logs/run_runtests_cuda_2984239.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie   88 Jun  5 15:48 run_runtests_cuda.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.7K Jun  5 15:56 run_runtests_cuda_2984228.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.9K Jun  5 16:00 run_runtests_cuda_2984239.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun  5 15:55 runtests_cuda_2984228.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.7K Jun  5 15:56 runtests_cuda_2984228.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun  5 16:00 runtests_cuda_2984239.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.9K Jun  5 16:00 runtests_cuda_2984239.out
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results:
+total 24K
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun  9 17:29 codex_smoke
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.3K Jun  5 22:27 gpu_syevd_vs_ipt_results.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.5K Jun  5 22:27 gpu_syevd_vs_ipt_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie  798 Jun  5 16:00 runtests_summary.csv
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun  5 22:22 smoke_repeats_v100
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun  5 19:17 smoke_v100
+finished at: Tue Jun  9 17:32:19 CST 2026

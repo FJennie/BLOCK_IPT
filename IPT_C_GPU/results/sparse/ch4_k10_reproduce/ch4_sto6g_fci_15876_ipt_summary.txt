@@ -1,0 +1,29 @@
+warmup skipped RUN_WARMUP=0
+timing_note=IPT_CUDA_BLOCK_CLUSTER avg_solve_time_sec is internal compute time solve_time_sec=iteration_time_sec+rayleigh_ritz_time_sec; it excludes preparation, transfer/setup, final unpermute, and host result copies. PRIMME_CUBLAS avg_solve_time_sec is cublas_dprimme time and excludes GPU matrix setup.
+
+matrix=ch4_sto6g_fci
+n=15876
+nnz=8906037
+k=10
+repeats=5
+tol=9.9999999999999998e-13
+ipt_maxiter=1000
+run_primme=1
+primme_max_matvecs=5000
+matrix_inf_norm=44.912933529440842
+integral_generation_time_sec=1.4443400329910219
+pyscf_site_packages=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+basis=sto-6g
+frozen_core_orbitals=0
+norb=9
+active_electrons=10
+neleca=5
+nelecb=5
+na=126
+nb=126
+ecore=13.447693319677899
+nuclear_repulsion=13.447693319677899
+hartree_fock_energy=-40.110302463968694
+
+PRIMME_CUBLAS avg_time_sec=1.2441847940906883 std_time_sec=0.30158399393681101 avg_iterations=571.60000000000002 avg_matvecs=2001.2 avg_first_eigenvalue=-40.190776252600713 last_first_eigenvalue=-40.190776252600728 last_max_residual=9.8516605248521333e-13 last_relative_fixed_point_residual=nan eigenvalue_abs_residual=0 avg_api_total_time_sec=1.2554783226922155 avg_preparation_time_sec=0 avg_transfer_setup_time_sec=0.011293528601527214 avg_iteration_time_sec=0 avg_rayleigh_ritz_time_sec=0
+IPT_CUDA_BLOCK_CLUSTER avg_time_sec=0.48160818459999993 std_time_sec=0.11370705977429393 avg_iterations=100 avg_matvecs=2469 avg_first_eigenvalue=-40.190776252600728 last_first_eigenvalue=-40.190776252600735 last_max_residual=1.7524054228200133e-14 last_relative_fixed_point_residual=2.0497266432993654e-06 eigenvalue_abs_residual=7.1054273576010019e-15 avg_api_total_time_sec=6.5608643004670739 avg_preparation_time_sec=5.6128084793999999 avg_transfer_setup_time_sec=0.45764250159999997 avg_iteration_time_sec=0.42378151359999999 avg_rayleigh_ritz_time_sec=0.057826670999999996

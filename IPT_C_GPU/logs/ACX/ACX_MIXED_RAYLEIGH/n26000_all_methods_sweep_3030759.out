@@ -1,0 +1,534 @@
+===== N=26000 IPT/ACX all methods sweep job =====
+Thu Jun 18 23:30:37 CST 2026
+gsn1
+SLURM_JOB_ID=3030759
+SLURM_JOB_NODELIST=gsn1
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/ACX/ACX_MIXED_RAYLEIGH
+ACX_MIXED_RAYLEIGH_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH
+ACX_MIXED_RAYLEIGH_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH
+ACX_N26000_ALL_METHODS_CSV=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/n26000_all_methods_sweep.csv
+ACX_N26000_ALL_METHODS_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/n26000_all_methods_sweep_summary.txt
+ACX_MIXED_RAYLEIGH_SWEEP_NS=26000
+ACX_MIXED_RAYLEIGH_EPSILON_VALUES=0.01,0.02,0.03,0.04,0.05,0.06,0.08,0.1,0.12
+ACX_TF32_TOL=1e-6
+ACX_TF32_MAXITER=1000
+ACX_FP64_TOL=1e-12
+ACX_FP64_MAXITER=1000
+ACX_MIXED_RAYLEIGH_REPEATS=5
+ACX_MIXED_RAYLEIGH_WARMUP_N=128
+ACX_MIXED_RAYLEIGH_SEED=20260617
+ACX_MIXED_RAYLEIGH_APPEND_RESULTS=false
+ACX_MIXED_RAYLEIGH_COMPUTE_RESIDUAL=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Thu Jun 18 23:30:37 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:A4:00.0 Off |                    0 |
+| N/A   28C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== N=26000 IPT/ACX all methods sweep =====
+root=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH
+logs=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH
+csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/n26000_all_methods_sweep.csv
+summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/n26000_all_methods_sweep_summary.txt
+N values = 26000
+epsilon values = 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.08, 0.1, 0.12
+tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 tf32_maxiter=1000 fp64_maxiter=1000 repeats=5 warmup_n=128 seed=20260617 gpu=NVIDIA A100-SXM4-80GB
+GPU memory at start: free 78.691 GiB / total 79.151 GiB
+
+===== epsilon=0.01 N=26000 =====
+GPU memory before matrix: free 78.691 GiB / total 79.151 GiB
+host matrix generated in 3.762562 s
+GPU memory after matrix: free 73.654 GiB / total 79.151 GiB
+cusolver warmup for N=26000
+  cusolver run 1/5: total=33.292908 s, residual=nan, status=ok
+  cusolver run 2/5: total=33.299175 s, residual=nan, status=ok
+  cusolver run 3/5: total=33.299474 s, residual=nan, status=ok
+  cusolver run 4/5: total=33.297095 s, residual=nan, status=ok
+  cusolver run 5/5: total=33.292226 s, residual=1.5163284e-08, status=ok
+IPT FP64 warmup for N=26000
+  IPT FP64 run 1/5: total=18.001526 s, residual=nan, fixed=9.3193728e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=8/0/0, f_calls=8/0/0, status=ok
+  IPT FP64 run 2/5: total=18.082699 s, residual=nan, fixed=9.3193728e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=8/0/0, f_calls=8/0/0, status=ok
+  IPT FP64 run 3/5: total=18.147185 s, residual=nan, fixed=9.3193728e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=8/0/0, f_calls=8/0/0, status=ok
+  IPT FP64 run 4/5: total=18.058129 s, residual=nan, fixed=9.3193728e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=8/0/0, f_calls=8/0/0, status=ok
+  IPT FP64 run 5/5: total=18.090421 s, residual=8.4623461e-11, fixed=9.3193728e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=8/0/0, f_calls=8/0/0, status=ok
+IPT mixed TF32->FP64 warmup for N=26000
+  IPT mixed TF32->FP64 run 1/5: total=13.439183 s, residual=nan, fixed=8.7679508e-14, tf32_fixed=3.9281215e-08, fp64_fixed=8.7679508e-14, iterations=9/4/5, f_calls=9/4/5, status=ok
+  IPT mixed TF32->FP64 run 2/5: total=13.391403 s, residual=nan, fixed=8.7679508e-14, tf32_fixed=3.9281215e-08, fp64_fixed=8.7679508e-14, iterations=9/4/5, f_calls=9/4/5, status=ok
+  IPT mixed TF32->FP64 run 3/5: total=13.441903 s, residual=nan, fixed=8.7679508e-14, tf32_fixed=3.9281215e-08, fp64_fixed=8.7679508e-14, iterations=9/4/5, f_calls=9/4/5, status=ok
+  IPT mixed TF32->FP64 run 4/5: total=13.451735 s, residual=nan, fixed=8.7679508e-14, tf32_fixed=3.9281215e-08, fp64_fixed=8.7679508e-14, iterations=9/4/5, f_calls=9/4/5, status=ok
+  IPT mixed TF32->FP64 run 5/5: total=13.417912 s, residual=4.2571872e-11, fixed=8.7679508e-14, tf32_fixed=3.9281215e-08, fp64_fixed=8.7679508e-14, iterations=9/4/5, f_calls=9/4/5, status=ok
+IPT mixed Rayleigh TF32->FP64 warmup for N=26000
+  IPT mixed Rayleigh TF32->FP64 run 1/5: total=19.164123 s, residual=nan, fixed=1.2853624e-17, tf32_fixed=3.9281215e-08, fp64_fixed=1.2853624e-17, iterations=7/4/3, f_calls=7/4/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 2/5: total=19.197372 s, residual=nan, fixed=1.2853624e-17, tf32_fixed=3.9281215e-08, fp64_fixed=1.2853624e-17, iterations=7/4/3, f_calls=7/4/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 3/5: total=19.184926 s, residual=nan, fixed=1.2853624e-17, tf32_fixed=3.9281215e-08, fp64_fixed=1.2853624e-17, iterations=7/4/3, f_calls=7/4/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 4/5: total=19.162978 s, residual=nan, fixed=1.2853624e-17, tf32_fixed=3.9281215e-08, fp64_fixed=1.2853624e-17, iterations=7/4/3, f_calls=7/4/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 5/5: total=19.099876 s, residual=1.5697618e-08, fixed=1.2853624e-17, tf32_fixed=3.9281215e-08, fp64_fixed=1.2853624e-17, iterations=7/4/3, f_calls=7/4/3, status=ok
+ACX FP64 warmup for N=26000
+  ACX FP64 run 1/5: total=26.326213 s, residual=nan, fixed=8.4879576e-15, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+  ACX FP64 run 2/5: total=26.371894 s, residual=nan, fixed=8.4879576e-15, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+  ACX FP64 run 3/5: total=26.354246 s, residual=nan, fixed=8.4879576e-15, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+  ACX FP64 run 4/5: total=26.277787 s, residual=nan, fixed=8.4879576e-15, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+  ACX FP64 run 5/5: total=26.415694 s, residual=2.0282808e-12, fixed=8.4879576e-15, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+ACX mixed TF32->FP64 warmup for N=26000
+  ACX mixed TF32->FP64 run 1/5: total=22.278685 s, residual=nan, fixed=1.1151036e-14, tf32_fixed=1.0476434e-09, fp64_fixed=1.1151036e-14, iterations=0/3/3, f_calls=12/6/6, status=ok
+  ACX mixed TF32->FP64 run 2/5: total=22.243618 s, residual=nan, fixed=1.1151036e-14, tf32_fixed=1.0476434e-09, fp64_fixed=1.1151036e-14, iterations=0/3/3, f_calls=12/6/6, status=ok
+  ACX mixed TF32->FP64 run 3/5: total=22.305153 s, residual=nan, fixed=1.1151036e-14, tf32_fixed=1.0476434e-09, fp64_fixed=1.1151036e-14, iterations=0/3/3, f_calls=12/6/6, status=ok
+  ACX mixed TF32->FP64 run 4/5: total=22.293011 s, residual=nan, fixed=1.1151036e-14, tf32_fixed=1.0476434e-09, fp64_fixed=1.1151036e-14, iterations=0/3/3, f_calls=12/6/6, status=ok
+  ACX mixed TF32->FP64 run 5/5: total=22.282405 s, residual=2.2980333e-12, fixed=1.1151036e-14, tf32_fixed=1.0476434e-09, fp64_fixed=1.1151036e-14, iterations=0/3/3, f_calls=12/6/6, status=ok
+ACX mixed Rayleigh TF32->FP64 warmup for N=26000
+  ACX mixed Rayleigh TF32->FP64 run 1/5: total=24.097681 s, residual=nan, fixed=1.0753489e-16, tf32_fixed=1.0476434e-09, fp64_fixed=1.0753489e-16, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 2/5: total=24.066188 s, residual=nan, fixed=1.0753489e-16, tf32_fixed=1.0476434e-09, fp64_fixed=1.0753489e-16, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 3/5: total=24.094092 s, residual=nan, fixed=1.0753489e-16, tf32_fixed=1.0476434e-09, fp64_fixed=1.0753489e-16, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 4/5: total=24.052158 s, residual=nan, fixed=1.0753489e-16, tf32_fixed=1.0476434e-09, fp64_fixed=1.0753489e-16, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 5/5: total=24.100019 s, residual=1.5810834e-08, fixed=1.0753489e-16, tf32_fixed=1.0476434e-09, fp64_fixed=1.0753489e-16, iterations=0/3/2, f_calls=9/6/3, status=ok
+GPU memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== epsilon=0.02 N=26000 =====
+GPU memory before matrix: free 78.689 GiB / total 79.151 GiB
+host matrix generated in 3.7999728 s
+GPU memory after matrix: free 73.652 GiB / total 79.151 GiB
+cusolver warmup for N=26000
+  cusolver run 1/5: total=33.296154 s, residual=nan, status=ok
+  cusolver run 2/5: total=33.292512 s, residual=nan, status=ok
+  cusolver run 3/5: total=33.298016 s, residual=nan, status=ok
+  cusolver run 4/5: total=33.302066 s, residual=nan, status=ok
+  cusolver run 5/5: total=33.296147 s, residual=1.5374811e-08, status=ok
+IPT FP64 warmup for N=26000
+  IPT FP64 run 1/5: total=22.169187 s, residual=nan, fixed=2.2600135e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=10/0/0, f_calls=10/0/0, status=ok
+  IPT FP64 run 2/5: total=22.060582 s, residual=nan, fixed=2.2600135e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=10/0/0, f_calls=10/0/0, status=ok
+  IPT FP64 run 3/5: total=22.038089 s, residual=nan, fixed=2.2600135e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=10/0/0, f_calls=10/0/0, status=ok
+  IPT FP64 run 4/5: total=22.139215 s, residual=nan, fixed=2.2600135e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=10/0/0, f_calls=10/0/0, status=ok
+  IPT FP64 run 5/5: total=22.117323 s, residual=4.5147168e-10, fixed=2.2600135e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=10/0/0, f_calls=10/0/0, status=ok
+IPT mixed TF32->FP64 warmup for N=26000
+  IPT mixed TF32->FP64 run 1/5: total=15.494479 s, residual=nan, fixed=2.0580652e-13, tf32_fixed=5.7098966e-07, fp64_fixed=2.0580652e-13, iterations=10/4/6, f_calls=10/4/6, status=ok
+  IPT mixed TF32->FP64 run 2/5: total=15.368802 s, residual=nan, fixed=2.0580652e-13, tf32_fixed=5.7098966e-07, fp64_fixed=2.0580652e-13, iterations=10/4/6, f_calls=10/4/6, status=ok
+  IPT mixed TF32->FP64 run 3/5: total=15.402473 s, residual=nan, fixed=2.0580652e-13, tf32_fixed=5.7098966e-07, fp64_fixed=2.0580652e-13, iterations=10/4/6, f_calls=10/4/6, status=ok
+  IPT mixed TF32->FP64 run 4/5: total=15.346207 s, residual=nan, fixed=2.0580652e-13, tf32_fixed=5.7098966e-07, fp64_fixed=2.0580652e-13, iterations=10/4/6, f_calls=10/4/6, status=ok
+  IPT mixed TF32->FP64 run 5/5: total=15.331771 s, residual=3.527822e-10, fixed=2.0580652e-13, tf32_fixed=5.7098966e-07, fp64_fixed=2.0580652e-13, iterations=10/4/6, f_calls=10/4/6, status=ok
+IPT mixed Rayleigh TF32->FP64 warmup for N=26000
+  IPT mixed Rayleigh TF32->FP64 run 1/5: total=19.085128 s, residual=nan, fixed=8.1860953e-17, tf32_fixed=5.7098966e-07, fp64_fixed=8.1860953e-17, iterations=7/4/3, f_calls=7/4/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 2/5: total=19.110365 s, residual=nan, fixed=8.1860953e-17, tf32_fixed=5.7098966e-07, fp64_fixed=8.1860953e-17, iterations=7/4/3, f_calls=7/4/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 3/5: total=19.132662 s, residual=nan, fixed=8.1860953e-17, tf32_fixed=5.7098966e-07, fp64_fixed=8.1860953e-17, iterations=7/4/3, f_calls=7/4/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 4/5: total=19.136865 s, residual=nan, fixed=8.1860953e-17, tf32_fixed=5.7098966e-07, fp64_fixed=8.1860953e-17, iterations=7/4/3, f_calls=7/4/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 5/5: total=19.094844 s, residual=1.717187e-08, fixed=8.1860953e-17, tf32_fixed=5.7098966e-07, fp64_fixed=8.1860953e-17, iterations=7/4/3, f_calls=7/4/3, status=ok
+ACX FP64 warmup for N=26000
+  ACX FP64 run 1/5: total=26.431898 s, residual=nan, fixed=8.1549602e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+  ACX FP64 run 2/5: total=26.398772 s, residual=nan, fixed=8.1549602e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+  ACX FP64 run 3/5: total=26.421907 s, residual=nan, fixed=8.1549602e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+  ACX FP64 run 4/5: total=26.377078 s, residual=nan, fixed=8.1549602e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+  ACX FP64 run 5/5: total=26.356619 s, residual=2.3217236e-11, fixed=8.1549602e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=4/0/0, f_calls=8/0/0, status=ok
+ACX mixed TF32->FP64 warmup for N=26000
+  ACX mixed TF32->FP64 run 1/5: total=22.270504 s, residual=nan, fixed=1.4121028e-13, tf32_fixed=7.6319215e-09, fp64_fixed=1.4121028e-13, iterations=0/3/3, f_calls=12/6/6, status=ok
+  ACX mixed TF32->FP64 run 2/5: total=22.315955 s, residual=nan, fixed=1.4121028e-13, tf32_fixed=7.6319215e-09, fp64_fixed=1.4121028e-13, iterations=0/3/3, f_calls=12/6/6, status=ok
+  ACX mixed TF32->FP64 run 3/5: total=22.308813 s, residual=nan, fixed=1.4121028e-13, tf32_fixed=7.6319215e-09, fp64_fixed=1.4121028e-13, iterations=0/3/3, f_calls=12/6/6, status=ok
+  ACX mixed TF32->FP64 run 4/5: total=22.274997 s, residual=nan, fixed=1.4121028e-13, tf32_fixed=7.6319215e-09, fp64_fixed=1.4121028e-13, iterations=0/3/3, f_calls=12/6/6, status=ok
+  ACX mixed TF32->FP64 run 5/5: total=22.326108 s, residual=2.9980495e-11, fixed=1.4121028e-13, tf32_fixed=7.6319215e-09, fp64_fixed=1.4121028e-13, iterations=0/3/3, f_calls=12/6/6, status=ok
+ACX mixed Rayleigh TF32->FP64 warmup for N=26000
+  ACX mixed Rayleigh TF32->FP64 run 1/5: total=24.120763 s, residual=nan, fixed=8.5779567e-16, tf32_fixed=7.6319215e-09, fp64_fixed=8.5779567e-16, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 2/5: total=24.087481 s, residual=nan, fixed=8.5779567e-16, tf32_fixed=7.6319215e-09, fp64_fixed=8.5779567e-16, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 3/5: total=24.146193 s, residual=nan, fixed=8.5779567e-16, tf32_fixed=7.6319215e-09, fp64_fixed=8.5779567e-16, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 4/5: total=24.092287 s, residual=nan, fixed=8.5779567e-16, tf32_fixed=7.6319215e-09, fp64_fixed=8.5779567e-16, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 5/5: total=24.1373 s, residual=1.7148791e-08, fixed=8.5779567e-16, tf32_fixed=7.6319215e-09, fp64_fixed=8.5779567e-16, iterations=0/3/2, f_calls=9/6/3, status=ok
+GPU memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== epsilon=0.03 N=26000 =====
+GPU memory before matrix: free 78.689 GiB / total 79.151 GiB
+host matrix generated in 3.7750885 s
+GPU memory after matrix: free 73.652 GiB / total 79.151 GiB
+cusolver warmup for N=26000
+  cusolver run 1/5: total=33.295482 s, residual=nan, status=ok
+  cusolver run 2/5: total=33.294393 s, residual=nan, status=ok
+  cusolver run 3/5: total=33.291348 s, residual=nan, status=ok
+  cusolver run 4/5: total=33.294372 s, residual=nan, status=ok
+  cusolver run 5/5: total=33.294176 s, residual=1.5170245e-08, status=ok
+IPT FP64 warmup for N=26000
+  IPT FP64 run 1/5: total=26.241161 s, residual=nan, fixed=3.3011076e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=12/0/0, f_calls=12/0/0, status=ok
+  IPT FP64 run 2/5: total=26.221411 s, residual=nan, fixed=3.3011076e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=12/0/0, f_calls=12/0/0, status=ok
+  IPT FP64 run 3/5: total=25.98642 s, residual=nan, fixed=3.3011076e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=12/0/0, f_calls=12/0/0, status=ok
+  IPT FP64 run 4/5: total=26.347441 s, residual=nan, fixed=3.3011076e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=12/0/0, f_calls=12/0/0, status=ok
+  IPT FP64 run 5/5: total=26.263373 s, residual=1.0353853e-09, fixed=3.3011076e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=12/0/0, f_calls=12/0/0, status=ok
+IPT mixed TF32->FP64 warmup for N=26000
+  IPT mixed TF32->FP64 run 1/5: total=17.840946 s, residual=nan, fixed=5.1752209e-13, tf32_fixed=3.0800592e-07, fp64_fixed=5.1752209e-13, iterations=12/5/7, f_calls=12/5/7, status=ok
+  IPT mixed TF32->FP64 run 2/5: total=17.771516 s, residual=nan, fixed=5.1752209e-13, tf32_fixed=3.0800592e-07, fp64_fixed=5.1752209e-13, iterations=12/5/7, f_calls=12/5/7, status=ok
+  IPT mixed TF32->FP64 run 3/5: total=17.752877 s, residual=nan, fixed=5.1752209e-13, tf32_fixed=3.0800592e-07, fp64_fixed=5.1752209e-13, iterations=12/5/7, f_calls=12/5/7, status=ok
+  IPT mixed TF32->FP64 run 4/5: total=17.785315 s, residual=nan, fixed=5.1752209e-13, tf32_fixed=3.0800592e-07, fp64_fixed=5.1752209e-13, iterations=12/5/7, f_calls=12/5/7, status=ok
+  IPT mixed TF32->FP64 run 5/5: total=17.813099 s, residual=1.5691983e-09, fixed=5.1752209e-13, tf32_fixed=3.0800592e-07, fp64_fixed=5.1752209e-13, iterations=12/5/7, f_calls=12/5/7, status=ok
+IPT mixed Rayleigh TF32->FP64 warmup for N=26000
+  IPT mixed Rayleigh TF32->FP64 run 1/5: total=19.488788 s, residual=nan, fixed=2.3980255e-16, tf32_fixed=3.0800592e-07, fp64_fixed=2.3980255e-16, iterations=8/5/3, f_calls=8/5/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 2/5: total=19.518939 s, residual=nan, fixed=2.3980255e-16, tf32_fixed=3.0800592e-07, fp64_fixed=2.3980255e-16, iterations=8/5/3, f_calls=8/5/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 3/5: total=19.53515 s, residual=nan, fixed=2.3980255e-16, tf32_fixed=3.0800592e-07, fp64_fixed=2.3980255e-16, iterations=8/5/3, f_calls=8/5/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 4/5: total=19.486833 s, residual=nan, fixed=2.3980255e-16, tf32_fixed=3.0800592e-07, fp64_fixed=2.3980255e-16, iterations=8/5/3, f_calls=8/5/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 5/5: total=19.545723 s, residual=1.9171566e-08, fixed=2.3980255e-16, tf32_fixed=3.0800592e-07, fp64_fixed=2.3980255e-16, iterations=8/5/3, f_calls=8/5/3, status=ok
+ACX FP64 warmup for N=26000
+  ACX FP64 run 1/5: total=35.590366 s, residual=nan, fixed=2.6323478e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 2/5: total=35.577508 s, residual=nan, fixed=2.6323478e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 3/5: total=35.547504 s, residual=nan, fixed=2.6323478e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 4/5: total=35.558427 s, residual=nan, fixed=2.6323478e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 5/5: total=35.551079 s, residual=1.2363006e-11, fixed=2.6323478e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+ACX mixed TF32->FP64 warmup for N=26000
+  ACX mixed TF32->FP64 run 1/5: total=28.456034 s, residual=nan, fixed=2.7445931e-14, tf32_fixed=2.5641508e-08, fp64_fixed=2.7445931e-14, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 2/5: total=28.482959 s, residual=nan, fixed=2.7445931e-14, tf32_fixed=2.5641508e-08, fp64_fixed=2.7445931e-14, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 3/5: total=28.392825 s, residual=nan, fixed=2.7445931e-14, tf32_fixed=2.5641508e-08, fp64_fixed=2.7445931e-14, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 4/5: total=28.451196 s, residual=nan, fixed=2.7445931e-14, tf32_fixed=2.5641508e-08, fp64_fixed=2.7445931e-14, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 5/5: total=28.469645 s, residual=1.2864837e-11, fixed=2.7445931e-14, tf32_fixed=2.5641508e-08, fp64_fixed=2.7445931e-14, iterations=0/3/4, f_calls=14/6/8, status=ok
+ACX mixed Rayleigh TF32->FP64 warmup for N=26000
+  ACX mixed Rayleigh TF32->FP64 run 1/5: total=24.125747 s, residual=nan, fixed=2.97742e-15, tf32_fixed=2.5641508e-08, fp64_fixed=2.97742e-15, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 2/5: total=24.184576 s, residual=nan, fixed=2.97742e-15, tf32_fixed=2.5641508e-08, fp64_fixed=2.97742e-15, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 3/5: total=24.102784 s, residual=nan, fixed=2.97742e-15, tf32_fixed=2.5641508e-08, fp64_fixed=2.97742e-15, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 4/5: total=24.145615 s, residual=nan, fixed=2.97742e-15, tf32_fixed=2.5641508e-08, fp64_fixed=2.97742e-15, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 5/5: total=24.106481 s, residual=1.9388528e-08, fixed=2.97742e-15, tf32_fixed=2.5641508e-08, fp64_fixed=2.97742e-15, iterations=0/3/2, f_calls=9/6/3, status=ok
+GPU memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== epsilon=0.04 N=26000 =====
+GPU memory before matrix: free 78.689 GiB / total 79.151 GiB
+host matrix generated in 3.7731936 s
+GPU memory after matrix: free 73.652 GiB / total 79.151 GiB
+cusolver warmup for N=26000
+  cusolver run 1/5: total=33.295327 s, residual=nan, status=ok
+  cusolver run 2/5: total=33.294688 s, residual=nan, status=ok
+  cusolver run 3/5: total=33.29222 s, residual=nan, status=ok
+  cusolver run 4/5: total=33.288872 s, residual=nan, status=ok
+  cusolver run 5/5: total=33.288757 s, residual=1.5138734e-08, status=ok
+IPT FP64 warmup for N=26000
+  IPT FP64 run 1/5: total=30.371449 s, residual=nan, fixed=3.7221168e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=14/0/0, f_calls=14/0/0, status=ok
+  IPT FP64 run 2/5: total=30.391797 s, residual=nan, fixed=3.7221168e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=14/0/0, f_calls=14/0/0, status=ok
+  IPT FP64 run 3/5: total=30.506659 s, residual=nan, fixed=3.7221168e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=14/0/0, f_calls=14/0/0, status=ok
+  IPT FP64 run 4/5: total=30.463398 s, residual=nan, fixed=3.7221168e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=14/0/0, f_calls=14/0/0, status=ok
+  IPT FP64 run 5/5: total=30.483844 s, residual=1.6720331e-09, fixed=3.7221168e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=14/0/0, f_calls=14/0/0, status=ok
+IPT mixed TF32->FP64 warmup for N=26000
+  IPT mixed TF32->FP64 run 1/5: total=20.116953 s, residual=nan, fixed=3.525438e-13, tf32_fixed=2.0920585e-07, fp64_fixed=3.525438e-13, iterations=14/6/8, f_calls=14/6/8, status=ok
+  IPT mixed TF32->FP64 run 2/5: total=20.090541 s, residual=nan, fixed=3.525438e-13, tf32_fixed=2.0920585e-07, fp64_fixed=3.525438e-13, iterations=14/6/8, f_calls=14/6/8, status=ok
+  IPT mixed TF32->FP64 run 3/5: total=20.141842 s, residual=nan, fixed=3.525438e-13, tf32_fixed=2.0920585e-07, fp64_fixed=3.525438e-13, iterations=14/6/8, f_calls=14/6/8, status=ok
+  IPT mixed TF32->FP64 run 4/5: total=20.191616 s, residual=nan, fixed=3.525438e-13, tf32_fixed=2.0920585e-07, fp64_fixed=3.525438e-13, iterations=14/6/8, f_calls=14/6/8, status=ok
+  IPT mixed TF32->FP64 run 5/5: total=20.187475 s, residual=1.2819079e-09, fixed=3.525438e-13, tf32_fixed=2.0920585e-07, fp64_fixed=3.525438e-13, iterations=14/6/8, f_calls=14/6/8, status=ok
+IPT mixed Rayleigh TF32->FP64 warmup for N=26000
+  IPT mixed Rayleigh TF32->FP64 run 1/5: total=19.818376 s, residual=nan, fixed=6.2140357e-16, tf32_fixed=2.0920585e-07, fp64_fixed=6.2140357e-16, iterations=9/6/3, f_calls=9/6/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 2/5: total=19.879696 s, residual=nan, fixed=6.2140357e-16, tf32_fixed=2.0920585e-07, fp64_fixed=6.2140357e-16, iterations=9/6/3, f_calls=9/6/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 3/5: total=19.799135 s, residual=nan, fixed=6.2140357e-16, tf32_fixed=2.0920585e-07, fp64_fixed=6.2140357e-16, iterations=9/6/3, f_calls=9/6/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 4/5: total=19.832912 s, residual=nan, fixed=6.2140357e-16, tf32_fixed=2.0920585e-07, fp64_fixed=6.2140357e-16, iterations=9/6/3, f_calls=9/6/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 5/5: total=19.81505 s, residual=2.3207539e-08, fixed=6.2140357e-16, tf32_fixed=2.0920585e-07, fp64_fixed=6.2140357e-16, iterations=9/6/3, f_calls=9/6/3, status=ok
+ACX FP64 warmup for N=26000
+  ACX FP64 run 1/5: total=35.590586 s, residual=nan, fixed=7.8016854e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 2/5: total=35.56984 s, residual=nan, fixed=7.8016854e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 3/5: total=35.514215 s, residual=nan, fixed=7.8016854e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 4/5: total=35.529402 s, residual=nan, fixed=7.8016854e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 5/5: total=35.77251 s, residual=2.4476575e-10, fixed=7.8016854e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+ACX mixed TF32->FP64 warmup for N=26000
+  ACX mixed TF32->FP64 run 1/5: total=28.738122 s, residual=nan, fixed=5.2136104e-14, tf32_fixed=7.9312884e-08, fp64_fixed=5.2136104e-14, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 2/5: total=28.365617 s, residual=nan, fixed=5.2136104e-14, tf32_fixed=7.9312884e-08, fp64_fixed=5.2136104e-14, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 3/5: total=28.360246 s, residual=nan, fixed=5.2136104e-14, tf32_fixed=7.9312884e-08, fp64_fixed=5.2136104e-14, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 4/5: total=28.247606 s, residual=nan, fixed=5.2136104e-14, tf32_fixed=7.9312884e-08, fp64_fixed=5.2136104e-14, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 5/5: total=28.340395 s, residual=5.4199103e-11, fixed=5.2136104e-14, tf32_fixed=7.9312884e-08, fp64_fixed=5.2136104e-14, iterations=0/3/4, f_calls=14/6/8, status=ok
+ACX mixed Rayleigh TF32->FP64 warmup for N=26000
+  ACX mixed Rayleigh TF32->FP64 run 1/5: total=24.089018 s, residual=nan, fixed=7.5220101e-15, tf32_fixed=7.9312884e-08, fp64_fixed=7.5220101e-15, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 2/5: total=24.149254 s, residual=nan, fixed=7.5220101e-15, tf32_fixed=7.9312884e-08, fp64_fixed=7.5220101e-15, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 3/5: total=24.123178 s, residual=nan, fixed=7.5220101e-15, tf32_fixed=7.9312884e-08, fp64_fixed=7.5220101e-15, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 4/5: total=24.12046 s, residual=nan, fixed=7.5220101e-15, tf32_fixed=7.9312884e-08, fp64_fixed=7.5220101e-15, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 5/5: total=24.108314 s, residual=2.3203133e-08, fixed=7.5220101e-15, tf32_fixed=7.9312884e-08, fp64_fixed=7.5220101e-15, iterations=0/3/2, f_calls=9/6/3, status=ok
+GPU memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== epsilon=0.05 N=26000 =====
+GPU memory before matrix: free 78.689 GiB / total 79.151 GiB
+host matrix generated in 3.7735886 s
+GPU memory after matrix: free 73.652 GiB / total 79.151 GiB
+cusolver warmup for N=26000
+  cusolver run 1/5: total=33.291111 s, residual=nan, status=ok
+  cusolver run 2/5: total=33.295154 s, residual=nan, status=ok
+  cusolver run 3/5: total=33.295048 s, residual=nan, status=ok
+  cusolver run 4/5: total=33.284804 s, residual=nan, status=ok
+  cusolver run 5/5: total=33.288899 s, residual=1.5253953e-08, status=ok
+IPT FP64 warmup for N=26000
+  IPT FP64 run 1/5: total=34.3135 s, residual=nan, fixed=6.3339571e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=16/0/0, f_calls=16/0/0, status=ok
+  IPT FP64 run 2/5: total=34.223676 s, residual=nan, fixed=6.3339571e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=16/0/0, f_calls=16/0/0, status=ok
+  IPT FP64 run 3/5: total=34.189734 s, residual=nan, fixed=6.3339571e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=16/0/0, f_calls=16/0/0, status=ok
+  IPT FP64 run 4/5: total=34.110667 s, residual=nan, fixed=6.3339571e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=16/0/0, f_calls=16/0/0, status=ok
+  IPT FP64 run 5/5: total=34.323181 s, residual=3.498301e-09, fixed=6.3339571e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=16/0/0, f_calls=16/0/0, status=ok
+IPT mixed TF32->FP64 warmup for N=26000
+  IPT mixed TF32->FP64 run 1/5: total=24.14591 s, residual=nan, fixed=6.1652881e-13, tf32_fixed=7.4719722e-07, fp64_fixed=6.1652881e-13, iterations=16/6/10, f_calls=16/6/10, status=ok
+  IPT mixed TF32->FP64 run 2/5: total=24.101458 s, residual=nan, fixed=6.1652881e-13, tf32_fixed=7.4719722e-07, fp64_fixed=6.1652881e-13, iterations=16/6/10, f_calls=16/6/10, status=ok
+  IPT mixed TF32->FP64 run 3/5: total=24.099151 s, residual=nan, fixed=6.1652881e-13, tf32_fixed=7.4719722e-07, fp64_fixed=6.1652881e-13, iterations=16/6/10, f_calls=16/6/10, status=ok
+  IPT mixed TF32->FP64 run 4/5: total=24.106293 s, residual=nan, fixed=6.1652881e-13, tf32_fixed=7.4719722e-07, fp64_fixed=6.1652881e-13, iterations=16/6/10, f_calls=16/6/10, status=ok
+  IPT mixed TF32->FP64 run 5/5: total=24.099536 s, residual=3.4166985e-09, fixed=6.1652881e-13, tf32_fixed=7.4719722e-07, fp64_fixed=6.1652881e-13, iterations=16/6/10, f_calls=16/6/10, status=ok
+IPT mixed Rayleigh TF32->FP64 warmup for N=26000
+  IPT mixed Rayleigh TF32->FP64 run 1/5: total=19.712619 s, residual=nan, fixed=1.2304504e-15, tf32_fixed=7.4719722e-07, fp64_fixed=1.2304504e-15, iterations=9/6/3, f_calls=9/6/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 2/5: total=19.786157 s, residual=nan, fixed=1.2304504e-15, tf32_fixed=7.4719722e-07, fp64_fixed=1.2304504e-15, iterations=9/6/3, f_calls=9/6/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 3/5: total=19.723869 s, residual=nan, fixed=1.2304504e-15, tf32_fixed=7.4719722e-07, fp64_fixed=1.2304504e-15, iterations=9/6/3, f_calls=9/6/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 4/5: total=19.762683 s, residual=nan, fixed=1.2304504e-15, tf32_fixed=7.4719722e-07, fp64_fixed=1.2304504e-15, iterations=9/6/3, f_calls=9/6/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 5/5: total=19.857843 s, residual=2.8842432e-08, fixed=1.2304504e-15, tf32_fixed=7.4719722e-07, fp64_fixed=1.2304504e-15, iterations=9/6/3, f_calls=9/6/3, status=ok
+ACX FP64 warmup for N=26000
+  ACX FP64 run 1/5: total=35.368725 s, residual=nan, fixed=8.5797979e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 2/5: total=35.348333 s, residual=nan, fixed=8.5797979e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 3/5: total=35.458957 s, residual=nan, fixed=8.5797979e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 4/5: total=35.148854 s, residual=nan, fixed=8.5797979e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+  ACX FP64 run 5/5: total=35.199111 s, residual=1.6397182e-10, fixed=8.5797979e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=5/0/0, f_calls=11/0/0, status=ok
+ACX mixed TF32->FP64 warmup for N=26000
+  ACX mixed TF32->FP64 run 1/5: total=28.104307 s, residual=nan, fixed=1.3527718e-13, tf32_fixed=1.5504458e-07, fp64_fixed=1.3527718e-13, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 2/5: total=28.170055 s, residual=nan, fixed=1.3527718e-13, tf32_fixed=1.5504458e-07, fp64_fixed=1.3527718e-13, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 3/5: total=28.132261 s, residual=nan, fixed=1.3527718e-13, tf32_fixed=1.5504458e-07, fp64_fixed=1.3527718e-13, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 4/5: total=28.437267 s, residual=nan, fixed=1.3527718e-13, tf32_fixed=1.5504458e-07, fp64_fixed=1.3527718e-13, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 5/5: total=28.3404 s, residual=1.2849353e-10, fixed=1.3527718e-13, tf32_fixed=1.5504458e-07, fp64_fixed=1.3527718e-13, iterations=0/3/4, f_calls=14/6/8, status=ok
+ACX mixed Rayleigh TF32->FP64 warmup for N=26000
+  ACX mixed Rayleigh TF32->FP64 run 1/5: total=24.051758 s, residual=nan, fixed=1.4453914e-14, tf32_fixed=1.5504458e-07, fp64_fixed=1.4453914e-14, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 2/5: total=24.147492 s, residual=nan, fixed=1.4453914e-14, tf32_fixed=1.5504458e-07, fp64_fixed=1.4453914e-14, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 3/5: total=24.130254 s, residual=nan, fixed=1.4453914e-14, tf32_fixed=1.5504458e-07, fp64_fixed=1.4453914e-14, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 4/5: total=24.100436 s, residual=nan, fixed=1.4453914e-14, tf32_fixed=1.5504458e-07, fp64_fixed=1.4453914e-14, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 5/5: total=24.091249 s, residual=2.8976045e-08, fixed=1.4453914e-14, tf32_fixed=1.5504458e-07, fp64_fixed=1.4453914e-14, iterations=0/3/2, f_calls=9/6/3, status=ok
+GPU memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=26000 =====
+GPU memory before matrix: free 78.689 GiB / total 79.151 GiB
+host matrix generated in 3.7451852 s
+GPU memory after matrix: free 73.652 GiB / total 79.151 GiB
+cusolver warmup for N=26000
+  cusolver run 1/5: total=33.291589 s, residual=nan, status=ok
+  cusolver run 2/5: total=33.290764 s, residual=nan, status=ok
+  cusolver run 3/5: total=33.294606 s, residual=nan, status=ok
+  cusolver run 4/5: total=33.296442 s, residual=nan, status=ok
+  cusolver run 5/5: total=33.283388 s, residual=1.5179637e-08, status=ok
+IPT FP64 warmup for N=26000
+  IPT FP64 run 1/5: total=40.150438 s, residual=nan, fixed=4.1421148e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=19/0/0, f_calls=19/0/0, status=ok
+  IPT FP64 run 2/5: total=40.121759 s, residual=nan, fixed=4.1421148e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=19/0/0, f_calls=19/0/0, status=ok
+  IPT FP64 run 3/5: total=40.071056 s, residual=nan, fixed=4.1421148e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=19/0/0, f_calls=19/0/0, status=ok
+  IPT FP64 run 4/5: total=40.362109 s, residual=nan, fixed=4.1421148e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=19/0/0, f_calls=19/0/0, status=ok
+  IPT FP64 run 5/5: total=40.367027 s, residual=2.7191706e-09, fixed=4.1421148e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=19/0/0, f_calls=19/0/0, status=ok
+IPT mixed TF32->FP64 warmup for N=26000
+  IPT mixed TF32->FP64 run 1/5: total=28.514334 s, residual=nan, fixed=4.5476329e-13, tf32_fixed=5.9020805e-07, fp64_fixed=4.5476329e-13, iterations=19/7/12, f_calls=19/7/12, status=ok
+  IPT mixed TF32->FP64 run 2/5: total=28.458118 s, residual=nan, fixed=4.5476329e-13, tf32_fixed=5.9020805e-07, fp64_fixed=4.5476329e-13, iterations=19/7/12, f_calls=19/7/12, status=ok
+  IPT mixed TF32->FP64 run 3/5: total=28.432297 s, residual=nan, fixed=4.5476329e-13, tf32_fixed=5.9020805e-07, fp64_fixed=4.5476329e-13, iterations=19/7/12, f_calls=19/7/12, status=ok
+  IPT mixed TF32->FP64 run 4/5: total=28.456913 s, residual=nan, fixed=4.5476329e-13, tf32_fixed=5.9020805e-07, fp64_fixed=4.5476329e-13, iterations=19/7/12, f_calls=19/7/12, status=ok
+  IPT mixed TF32->FP64 run 5/5: total=28.490693 s, residual=2.9641917e-09, fixed=4.5476329e-13, tf32_fixed=5.9020805e-07, fp64_fixed=4.5476329e-13, iterations=19/7/12, f_calls=19/7/12, status=ok
+IPT mixed Rayleigh TF32->FP64 warmup for N=26000
+  IPT mixed Rayleigh TF32->FP64 run 1/5: total=20.127357 s, residual=nan, fixed=1.8814003e-15, tf32_fixed=5.9020805e-07, fp64_fixed=1.8814003e-15, iterations=10/7/3, f_calls=10/7/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 2/5: total=20.007955 s, residual=nan, fixed=1.8814003e-15, tf32_fixed=5.9020805e-07, fp64_fixed=1.8814003e-15, iterations=10/7/3, f_calls=10/7/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 3/5: total=20.111304 s, residual=nan, fixed=1.8814003e-15, tf32_fixed=5.9020805e-07, fp64_fixed=1.8814003e-15, iterations=10/7/3, f_calls=10/7/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 4/5: total=20.081214 s, residual=nan, fixed=1.8814003e-15, tf32_fixed=5.9020805e-07, fp64_fixed=1.8814003e-15, iterations=10/7/3, f_calls=10/7/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 5/5: total=20.128819 s, residual=3.4504452e-08, fixed=1.8814003e-15, tf32_fixed=5.9020805e-07, fp64_fixed=1.8814003e-15, iterations=10/7/3, f_calls=10/7/3, status=ok
+ACX FP64 warmup for N=26000
+  ACX FP64 run 1/5: total=41.715633 s, residual=nan, fixed=6.3433419e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=6/0/0, f_calls=13/0/0, status=ok
+  ACX FP64 run 2/5: total=41.640791 s, residual=nan, fixed=6.3433419e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=6/0/0, f_calls=13/0/0, status=ok
+  ACX FP64 run 3/5: total=41.421525 s, residual=nan, fixed=6.3433419e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=6/0/0, f_calls=13/0/0, status=ok
+  ACX FP64 run 4/5: total=41.44319 s, residual=nan, fixed=6.3433419e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=6/0/0, f_calls=13/0/0, status=ok
+  ACX FP64 run 5/5: total=41.468857 s, residual=4.9108321e-11, fixed=6.3433419e-14, tf32_fixed=nan, fp64_fixed=nan, iterations=6/0/0, f_calls=13/0/0, status=ok
+ACX mixed TF32->FP64 warmup for N=26000
+  ACX mixed TF32->FP64 run 1/5: total=28.26191 s, residual=nan, fixed=6.1230283e-13, tf32_fixed=3.234014e-07, fp64_fixed=6.1230283e-13, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 2/5: total=28.322043 s, residual=nan, fixed=6.1230283e-13, tf32_fixed=3.234014e-07, fp64_fixed=6.1230283e-13, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 3/5: total=28.414275 s, residual=nan, fixed=6.1230283e-13, tf32_fixed=3.234014e-07, fp64_fixed=6.1230283e-13, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 4/5: total=28.434389 s, residual=nan, fixed=6.1230283e-13, tf32_fixed=3.234014e-07, fp64_fixed=6.1230283e-13, iterations=0/3/4, f_calls=14/6/8, status=ok
+  ACX mixed TF32->FP64 run 5/5: total=28.479462 s, residual=3.1952449e-09, fixed=6.1230283e-13, tf32_fixed=3.234014e-07, fp64_fixed=6.1230283e-13, iterations=0/3/4, f_calls=14/6/8, status=ok
+ACX mixed Rayleigh TF32->FP64 warmup for N=26000
+  ACX mixed Rayleigh TF32->FP64 run 1/5: total=24.071304 s, residual=nan, fixed=2.5868556e-14, tf32_fixed=3.234014e-07, fp64_fixed=2.5868556e-14, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 2/5: total=24.156835 s, residual=nan, fixed=2.5868556e-14, tf32_fixed=3.234014e-07, fp64_fixed=2.5868556e-14, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 3/5: total=24.030849 s, residual=nan, fixed=2.5868556e-14, tf32_fixed=3.234014e-07, fp64_fixed=2.5868556e-14, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 4/5: total=24.051579 s, residual=nan, fixed=2.5868556e-14, tf32_fixed=3.234014e-07, fp64_fixed=2.5868556e-14, iterations=0/3/2, f_calls=9/6/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 5/5: total=24.062852 s, residual=3.4675651e-08, fixed=2.5868556e-14, tf32_fixed=3.234014e-07, fp64_fixed=2.5868556e-14, iterations=0/3/2, f_calls=9/6/3, status=ok
+GPU memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== epsilon=0.08 N=26000 =====
+GPU memory before matrix: free 78.689 GiB / total 79.151 GiB
+host matrix generated in 3.732244 s
+GPU memory after matrix: free 73.652 GiB / total 79.151 GiB
+cusolver warmup for N=26000
+  cusolver run 1/5: total=33.296491 s, residual=nan, status=ok
+  cusolver run 2/5: total=33.296878 s, residual=nan, status=ok
+  cusolver run 3/5: total=33.294477 s, residual=nan, status=ok
+  cusolver run 4/5: total=33.287132 s, residual=nan, status=ok
+  cusolver run 5/5: total=33.29715 s, residual=1.51273e-08, status=ok
+IPT FP64 warmup for N=26000
+  IPT FP64 run 1/5: total=52.49883 s, residual=nan, fixed=4.6752257e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=25/0/0, f_calls=25/0/0, status=ok
+  IPT FP64 run 2/5: total=51.957892 s, residual=nan, fixed=4.6752257e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=25/0/0, f_calls=25/0/0, status=ok
+  IPT FP64 run 3/5: total=51.680309 s, residual=nan, fixed=4.6752257e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=25/0/0, f_calls=25/0/0, status=ok
+  IPT FP64 run 4/5: total=51.887413 s, residual=nan, fixed=4.6752257e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=25/0/0, f_calls=25/0/0, status=ok
+  IPT FP64 run 5/5: total=52.116647 s, residual=4.210076e-09, fixed=4.6752257e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=25/0/0, f_calls=25/0/0, status=ok
+IPT mixed TF32->FP64 warmup for N=26000
+  IPT mixed TF32->FP64 run 1/5: total=36.680484 s, residual=nan, fixed=5.4062405e-13, tf32_fixed=6.6283589e-07, fp64_fixed=5.4062405e-13, iterations=25/9/16, f_calls=25/9/16, status=ok
+  IPT mixed TF32->FP64 run 2/5: total=36.701955 s, residual=nan, fixed=5.4062405e-13, tf32_fixed=6.6283589e-07, fp64_fixed=5.4062405e-13, iterations=25/9/16, f_calls=25/9/16, status=ok
+  IPT mixed TF32->FP64 run 3/5: total=36.744799 s, residual=nan, fixed=5.4062405e-13, tf32_fixed=6.6283589e-07, fp64_fixed=5.4062405e-13, iterations=25/9/16, f_calls=25/9/16, status=ok
+  IPT mixed TF32->FP64 run 4/5: total=36.90181 s, residual=nan, fixed=5.4062405e-13, tf32_fixed=6.6283589e-07, fp64_fixed=5.4062405e-13, iterations=25/9/16, f_calls=25/9/16, status=ok
+  IPT mixed TF32->FP64 run 5/5: total=36.919394 s, residual=4.8816908e-09, fixed=5.4062405e-13, tf32_fixed=6.6283589e-07, fp64_fixed=5.4062405e-13, iterations=25/9/16, f_calls=25/9/16, status=ok
+IPT mixed Rayleigh TF32->FP64 warmup for N=26000
+  IPT mixed Rayleigh TF32->FP64 run 1/5: total=20.706733 s, residual=nan, fixed=4.9135078e-15, tf32_fixed=6.6283589e-07, fp64_fixed=4.9135078e-15, iterations=12/9/3, f_calls=12/9/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 2/5: total=20.734039 s, residual=nan, fixed=4.9135078e-15, tf32_fixed=6.6283589e-07, fp64_fixed=4.9135078e-15, iterations=12/9/3, f_calls=12/9/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 3/5: total=20.690953 s, residual=nan, fixed=4.9135078e-15, tf32_fixed=6.6283589e-07, fp64_fixed=4.9135078e-15, iterations=12/9/3, f_calls=12/9/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 4/5: total=20.734647 s, residual=nan, fixed=4.9135078e-15, tf32_fixed=6.6283589e-07, fp64_fixed=4.9135078e-15, iterations=12/9/3, f_calls=12/9/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 5/5: total=20.613839 s, residual=4.9832999e-08, fixed=4.9135078e-15, tf32_fixed=6.6283589e-07, fp64_fixed=4.9135078e-15, iterations=12/9/3, f_calls=12/9/3, status=ok
+ACX FP64 warmup for N=26000
+  ACX FP64 run 1/5: total=41.40045 s, residual=nan, fixed=4.1739772e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=6/0/0, f_calls=13/0/0, status=ok
+  ACX FP64 run 2/5: total=41.497234 s, residual=nan, fixed=4.1739772e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=6/0/0, f_calls=13/0/0, status=ok
+  ACX FP64 run 3/5: total=41.364627 s, residual=nan, fixed=4.1739772e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=6/0/0, f_calls=13/0/0, status=ok
+  ACX FP64 run 4/5: total=41.527294 s, residual=nan, fixed=4.1739772e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=6/0/0, f_calls=13/0/0, status=ok
+  ACX FP64 run 5/5: total=41.397124 s, residual=9.4831716e-10, fixed=4.1739772e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=6/0/0, f_calls=13/0/0, status=ok
+ACX mixed TF32->FP64 warmup for N=26000
+  ACX mixed TF32->FP64 run 1/5: total=37.936731 s, residual=nan, fixed=2.7014123e-13, tf32_fixed=3.1774612e-07, fp64_fixed=2.7014123e-13, iterations=0/4/5, f_calls=19/8/11, status=ok
+  ACX mixed TF32->FP64 run 2/5: total=38.082747 s, residual=nan, fixed=2.7014123e-13, tf32_fixed=3.1774612e-07, fp64_fixed=2.7014123e-13, iterations=0/4/5, f_calls=19/8/11, status=ok
+  ACX mixed TF32->FP64 run 3/5: total=38.056357 s, residual=nan, fixed=2.7014123e-13, tf32_fixed=3.1774612e-07, fp64_fixed=2.7014123e-13, iterations=0/4/5, f_calls=19/8/11, status=ok
+  ACX mixed TF32->FP64 run 4/5: total=38.022638 s, residual=nan, fixed=2.7014123e-13, tf32_fixed=3.1774612e-07, fp64_fixed=2.7014123e-13, iterations=0/4/5, f_calls=19/8/11, status=ok
+  ACX mixed TF32->FP64 run 5/5: total=38.167378 s, residual=2.623093e-10, fixed=2.7014123e-13, tf32_fixed=3.1774612e-07, fp64_fixed=2.7014123e-13, iterations=0/4/5, f_calls=19/8/11, status=ok
+ACX mixed Rayleigh TF32->FP64 warmup for N=26000
+  ACX mixed Rayleigh TF32->FP64 run 1/5: total=24.735416 s, residual=nan, fixed=6.3534664e-14, tf32_fixed=3.1774612e-07, fp64_fixed=6.3534664e-14, iterations=0/4/2, f_calls=11/8/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 2/5: total=25.199276 s, residual=nan, fixed=6.3534664e-14, tf32_fixed=3.1774612e-07, fp64_fixed=6.3534664e-14, iterations=0/4/2, f_calls=11/8/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 3/5: total=24.626574 s, residual=nan, fixed=6.3534664e-14, tf32_fixed=3.1774612e-07, fp64_fixed=6.3534664e-14, iterations=0/4/2, f_calls=11/8/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 4/5: total=24.520239 s, residual=nan, fixed=6.3534664e-14, tf32_fixed=3.1774612e-07, fp64_fixed=6.3534664e-14, iterations=0/4/2, f_calls=11/8/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 5/5: total=24.52954 s, residual=4.9759723e-08, fixed=6.3534664e-14, tf32_fixed=3.1774612e-07, fp64_fixed=6.3534664e-14, iterations=0/4/2, f_calls=11/8/3, status=ok
+GPU memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== epsilon=0.1 N=26000 =====
+GPU memory before matrix: free 78.689 GiB / total 79.151 GiB
+host matrix generated in 3.7720925 s
+GPU memory after matrix: free 73.652 GiB / total 79.151 GiB
+cusolver warmup for N=26000
+  cusolver run 1/5: total=33.292075 s, residual=nan, status=ok
+  cusolver run 2/5: total=33.295336 s, residual=nan, status=ok
+  cusolver run 3/5: total=33.290158 s, residual=nan, status=ok
+  cusolver run 4/5: total=33.289087 s, residual=nan, status=ok
+  cusolver run 5/5: total=33.28575 s, residual=1.5086121e-08, status=ok
+IPT FP64 warmup for N=26000
+  IPT FP64 run 1/5: total=70.179547 s, residual=nan, fixed=5.7574554e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=34/0/0, f_calls=34/0/0, status=ok
+  IPT FP64 run 2/5: total=70.254536 s, residual=nan, fixed=5.7574554e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=34/0/0, f_calls=34/0/0, status=ok
+  IPT FP64 run 3/5: total=70.430575 s, residual=nan, fixed=5.7574554e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=34/0/0, f_calls=34/0/0, status=ok
+  IPT FP64 run 4/5: total=70.017373 s, residual=nan, fixed=5.7574554e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=34/0/0, f_calls=34/0/0, status=ok
+  IPT FP64 run 5/5: total=70.313444 s, residual=6.3139571e-09, fixed=5.7574554e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=34/0/0, f_calls=34/0/0, status=ok
+IPT mixed TF32->FP64 warmup for N=26000
+  IPT mixed TF32->FP64 run 1/5: total=47.590012 s, residual=nan, fixed=9.6587951e-13, tf32_fixed=8.1922721e-07, fp64_fixed=9.6587951e-13, iterations=33/12/21, f_calls=33/12/21, status=ok
+  IPT mixed TF32->FP64 run 2/5: total=47.708347 s, residual=nan, fixed=9.6587951e-13, tf32_fixed=8.1922721e-07, fp64_fixed=9.6587951e-13, iterations=33/12/21, f_calls=33/12/21, status=ok
+  IPT mixed TF32->FP64 run 3/5: total=47.949985 s, residual=nan, fixed=9.6587951e-13, tf32_fixed=8.1922721e-07, fp64_fixed=9.6587951e-13, iterations=33/12/21, f_calls=33/12/21, status=ok
+  IPT mixed TF32->FP64 run 4/5: total=48.08621 s, residual=nan, fixed=9.6587951e-13, tf32_fixed=8.1922721e-07, fp64_fixed=9.6587951e-13, iterations=33/12/21, f_calls=33/12/21, status=ok
+  IPT mixed TF32->FP64 run 5/5: total=48.073664 s, residual=1.0718133e-08, fixed=9.6587951e-13, tf32_fixed=8.1922721e-07, fp64_fixed=9.6587951e-13, iterations=33/12/21, f_calls=33/12/21, status=ok
+IPT mixed Rayleigh TF32->FP64 warmup for N=26000
+  IPT mixed Rayleigh TF32->FP64 run 1/5: total=21.527725 s, residual=nan, fixed=1.0002622e-14, tf32_fixed=8.1922721e-07, fp64_fixed=1.0002622e-14, iterations=15/12/3, f_calls=15/12/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 2/5: total=21.536946 s, residual=nan, fixed=1.0002622e-14, tf32_fixed=8.1922721e-07, fp64_fixed=1.0002622e-14, iterations=15/12/3, f_calls=15/12/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 3/5: total=21.615702 s, residual=nan, fixed=1.0002622e-14, tf32_fixed=8.1922721e-07, fp64_fixed=1.0002622e-14, iterations=15/12/3, f_calls=15/12/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 4/5: total=21.681953 s, residual=nan, fixed=1.0002622e-14, tf32_fixed=8.1922721e-07, fp64_fixed=1.0002622e-14, iterations=15/12/3, f_calls=15/12/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 5/5: total=21.67221 s, residual=6.8253581e-08, fixed=1.0002622e-14, tf32_fixed=8.1922721e-07, fp64_fixed=1.0002622e-14, iterations=15/12/3, f_calls=15/12/3, status=ok
+ACX FP64 warmup for N=26000
+  ACX FP64 run 1/5: total=50.50265 s, residual=nan, fixed=1.5207426e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=7/0/0, f_calls=16/0/0, status=ok
+  ACX FP64 run 2/5: total=50.541268 s, residual=nan, fixed=1.5207426e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=7/0/0, f_calls=16/0/0, status=ok
+  ACX FP64 run 3/5: total=50.326579 s, residual=nan, fixed=1.5207426e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=7/0/0, f_calls=16/0/0, status=ok
+  ACX FP64 run 4/5: total=50.447683 s, residual=nan, fixed=1.5207426e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=7/0/0, f_calls=16/0/0, status=ok
+  ACX FP64 run 5/5: total=50.222441 s, residual=5.2299372e-10, fixed=1.5207426e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=7/0/0, f_calls=16/0/0, status=ok
+ACX mixed TF32->FP64 warmup for N=26000
+  ACX mixed TF32->FP64 run 1/5: total=43.723186 s, residual=nan, fixed=1.317951e-13, tf32_fixed=6.8877591e-07, fp64_fixed=1.317951e-13, iterations=0/4/6, f_calls=21/8/13, status=ok
+  ACX mixed TF32->FP64 run 2/5: total=43.833866 s, residual=nan, fixed=1.317951e-13, tf32_fixed=6.8877591e-07, fp64_fixed=1.317951e-13, iterations=0/4/6, f_calls=21/8/13, status=ok
+  ACX mixed TF32->FP64 run 3/5: total=43.894855 s, residual=nan, fixed=1.317951e-13, tf32_fixed=6.8877591e-07, fp64_fixed=1.317951e-13, iterations=0/4/6, f_calls=21/8/13, status=ok
+  ACX mixed TF32->FP64 run 4/5: total=43.928302 s, residual=nan, fixed=1.317951e-13, tf32_fixed=6.8877591e-07, fp64_fixed=1.317951e-13, iterations=0/4/6, f_calls=21/8/13, status=ok
+  ACX mixed TF32->FP64 run 5/5: total=44.16595 s, residual=3.5065418e-10, fixed=1.317951e-13, tf32_fixed=6.8877591e-07, fp64_fixed=1.317951e-13, iterations=0/4/6, f_calls=21/8/13, status=ok
+ACX mixed Rayleigh TF32->FP64 warmup for N=26000
+  ACX mixed Rayleigh TF32->FP64 run 1/5: total=24.668947 s, residual=nan, fixed=1.2695927e-13, tf32_fixed=6.8877591e-07, fp64_fixed=1.2695927e-13, iterations=0/4/2, f_calls=11/8/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 2/5: total=24.592466 s, residual=nan, fixed=1.2695927e-13, tf32_fixed=6.8877591e-07, fp64_fixed=1.2695927e-13, iterations=0/4/2, f_calls=11/8/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 3/5: total=24.643071 s, residual=nan, fixed=1.2695927e-13, tf32_fixed=6.8877591e-07, fp64_fixed=1.2695927e-13, iterations=0/4/2, f_calls=11/8/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 4/5: total=24.670384 s, residual=nan, fixed=1.2695927e-13, tf32_fixed=6.8877591e-07, fp64_fixed=1.2695927e-13, iterations=0/4/2, f_calls=11/8/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 5/5: total=24.826309 s, residual=6.8417656e-08, fixed=1.2695927e-13, tf32_fixed=6.8877591e-07, fp64_fixed=1.2695927e-13, iterations=0/4/2, f_calls=11/8/3, status=ok
+GPU memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== epsilon=0.12 N=26000 =====
+GPU memory before matrix: free 78.689 GiB / total 79.151 GiB
+host matrix generated in 3.8483429 s
+GPU memory after matrix: free 73.652 GiB / total 79.151 GiB
+cusolver warmup for N=26000
+  cusolver run 1/5: total=33.287343 s, residual=nan, status=ok
+  cusolver run 2/5: total=33.295699 s, residual=nan, status=ok
+  cusolver run 3/5: total=33.290566 s, residual=nan, status=ok
+  cusolver run 4/5: total=33.289108 s, residual=nan, status=ok
+  cusolver run 5/5: total=33.284295 s, residual=1.5166524e-08, status=ok
+IPT FP64 warmup for N=26000
+  IPT FP64 run 1/5: total=96.773794 s, residual=nan, fixed=6.706895e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=47/0/0, f_calls=47/0/0, status=ok
+  IPT FP64 run 2/5: total=96.838133 s, residual=nan, fixed=6.706895e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=47/0/0, f_calls=47/0/0, status=ok
+  IPT FP64 run 3/5: total=96.436643 s, residual=nan, fixed=6.706895e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=47/0/0, f_calls=47/0/0, status=ok
+  IPT FP64 run 4/5: total=96.647562 s, residual=nan, fixed=6.706895e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=47/0/0, f_calls=47/0/0, status=ok
+  IPT FP64 run 5/5: total=96.758784 s, residual=8.936739e-09, fixed=6.706895e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=47/0/0, f_calls=47/0/0, status=ok
+IPT mixed TF32->FP64 warmup for N=26000
+  IPT mixed TF32->FP64 run 1/5: total=64.44958 s, residual=nan, fixed=8.4579997e-13, tf32_fixed=9.8162671e-07, fp64_fixed=8.4579997e-13, iterations=47/19/28, f_calls=47/19/28, status=ok
+  IPT mixed TF32->FP64 run 2/5: total=64.499091 s, residual=nan, fixed=8.4579997e-13, tf32_fixed=9.8162671e-07, fp64_fixed=8.4579997e-13, iterations=47/19/28, f_calls=47/19/28, status=ok
+  IPT mixed TF32->FP64 run 3/5: total=64.24546 s, residual=nan, fixed=8.4579997e-13, tf32_fixed=9.8162671e-07, fp64_fixed=8.4579997e-13, iterations=47/19/28, f_calls=47/19/28, status=ok
+  IPT mixed TF32->FP64 run 4/5: total=64.390988 s, residual=nan, fixed=8.4579997e-13, tf32_fixed=9.8162671e-07, fp64_fixed=8.4579997e-13, iterations=47/19/28, f_calls=47/19/28, status=ok
+  IPT mixed TF32->FP64 run 5/5: total=64.348354 s, residual=1.1360202e-08, fixed=8.4579997e-13, tf32_fixed=9.8162671e-07, fp64_fixed=8.4579997e-13, iterations=47/19/28, f_calls=47/19/28, status=ok
+IPT mixed Rayleigh TF32->FP64 warmup for N=26000
+  IPT mixed Rayleigh TF32->FP64 run 1/5: total=23.66116 s, residual=nan, fixed=1.5071091e-14, tf32_fixed=9.8162671e-07, fp64_fixed=1.5071091e-14, iterations=22/19/3, f_calls=22/19/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 2/5: total=23.794331 s, residual=nan, fixed=1.5071091e-14, tf32_fixed=9.8162671e-07, fp64_fixed=1.5071091e-14, iterations=22/19/3, f_calls=22/19/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 3/5: total=23.769959 s, residual=nan, fixed=1.5071091e-14, tf32_fixed=9.8162671e-07, fp64_fixed=1.5071091e-14, iterations=22/19/3, f_calls=22/19/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 4/5: total=23.719351 s, residual=nan, fixed=1.5071091e-14, tf32_fixed=9.8162671e-07, fp64_fixed=1.5071091e-14, iterations=22/19/3, f_calls=22/19/3, status=ok
+  IPT mixed Rayleigh TF32->FP64 run 5/5: total=23.856076 s, residual=8.4737017e-08, fixed=1.5071091e-14, tf32_fixed=9.8162671e-07, fp64_fixed=1.5071091e-14, iterations=22/19/3, f_calls=22/19/3, status=ok
+ACX FP64 warmup for N=26000
+  ACX FP64 run 1/5: total=65.548862 s, residual=nan, fixed=1.111816e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=9/0/0, f_calls=21/0/0, status=ok
+  ACX FP64 run 2/5: total=65.487247 s, residual=nan, fixed=1.111816e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=9/0/0, f_calls=21/0/0, status=ok
+  ACX FP64 run 3/5: total=65.608104 s, residual=nan, fixed=1.111816e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=9/0/0, f_calls=21/0/0, status=ok
+  ACX FP64 run 4/5: total=65.354721 s, residual=nan, fixed=1.111816e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=9/0/0, f_calls=21/0/0, status=ok
+  ACX FP64 run 5/5: total=65.426872 s, residual=2.1271826e-10, fixed=1.111816e-13, tf32_fixed=nan, fp64_fixed=nan, iterations=9/0/0, f_calls=21/0/0, status=ok
+ACX mixed TF32->FP64 warmup for N=26000
+  ACX mixed TF32->FP64 run 1/5: total=54.277213 s, residual=nan, fixed=4.6983849e-13, tf32_fixed=6.8381065e-07, fp64_fixed=4.6983849e-13, iterations=0/6/7, f_calls=29/13/16, status=ok
+  ACX mixed TF32->FP64 run 2/5: total=54.711875 s, residual=nan, fixed=4.6983849e-13, tf32_fixed=6.8381065e-07, fp64_fixed=4.6983849e-13, iterations=0/6/7, f_calls=29/13/16, status=ok
+  ACX mixed TF32->FP64 run 3/5: total=54.50003 s, residual=nan, fixed=4.6983849e-13, tf32_fixed=6.8381065e-07, fp64_fixed=4.6983849e-13, iterations=0/6/7, f_calls=29/13/16, status=ok
+  ACX mixed TF32->FP64 run 4/5: total=54.465155 s, residual=nan, fixed=4.6983849e-13, tf32_fixed=6.8381065e-07, fp64_fixed=4.6983849e-13, iterations=0/6/7, f_calls=29/13/16, status=ok
+  ACX mixed TF32->FP64 run 5/5: total=54.540783 s, residual=8.3528637e-09, fixed=4.6983849e-13, tf32_fixed=6.8381065e-07, fp64_fixed=4.6983849e-13, iterations=0/6/7, f_calls=29/13/16, status=ok
+ACX mixed Rayleigh TF32->FP64 warmup for N=26000
+  ACX mixed Rayleigh TF32->FP64 run 1/5: total=26.167362 s, residual=nan, fixed=2.2309884e-13, tf32_fixed=6.8381065e-07, fp64_fixed=2.2309884e-13, iterations=0/6/2, f_calls=16/13/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 2/5: total=26.274156 s, residual=nan, fixed=2.2309884e-13, tf32_fixed=6.8381065e-07, fp64_fixed=2.2309884e-13, iterations=0/6/2, f_calls=16/13/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 3/5: total=26.269626 s, residual=nan, fixed=2.2309884e-13, tf32_fixed=6.8381065e-07, fp64_fixed=2.2309884e-13, iterations=0/6/2, f_calls=16/13/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 4/5: total=26.486995 s, residual=nan, fixed=2.2309884e-13, tf32_fixed=6.8381065e-07, fp64_fixed=2.2309884e-13, iterations=0/6/2, f_calls=16/13/3, status=ok
+  ACX mixed Rayleigh TF32->FP64 run 5/5: total=27.007545 s, residual=8.4796288e-08, fixed=2.2309884e-13, tf32_fixed=6.8381065e-07, fp64_fixed=2.2309884e-13, iterations=0/6/2, f_calls=16/13/3, status=ok
+GPU memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== done failures=0 =====
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH:
+total 476K
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 18 19:07 acx_mixed_rayleigh_comprehensive_sweep_3029797.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  56K Jun 18 19:35 acx_mixed_rayleigh_comprehensive_sweep_3029797.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  56K Jun 18 19:35 acx_mixed_rayleigh_comprehensive_sweep_3029797.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 18 20:29 acx_mixed_rayleigh_comprehensive_sweep_3030036.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  68K Jun 18 20:53 acx_mixed_rayleigh_comprehensive_sweep_3030036.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  68K Jun 18 20:53 acx_mixed_rayleigh_comprehensive_sweep_3030036.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 18 18:41 acx_mixed_rayleigh_tf32_cuda_sweep_3029745.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  28K Jun 18 18:46 acx_mixed_rayleigh_tf32_cuda_sweep_3029745.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  28K Jun 18 18:46 acx_mixed_rayleigh_tf32_cuda_sweep_3029745.out
+lrwxrwxrwx 1 nudt_liujie nudt_liujie  114 Jun 18 20:29 latest_acx_mixed_rayleigh_comprehensive_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep_3030036.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie  110 Jun 18 18:41 latest_acx_mixed_rayleigh_tf32_cuda_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_tf32_cuda_sweep_3029745.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie  100 Jun 18 23:30 latest_n26000_all_methods_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/ACX_MIXED_RAYLEIGH/n26000_all_methods_sweep_3030759.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 18 23:29 n26000_all_methods_sweep_3030758.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.1K Jun 18 23:29 n26000_all_methods_sweep_3030758.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 18 23:30 n26000_all_methods_sweep_3030759.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  58K Jun 19 02:55 n26000_all_methods_sweep_3030759.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  58K Jun 19 02:55 n26000_all_methods_sweep_3030759.out
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 18 23:29 smoke_n26000_all_methods
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 18 18:40 wrong_tf32_tol_1e-12_job3029730
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH:
+total 144K
+-rw-r--r-- 1 nudt_liujie nudt_liujie  21K Jun 18 19:35 acx_mixed_rayleigh_comprehensive_sweep.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  25K Jun 18 20:53 acx_mixed_rayleigh_comprehensive_sweep_eps_0p01_0p05.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.7K Jun 18 20:53 acx_mixed_rayleigh_comprehensive_sweep_eps_0p01_0p05_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.3K Jun 18 19:35 acx_mixed_rayleigh_comprehensive_sweep_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 18 18:42 acx_mixed_rayleigh_tf32_cuda_sweep_epsilon_0_06.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 18 18:43 acx_mixed_rayleigh_tf32_cuda_sweep_epsilon_0_08.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.6K Jun 18 18:44 acx_mixed_rayleigh_tf32_cuda_sweep_epsilon_0_1.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.5K Jun 18 18:46 acx_mixed_rayleigh_tf32_cuda_sweep_epsilon_0_12.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 8.8K Jun 18 18:46 acx_mixed_rayleigh_tf32_cuda_sweep_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie  21K Jun 19 02:55 n26000_all_methods_sweep.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.1K Jun 19 02:55 n26000_all_methods_sweep_summary.txt
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 18 23:29 smoke_n26000_all_methods
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 18 18:40 wrong_tf32_tol_1e-12_job3029730
+finished at: Fri Jun 19 02:55:26 CST 2026

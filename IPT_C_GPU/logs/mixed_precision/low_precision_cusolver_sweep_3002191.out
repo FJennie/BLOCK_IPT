@@ -1,0 +1,173 @@
+===== IPT_C FP16/FP32 initial sweep vs cuSolver job =====
+Wed Jun 10 15:26:34 CST 2026
+gsn0
+SLURM_JOB_ID=3002191
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/mixed_precision
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/mixed_precision
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision
+IPT_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_summary.txt
+IPT_SWEEP_NS=4096,8192,16384,32768
+IPT_EPSILON_VALUES=0.04
+IPT_FP16_TOL=1e-3
+IPT_FP16_MAXITER=1000
+IPT_FP32_TOL=1e-6
+IPT_FP32_MAXITER=1000
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=5
+IPT_SEED=20260603
+IPT_COMPUTE_RESIDUALS=true
+IPT_WARMUP_N=128
+IPT_APPEND_RESULTS=true
+IPT_SKIP_EXISTING=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Wed Jun 10 15:26:34 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:CA:00.0 Off |                    0 |
+| N/A   32C    P0              62W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== IPT_C mixed precision FP16/FP32 sweep vs cuSolver =====
+ROOT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+RESULT_DIR = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision
+SUMMARY_TXT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_summary.txt
+N values = 4096, 8192, 16384, 32768
+epsilon values = 0.04
+fp16_tol = 0.001
+fp16_maxiter = 1000
+fp32_tol = 9.9999999999999995e-07
+fp32_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 5
+seed = 20260603
+compute_residuals = true
+append_results = true
+skip_existing = true
+gpu_name = NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.691 GiB / total 79.151 GiB
+===== device warmup N=128 =====
+===== device warmup done =====
+
+===== epsilon = 0.04, N = 4096 =====
+Skipping epsilon=0.04 N=4096 because fp16/fp32 rows already exist in /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_epsilon_0_04.csv
+
+===== epsilon = 0.04, N = 8192 =====
+Skipping epsilon=0.04 N=8192 because fp16/fp32 rows already exist in /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_epsilon_0_04.csv
+
+===== epsilon = 0.04, N = 16384 =====
+Skipping epsilon=0.04 N=16384 because fp16/fp32 rows already exist in /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_epsilon_0_04.csv
+
+===== epsilon = 0.04, N = 32768 =====
+CUDA memory before matrix: free 78.683 GiB / total 79.151 GiB
+host matrix generated in 60.857471 s
+CUDA memory after matrix: free 70.683 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.04 N=32768
+CUSOLVER SYEVD warmup for N=32768
+Running original IPT for epsilon=0.04 N=32768
+Original IPT warmup for N=32768
+  original IPT run 1/5: time = 60.997213 s, fp = 4.8731063e-13, iterations = 14, residual = nan, status = ok
+  original IPT run 2/5: time = 60.633675 s, fp = 4.8731063e-13, iterations = 14, residual = nan, status = ok
+  original IPT run 3/5: time = 60.451385 s, fp = 4.8731063e-13, iterations = 14, residual = nan, status = ok
+  original IPT run 4/5: time = 61.093384 s, fp = 4.8731063e-13, iterations = 14, residual = nan, status = ok
+  original IPT run 5/5: time = 60.908345 s, fp = 4.8731063e-13, iterations = 14, residual = 2.7300224e-09, status = ok
+Running mixed FP16->FP64 for epsilon=0.04 N=32768
+Mixed FP16->FP64 warmup for N=32768
+  mixed run 1/5: fp16 = 0.91891459 s, fp64 = 49.124689 s, total = 50.043604 s, fp16_fp = 9.5674063e-05, fp64_fp = 5.0244689e-13, fp16_iters = 3, fp64_iters = 11, residual = nan, status = ok
+  mixed run 2/5: fp16 = 0.90715733 s, fp64 = 48.787386 s, total = 49.694543 s, fp16_fp = 9.5674063e-05, fp64_fp = 5.0244689e-13, fp16_iters = 3, fp64_iters = 11, residual = nan, status = ok
+  mixed run 3/5: fp16 = 0.90609496 s, fp64 = 49.145092 s, total = 50.051188 s, fp16_fp = 9.5674063e-05, fp64_fp = 5.0244689e-13, fp16_iters = 3, fp64_iters = 11, residual = nan, status = ok
+  mixed run 4/5: fp16 = 0.90665398 s, fp64 = 48.951311 s, total = 49.857966 s, fp16_fp = 9.5674063e-05, fp64_fp = 5.0244689e-13, fp16_iters = 3, fp64_iters = 11, residual = nan, status = ok
+  mixed run 5/5: fp16 = 0.89961864 s, fp64 = 48.759439 s, total = 49.659059 s, fp16_fp = 9.5674063e-05, fp64_fp = 5.0244689e-13, fp16_iters = 3, fp64_iters = 11, residual = 2.8090909e-09, status = ok
+Averages FP16: syevd = 6.5766741e-05 s, original_ipt = 60.8168 s, mixed_total = 49.861272 s, mixed_residual = 2.8090909e-09, initial_fp = 9.5674063e-05, fp64_fp = 5.0244689e-13, fp16_iters = 3, fp64_iters = 11, status = partial_failed
+Running mixed FP32->FP64 for epsilon=0.04 N=32768
+Mixed FP32->FP64 warmup for N=32768
+  mixed run 1/5: fp32 = 23.369858 s, fp64 = 36.49239 s, total = 59.862249 s, fp32_fp = 1.9432955e-07, fp64_fp = 4.8685406e-13, fp32_iters = 6, fp64_iters = 8, residual = nan, status = ok
+  mixed run 2/5: fp32 = 23.374581 s, fp64 = 36.662135 s, total = 60.036717 s, fp32_fp = 1.9432955e-07, fp64_fp = 4.8685406e-13, fp32_iters = 6, fp64_iters = 8, residual = nan, status = ok
+  mixed run 3/5: fp32 = 23.410304 s, fp64 = 36.574383 s, total = 59.984687 s, fp32_fp = 1.9432955e-07, fp64_fp = 4.8685406e-13, fp32_iters = 6, fp64_iters = 8, residual = nan, status = ok
+  mixed run 4/5: fp32 = 23.401528 s, fp64 = 36.440247 s, total = 59.841776 s, fp32_fp = 1.9432955e-07, fp64_fp = 4.8685406e-13, fp32_iters = 6, fp64_iters = 8, residual = nan, status = ok
+  mixed run 5/5: fp32 = 23.400431 s, fp64 = 36.545091 s, total = 59.945523 s, fp32_fp = 1.9432955e-07, fp64_fp = 4.8685406e-13, fp32_iters = 6, fp64_iters = 8, residual = 2.7278565e-09, status = ok
+Averages FP32: syevd = 6.5766741e-05 s, original_ipt = 60.8168 s, mixed_total = 59.93419 s, mixed_residual = 2.7278565e-09, initial_fp = 1.9432955e-07, fp64_fp = 4.8685406e-13, fp32_iters = 6, fp64_iters = 8, status = partial_failed
+CUDA memory after cleanup: free 78.683 GiB / total 79.151 GiB
+===== sweep done =====
+Results dir: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision
+Summary: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_summary.txt
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision:
+total 396K
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 10 13:16 fp16_cusolver_sweep_3001770.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.6K Jun 10 13:16 fp16_cusolver_sweep_3001770.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.6K Jun 10 13:16 fp16_cusolver_sweep_3001770.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 10 13:24 fp16_cusolver_sweep_3001779.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.6K Jun 10 13:19 fp16_cusolver_sweep_3001779.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.6K Jun 10 13:19 fp16_cusolver_sweep_3001779.out
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   88 Jun 10 13:19 latest_fp16_cusolver_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/fp16_cusolver_sweep_3001779.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   97 Jun 10 15:26 latest_low_precision_cusolver_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/low_precision_cusolver_sweep_3002191.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   94 Jun 10 11:20 latest_mixed_precision_fp16_fp64.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/mixed_precision_fp16_fp64_3001511.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   94 Jun 10 12:49 latest_mixed_precision_fp32_fp64.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/mixed_precision_fp32_fp64_3001716.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 10 14:08 low_precision_cusolver_sweep_3001817.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  39K Jun 10 14:06 low_precision_cusolver_sweep_3001817.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  39K Jun 10 14:06 low_precision_cusolver_sweep_3001817.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 10 15:22 low_precision_cusolver_sweep_3002003.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  59K Jun 10 15:20 low_precision_cusolver_sweep_3002003.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  59K Jun 10 15:20 low_precision_cusolver_sweep_3002003.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 15:26 low_precision_cusolver_sweep_3002191.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.8K Jun 10 15:44 low_precision_cusolver_sweep_3002191.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 7.8K Jun 10 15:44 low_precision_cusolver_sweep_3002191.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 10 11:15 mixed_precision_fp16_fp64_3001494.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.7K Jun 10 11:14 mixed_precision_fp16_fp64_3001494.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.7K Jun 10 11:14 mixed_precision_fp16_fp64_3001494.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 11:19 mixed_precision_fp16_fp64_3001507.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.9K Jun 10 11:19 mixed_precision_fp16_fp64_3001507.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 11:20 mixed_precision_fp16_fp64_3001511.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  13K Jun 10 11:31 mixed_precision_fp16_fp64_3001511.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  13K Jun 10 11:31 mixed_precision_fp16_fp64_3001511.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 12:44 mixed_precision_fp32_fp64_3001705.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.0K Jun 10 12:44 mixed_precision_fp32_fp64_3001705.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 12:49 mixed_precision_fp32_fp64_3001716.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  14K Jun 10 13:00 mixed_precision_fp32_fp64_3001716.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  14K Jun 10 13:00 mixed_precision_fp32_fp64_3001716.out
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 10 11:19 smoke
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 10 12:44 smoke_fp32
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision:
+total 56K
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 10 14:25 backup_before_original_ipt_time_20260610_142519
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.2K Jun 10 14:39 low_precision_cusolver_sweep_epsilon_0_01.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.2K Jun 10 14:56 low_precision_cusolver_sweep_epsilon_0_02.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.2K Jun 10 15:16 low_precision_cusolver_sweep_epsilon_0_03.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.2K Jun 10 15:44 low_precision_cusolver_sweep_epsilon_0_04.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  455 Jun 10 14:25 low_precision_cusolver_sweep_epsilon_0_05.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  455 Jun 10 14:25 low_precision_cusolver_sweep_epsilon_0_06.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.7K Jun 10 15:44 low_precision_cusolver_sweep_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.4K Jun 10 11:31 mixed_precision_fp16_fp64_results.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.7K Jun 10 11:31 mixed_precision_fp16_fp64_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.5K Jun 10 13:00 mixed_precision_fp32_fp64_results.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.7K Jun 10 13:00 mixed_precision_fp32_fp64_summary.txt
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 10 11:19 smoke
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 10 12:44 smoke_fp32
+finished at: Wed Jun 10 15:44:55 CST 2026

@@ -1,0 +1,13 @@
+IPT_C GPU EPSILON sweep thresholds
+summary_csv = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/EPSILON_test/epsilon_sweep_summary.csv
+
+N = 8192
+  largest tested converged epsilon = 0.18 (iters=171, fp=8.9537616500608359e-13, ipt_time=10.781711388844997, syevd_time=1.4560233210213482)
+  first tested non-converged epsilon = 0.2 (run_status=ok, iters=1000, fp=4.0210713098172091e-10)
+  first tested slower-than-SYEVD epsilon = 0.08 (ipt_time=1.4987750151194632, syevd_time=1.4560446660034359, speedup=0.97148981756102903)
+
+N = 16384
+  largest tested converged epsilon = 0.18 (iters=401, fp=9.7831194256981179e-13, ipt_time=199.11680086283013, syevd_time=8.9132502428255975)
+  first tested non-converged epsilon = 0.2 (run_status=timeout, iters=0, fp=nan)
+  first tested slower-than-SYEVD epsilon = 0.06 (ipt_time=9.3871267992071807, syevd_time=8.9111560899764299, speedup=0.94929537872323722)
+

@@ -1,0 +1,8 @@
+started_at=2026-06-15T18:47:57+0800 method=rayleigh_mixed_no_qr repeats=5 tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 gpu=NVIDIA A100-SXM4-80GB
+epsilon=0.06 N=16384 started_at=2026-06-15T18:47:57+0800
+epsilon=0.06 N=16384 finished_at=2026-06-15T18:48:18+0800 status=failed time_total=nan tf32_time=nan orth_time=nan transform_time=nan fp64_time=nan back_time=nan abs_residual=nan tf32_fp=nan fp64_fp=nan iters=0/0 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/no_qr/results/rayleigh_mixed_no_qr_sweep_epsilon_0_06.csv
+finished_at=2026-06-15T18:48:18+0800 failures=1
+started_at=2026-06-15T18:58:26+0800 method=rayleigh_mixed_no_qr repeats=5 tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 gpu=NVIDIA A100-SXM4-80GB
+epsilon=0.06 N=16384 started_at=2026-06-15T18:58:26+0800
+epsilon=0.06 N=16384 finished_at=2026-06-15T18:59:28+0800 status=ok time_total=7.8477823127992448 tf32_time=0.51957048112526538 orth_time=0.75554490303620692 transform_time=1.047592088393867 fp64_time=5.0349768922664229 back_time=0.49009794797748329 abs_residual=1.2492940065328404 tf32_fp=5.3660300835846856e-07 fp64_fp=7.7181888176215591e-14 iters=7/9 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/no_qr/results/rayleigh_mixed_no_qr_sweep_epsilon_0_06.csv
+finished_at=2026-06-15T18:59:28+0800 failures=0

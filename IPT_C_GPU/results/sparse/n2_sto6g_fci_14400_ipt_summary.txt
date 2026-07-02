@@ -1,0 +1,27 @@
+warmup skipped RUN_WARMUP=0
+
+matrix=n2_sto6g_fci
+n=14400
+nnz=8783997
+k=1
+repeats=1
+tol=9.9999999999999998e-13
+ipt_maxiter=1000
+run_primme=0
+primme_max_matvecs=1000
+matrix_inf_norm=112.86597400877434
+integral_generation_time_sec=0.98275560699403286
+pyscf_site_packages=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+basis=sto-6g
+frozen_core_orbitals=0
+norb=10
+active_electrons=14
+neleca=7
+nelecb=7
+na=120
+nb=120
+ecore=23.623982630357144
+nuclear_repulsion=23.623982630357144
+hartree_fock_energy=-108.54179971345985
+
+IPT_CUDA_SPARSE avg_time_sec=1.24480269709602 std_time_sec=0 avg_iterations=0 avg_matvecs=0 avg_eigenvalue=nan avg_residual=nan

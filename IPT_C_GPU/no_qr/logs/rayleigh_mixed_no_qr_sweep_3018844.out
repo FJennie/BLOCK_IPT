@@ -1,0 +1,65 @@
+===== Rayleigh mixed no-QR sweep job =====
+Mon Jun 15 18:47:51 CST 2026
+gsn0
+SLURM_JOB_ID=3018844
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/no_qr
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/no_qr
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/no_qr/results
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/no_qr/logs
+IPT_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/no_qr/results/rayleigh_mixed_no_qr_sweep_summary.txt
+IPT_SWEEP_NS=16384
+IPT_EPSILON_VALUES=0.06
+IPT_TF32_TOL=1e-6
+IPT_TF32_MAXITER=1000
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=5
+IPT_WARMUP_N=128
+IPT_APPEND_RESULTS=false
+IPT_SKIP_EXISTING=false
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Mon Jun 15 18:47:51 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:2A:00.0 Off |                    0 |
+| N/A   28C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== Rayleigh mixed no-QR sweep =====
+results_dir=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/no_qr/results logs_dir=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/no_qr/logs summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/no_qr/results/rayleigh_mixed_no_qr_sweep_summary.txt
+N values = 16384
+epsilon values = 0.06
+tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 repeats=5 gpu=NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.722 GiB / total 79.151 GiB
+===== warmup N=128 =====
+===== warmup done =====
+
+===== epsilon=0.06 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 13.981066 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Rayleigh mixed no-QR warmup for N=16384
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+===== sweep done failures=1 =====

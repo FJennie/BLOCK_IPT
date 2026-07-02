@@ -1,0 +1,41 @@
+Build and run inside an allocated GPU environment:
+
+    bash /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/run_sparse_tests.sh
+
+Submit through Slurm:
+
+    mkdir -p /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse
+    mkdir -p /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse
+    sbatch /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/submit_sparse_tests.sbatch
+
+The test binary is built as:
+
+    nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 \
+        /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/runtests_sparse.cu \
+        -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/runtests_sparse_cuda \
+        -lcublas
+
+H2O/sto-6g FCI PySCF 441x441 PRIMME vs IPT performance benchmark:
+
+    bash /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/run_h20_fci_primme_vs_ipt.sh
+
+Submit through Slurm:
+
+    sbatch /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/submit_h20_fci_primme_vs_ipt.sbatch
+
+Default benchmark parameters:
+
+    IPT_REPEATS=5
+    IPT_TOL=1e-12
+    IPT_MAXITER=1000
+    PRIMME_MAX_MATVECS=1000
+
+The benchmark generates the 441x441 FCI Hamiltonian by calling PySCF from the
+CUDA/C benchmark through the Python C API. Matrix generation is completed before
+the warmup and timed loops, so PRIMME/IPT timings only include eigensolver work.
+The benchmark warms up PRIMME and IPT once, then records five timed repeats.
+
+Result files:
+
+    /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/h2o_fci_pyscf_441_primme_vs_ipt_summary.txt
+    /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/h2o_fci_pyscf_441_primme_vs_ipt_trials.csv

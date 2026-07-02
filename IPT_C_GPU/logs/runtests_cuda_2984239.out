@@ -1,0 +1,59 @@
+===== IPT_C CUDA tests =====
+Fri Jun  5 16:00:00 CST 2026
+gn62
+SLURM_JOB_ID=2984239
+SLURM_JOB_NODELIST=gn62
+CUDA_VISIBLE_DEVICES=0
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Fri Jun  5 16:00:04 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla V100-SXM2-32GB           Off | 00000000:60:00.0 Off |                    0 |
+| N/A   31C    P0              55W / 300W |      0MiB / 32768MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+CUDA device 0: Tesla V100-SXM2-32GB, compute capability 7.0
+random_k1          n= 32 k=  1 sym=0 vector_diff=1.301e-18 value_diff=3.331e-16 residual=3.331e-16 PASS
+random_k5          n= 32 k=  5 sym=0 vector_diff=1.475e-17 value_diff=1.776e-15 residual=3.553e-16 PASS
+random_full        n= 32 k= 32 sym=0 vector_diff=1.301e-17 value_diff=0.000e+00 residual=1.860e-18 PASS
+symmetric_k1       n= 32 k=  1 sym=1 vector_diff=8.674e-19 value_diff=1.110e-16 residual=1.110e-16 PASS
+symmetric_k5       n= 32 k=  5 sym=1 vector_diff=4.337e-18 value_diff=8.882e-16 residual=2.958e-16 PASS
+symmetric_full     n= 32 k= 32 sym=1 vector_diff=9.541e-18 value_diff=0.000e+00 residual=1.141e-18 PASS
+random_medium      n= 96 k=  5 sym=0 vector_diff=6.939e-18 value_diff=1.776e-15 residual=4.436e-16 PASS
+symmetric_medium   n= 96 k= 16 sym=1 vector_diff=2.472e-17 value_diff=4.441e-15 residual=6.347e-16 PASS
+wrote /fs1/home/nudt_liujie/ftt/IPT_C/results/runtests_summary.csv
+all CUDA IPT tests passed
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C/logs:
+total 36K
+-rw-r--r-- 1 nudt_liujie nudt_liujie  237 Jun  5 15:58 build_runtests_cuda.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   66 Jun  5 16:00 latest_run_runtests_cuda.log -> /fs1/home/nudt_liujie/ftt/IPT_C/logs/run_runtests_cuda_2984239.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie   88 Jun  5 15:48 run_runtests_cuda.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.7K Jun  5 15:56 run_runtests_cuda_2984228.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.9K Jun  5 16:00 run_runtests_cuda_2984239.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun  5 15:55 runtests_cuda_2984228.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.7K Jun  5 15:56 runtests_cuda_2984228.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun  5 16:00 runtests_cuda_2984239.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.9K Jun  5 16:00 runtests_cuda_2984239.out
+
+/fs1/home/nudt_liujie/ftt/IPT_C/results:
+total 512
+-rw-r--r-- 1 nudt_liujie nudt_liujie 798 Jun  5 16:00 runtests_summary.csv
+finished at: Fri Jun  5 16:00:14 CST 2026

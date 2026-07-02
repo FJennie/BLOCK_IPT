@@ -1,0 +1,357 @@
+===== IPT_C FP16/FP32 initial sweep vs cuSolver job =====
+Wed Jun 10 18:33:23 CST 2026
+gsn0
+SLURM_JOB_ID=3002678
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/mixed_precision
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/mixed_precision
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision
+IPT_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_N26000_summary.txt
+IPT_SWEEP_NS=26000
+IPT_EPSILON_VALUES=0.01,0.02,0.03,0.04,0.05,0.06
+IPT_FP16_TOL=1e-3
+IPT_FP16_MAXITER=1000
+IPT_FP32_TOL=1e-6
+IPT_FP32_MAXITER=1000
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=5
+IPT_SEED=20260603
+IPT_COMPUTE_RESIDUALS=true
+IPT_WARMUP_N=128
+IPT_APPEND_RESULTS=true
+IPT_SKIP_EXISTING=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Wed Jun 10 18:33:23 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:CA:00.0 Off |                    0 |
+| N/A   32C    P0              62W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== IPT_C mixed precision FP16/FP32 sweep vs cuSolver =====
+ROOT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+RESULT_DIR = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision
+SUMMARY_TXT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_N26000_summary.txt
+N values = 26000
+epsilon values = 0.01, 0.02, 0.03, 0.04, 0.05, 0.06
+fp16_tol = 0.001
+fp16_maxiter = 1000
+fp32_tol = 9.9999999999999995e-07
+fp32_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 5
+seed = 20260603
+compute_residuals = true
+append_results = true
+skip_existing = true
+gpu_name = NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.691 GiB / total 79.151 GiB
+===== device warmup N=128 =====
+===== device warmup done =====
+
+===== epsilon = 0.01, N = 26000 =====
+CUDA memory before matrix: free 78.683 GiB / total 79.151 GiB
+host matrix generated in 3.6051177 s
+CUDA memory after matrix: free 73.646 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.01 N=26000
+CUSOLVER SYEVD warmup for N=26000
+  CUSOLVER SYEVD run 1/5: time = 33.310589 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/5: time = 33.314106 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/5: time = 33.324699 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/5: time = 33.332442 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/5: time = 33.33001 s, residual = 1.5050336e-08, status = ok
+Running original IPT for epsilon=0.01 N=26000
+Original IPT warmup for N=26000
+  original IPT run 1/5: time = 17.757795 s, fp = 9.356391e-14, iterations = 8, residual = nan, status = ok
+  original IPT run 2/5: time = 17.737758 s, fp = 9.356391e-14, iterations = 8, residual = nan, status = ok
+  original IPT run 3/5: time = 17.75226 s, fp = 9.356391e-14, iterations = 8, residual = nan, status = ok
+  original IPT run 4/5: time = 17.773525 s, fp = 9.356391e-14, iterations = 8, residual = nan, status = ok
+  original IPT run 5/5: time = 17.824164 s, fp = 9.356391e-14, iterations = 8, residual = 8.4874156e-11, status = ok
+Running mixed FP16->FP64 for epsilon=0.01 N=26000
+Mixed FP16->FP64 warmup for N=26000
+  mixed run 1/5: fp16 = 0.33327089 s, fp64 = 13.936594 s, total = 14.269865 s, fp16_fp = 9.9224825e-05, fp64_fp = 8.4119894e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 2/5: fp16 = 0.33186364 s, fp64 = 13.844066 s, total = 14.17593 s, fp16_fp = 9.9224825e-05, fp64_fp = 8.4119894e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 3/5: fp16 = 0.33248533 s, fp64 = 13.909861 s, total = 14.242347 s, fp16_fp = 9.9224825e-05, fp64_fp = 8.4119894e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 4/5: fp16 = 0.332788 s, fp64 = 13.840847 s, total = 14.173637 s, fp16_fp = 9.9224825e-05, fp64_fp = 8.4119894e-14, fp16_iters = 2, fp64_iters = 6, residual = nan, status = ok
+  mixed run 5/5: fp16 = 0.33190115 s, fp64 = 13.936285 s, total = 14.268187 s, fp16_fp = 9.9224825e-05, fp64_fp = 8.4119894e-14, fp16_iters = 2, fp64_iters = 6, residual = 7.745401e-11, status = ok
+Averages FP16: syevd = 33.322369 s, original_ipt = 17.7691 s, mixed_total = 14.225993 s, mixed_residual = 7.745401e-11, initial_fp = 9.9224825e-05, fp64_fp = 8.4119894e-14, fp16_iters = 2, fp64_iters = 6, status = ok
+Running mixed FP32->FP64 for epsilon=0.01 N=26000
+Mixed FP32->FP64 warmup for N=26000
+  mixed run 1/5: fp32 = 7.8778746 s, fp64 = 9.8535022 s, total = 17.731378 s, fp32_fp = 3.537654e-08, fp64_fp = 8.8941685e-14, fp32_iters = 4, fp64_iters = 4, residual = nan, status = ok
+  mixed run 2/5: fp32 = 7.8739584 s, fp64 = 9.8491318 s, total = 17.723091 s, fp32_fp = 3.537654e-08, fp64_fp = 8.8941685e-14, fp32_iters = 4, fp64_iters = 4, residual = nan, status = ok
+  mixed run 3/5: fp32 = 7.8725713 s, fp64 = 9.8973097 s, total = 17.769881 s, fp32_fp = 3.537654e-08, fp64_fp = 8.8941685e-14, fp32_iters = 4, fp64_iters = 4, residual = nan, status = ok
+  mixed run 4/5: fp32 = 7.8710668 s, fp64 = 9.891161 s, total = 17.762228 s, fp32_fp = 3.537654e-08, fp64_fp = 8.8941685e-14, fp32_iters = 4, fp64_iters = 4, residual = nan, status = ok
+  mixed run 5/5: fp32 = 7.873714 s, fp64 = 9.9189485 s, total = 17.792663 s, fp32_fp = 3.537654e-08, fp64_fp = 8.8941685e-14, fp32_iters = 4, fp64_iters = 4, residual = 7.7364299e-11, status = ok
+Averages FP32: syevd = 33.322369 s, original_ipt = 17.7691 s, mixed_total = 17.755848 s, mixed_residual = 7.7364299e-11, initial_fp = 3.537654e-08, fp64_fp = 8.8941685e-14, fp32_iters = 4, fp64_iters = 4, status = ok
+CUDA memory after cleanup: free 78.683 GiB / total 79.151 GiB
+
+===== epsilon = 0.02, N = 26000 =====
+CUDA memory before matrix: free 78.683 GiB / total 79.151 GiB
+host matrix generated in 3.6648887 s
+CUDA memory after matrix: free 73.646 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.02 N=26000
+CUSOLVER SYEVD warmup for N=26000
+  CUSOLVER SYEVD run 1/5: time = 33.345498 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/5: time = 33.350125 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/5: time = 33.35394 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/5: time = 33.350638 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/5: time = 33.339378 s, residual = 1.5098918e-08, status = ok
+Running original IPT for epsilon=0.02 N=26000
+Original IPT warmup for N=26000
+  original IPT run 1/5: time = 21.712074 s, fp = 2.2700801e-13, iterations = 10, residual = nan, status = ok
+  original IPT run 2/5: time = 21.815168 s, fp = 2.2700801e-13, iterations = 10, residual = nan, status = ok
+  original IPT run 3/5: time = 21.835037 s, fp = 2.2700801e-13, iterations = 10, residual = nan, status = ok
+  original IPT run 4/5: time = 21.676926 s, fp = 2.2700801e-13, iterations = 10, residual = nan, status = ok
+  original IPT run 5/5: time = 21.732071 s, fp = 2.2700801e-13, iterations = 10, residual = 4.5770754e-10, status = ok
+Running mixed FP16->FP64 for epsilon=0.02 N=26000
+Mixed FP16->FP64 warmup for N=26000
+  mixed run 1/5: fp16 = 0.33339386 s, fp64 = 17.822527 s, total = 18.155921 s, fp16_fp = 0.00039955729, fp64_fp = 2.2180587e-13, fp16_iters = 2, fp64_iters = 8, residual = nan, status = ok
+  mixed run 2/5: fp16 = 0.33503715 s, fp64 = 17.727289 s, total = 18.062326 s, fp16_fp = 0.00039955729, fp64_fp = 2.2180587e-13, fp16_iters = 2, fp64_iters = 8, residual = nan, status = ok
+  mixed run 3/5: fp16 = 0.36228686 s, fp64 = 17.883127 s, total = 18.245414 s, fp16_fp = 0.00039955729, fp64_fp = 2.2180587e-13, fp16_iters = 2, fp64_iters = 8, residual = nan, status = ok
+  mixed run 4/5: fp16 = 0.33352516 s, fp64 = 17.867116 s, total = 18.200642 s, fp16_fp = 0.00039955729, fp64_fp = 2.2180587e-13, fp16_iters = 2, fp64_iters = 8, residual = nan, status = ok
+  mixed run 5/5: fp16 = 0.33461921 s, fp64 = 17.8183 s, total = 18.15292 s, fp16_fp = 0.00039955729, fp64_fp = 2.2180587e-13, fp16_iters = 2, fp64_iters = 8, residual = 4.4827657e-10, status = ok
+Averages FP16: syevd = 33.347916 s, original_ipt = 21.754255 s, mixed_total = 18.163445 s, mixed_residual = 4.4827657e-10, initial_fp = 0.00039955729, fp64_fp = 2.2180587e-13, fp16_iters = 2, fp64_iters = 8, status = ok
+Running mixed FP32->FP64 for epsilon=0.02 N=26000
+Mixed FP32->FP64 warmup for N=26000
+  mixed run 1/5: fp32 = 7.8764888 s, fp64 = 13.934682 s, total = 21.811171 s, fp32_fp = 5.6357485e-07, fp64_fp = 2.264531e-13, fp32_iters = 4, fp64_iters = 6, residual = nan, status = ok
+  mixed run 2/5: fp32 = 7.878612 s, fp64 = 13.913349 s, total = 21.791962 s, fp32_fp = 5.6357485e-07, fp64_fp = 2.264531e-13, fp32_iters = 4, fp64_iters = 6, residual = nan, status = ok
+  mixed run 3/5: fp32 = 7.8915901 s, fp64 = 13.837365 s, total = 21.728955 s, fp32_fp = 5.6357485e-07, fp64_fp = 2.264531e-13, fp32_iters = 4, fp64_iters = 6, residual = nan, status = ok
+  mixed run 4/5: fp32 = 7.8767534 s, fp64 = 13.752121 s, total = 21.628875 s, fp32_fp = 5.6357485e-07, fp64_fp = 2.264531e-13, fp32_iters = 4, fp64_iters = 6, residual = nan, status = ok
+  mixed run 5/5: fp32 = 7.8847341 s, fp64 = 13.88685 s, total = 21.771585 s, fp32_fp = 5.6357485e-07, fp64_fp = 2.264531e-13, fp32_iters = 4, fp64_iters = 6, residual = 4.5671144e-10, status = ok
+Averages FP32: syevd = 33.347916 s, original_ipt = 21.754255 s, mixed_total = 21.74651 s, mixed_residual = 4.5671144e-10, initial_fp = 5.6357485e-07, fp64_fp = 2.264531e-13, fp32_iters = 4, fp64_iters = 6, status = ok
+CUDA memory after cleanup: free 78.683 GiB / total 79.151 GiB
+
+===== epsilon = 0.03, N = 26000 =====
+CUDA memory before matrix: free 78.683 GiB / total 79.151 GiB
+host matrix generated in 3.6686198 s
+CUDA memory after matrix: free 73.646 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.03 N=26000
+CUSOLVER SYEVD warmup for N=26000
+  CUSOLVER SYEVD run 1/5: time = 33.355335 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/5: time = 33.360833 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/5: time = 33.350628 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/5: time = 33.350783 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/5: time = 33.357665 s, residual = 1.501464e-08, status = ok
+Running original IPT for epsilon=0.03 N=26000
+Original IPT warmup for N=26000
+  original IPT run 1/5: time = 25.726594 s, fp = 2.7910169e-13, iterations = 12, residual = nan, status = ok
+  original IPT run 2/5: time = 25.806045 s, fp = 2.7910169e-13, iterations = 12, residual = nan, status = ok
+  original IPT run 3/5: time = 25.687666 s, fp = 2.7910169e-13, iterations = 12, residual = nan, status = ok
+  original IPT run 4/5: time = 25.728756 s, fp = 2.7910169e-13, iterations = 12, residual = nan, status = ok
+  original IPT run 5/5: time = 25.679115 s, fp = 2.7910169e-13, iterations = 12, residual = 9.0020078e-10, status = ok
+Running mixed FP16->FP64 for epsilon=0.03 N=26000
+Mixed FP16->FP64 warmup for N=26000
+  mixed run 1/5: fp16 = 0.33445098 s, fp64 = 21.804202 s, total = 22.138654 s, fp16_fp = 0.00090006992, fp64_fp = 2.7556246e-13, fp16_iters = 2, fp64_iters = 10, residual = nan, status = ok
+  mixed run 2/5: fp16 = 0.3344031 s, fp64 = 21.720376 s, total = 22.054779 s, fp16_fp = 0.00090006992, fp64_fp = 2.7556246e-13, fp16_iters = 2, fp64_iters = 10, residual = nan, status = ok
+  mixed run 3/5: fp16 = 0.33108807 s, fp64 = 21.752045 s, total = 22.083134 s, fp16_fp = 0.00090006992, fp64_fp = 2.7556246e-13, fp16_iters = 2, fp64_iters = 10, residual = nan, status = ok
+  mixed run 4/5: fp16 = 0.33379738 s, fp64 = 21.742259 s, total = 22.076057 s, fp16_fp = 0.00090006992, fp64_fp = 2.7556246e-13, fp16_iters = 2, fp64_iters = 10, residual = nan, status = ok
+  mixed run 5/5: fp16 = 0.33223588 s, fp64 = 21.748771 s, total = 22.081007 s, fp16_fp = 0.00090006992, fp64_fp = 2.7556246e-13, fp16_iters = 2, fp64_iters = 10, residual = 8.8891861e-10, status = ok
+Averages FP16: syevd = 33.355049 s, original_ipt = 25.725635 s, mixed_total = 22.086726 s, mixed_residual = 8.8891861e-10, initial_fp = 0.00090006992, fp64_fp = 2.7556246e-13, fp16_iters = 2, fp64_iters = 10, status = ok
+Running mixed FP32->FP64 for epsilon=0.03 N=26000
+Mixed FP32->FP64 warmup for N=26000
+  mixed run 1/5: fp32 = 9.8353261 s, fp64 = 15.93121 s, total = 25.766536 s, fp32_fp = 2.8159958e-07, fp64_fp = 2.7869038e-13, fp32_iters = 5, fp64_iters = 7, residual = nan, status = ok
+  mixed run 2/5: fp32 = 9.8387501 s, fp64 = 15.857684 s, total = 25.696435 s, fp32_fp = 2.8159958e-07, fp64_fp = 2.7869038e-13, fp32_iters = 5, fp64_iters = 7, residual = nan, status = ok
+  mixed run 3/5: fp32 = 9.833204 s, fp64 = 15.831252 s, total = 25.664457 s, fp32_fp = 2.8159958e-07, fp64_fp = 2.7869038e-13, fp32_iters = 5, fp64_iters = 7, residual = nan, status = ok
+  mixed run 4/5: fp32 = 9.8337498 s, fp64 = 15.805482 s, total = 25.639233 s, fp32_fp = 2.8159958e-07, fp64_fp = 2.7869038e-13, fp32_iters = 5, fp64_iters = 7, residual = nan, status = ok
+  mixed run 5/5: fp32 = 9.833469 s, fp64 = 15.779355 s, total = 25.612825 s, fp32_fp = 2.8159958e-07, fp64_fp = 2.7869038e-13, fp32_iters = 5, fp64_iters = 7, residual = 8.9811983e-10, status = ok
+Averages FP32: syevd = 33.355049 s, original_ipt = 25.725635 s, mixed_total = 25.675897 s, mixed_residual = 8.9811983e-10, initial_fp = 2.8159958e-07, fp64_fp = 2.7869038e-13, fp32_iters = 5, fp64_iters = 7, status = ok
+CUDA memory after cleanup: free 78.683 GiB / total 79.151 GiB
+
+===== epsilon = 0.04, N = 26000 =====
+CUDA memory before matrix: free 78.683 GiB / total 79.151 GiB
+host matrix generated in 3.6535322 s
+CUDA memory after matrix: free 73.646 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.04 N=26000
+CUSOLVER SYEVD warmup for N=26000
+  CUSOLVER SYEVD run 1/5: time = 33.351357 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/5: time = 33.344843 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/5: time = 33.342664 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/5: time = 33.345909 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/5: time = 33.345309 s, residual = 1.5191856e-08, status = ok
+Running original IPT for epsilon=0.04 N=26000
+Original IPT warmup for N=26000
+  original IPT run 1/5: time = 29.557928 s, fp = 4.5303927e-13, iterations = 14, residual = nan, status = ok
+  original IPT run 2/5: time = 29.772374 s, fp = 4.5303927e-13, iterations = 14, residual = nan, status = ok
+  original IPT run 3/5: time = 29.598189 s, fp = 4.5303927e-13, iterations = 14, residual = nan, status = ok
+  original IPT run 4/5: time = 29.577035 s, fp = 4.5303927e-13, iterations = 14, residual = nan, status = ok
+  original IPT run 5/5: time = 29.538925 s, fp = 4.5303927e-13, iterations = 14, residual = 1.9424242e-09, status = ok
+Running mixed FP16->FP64 for epsilon=0.04 N=26000
+Mixed FP16->FP64 warmup for N=26000
+  mixed run 1/5: fp16 = 0.4864288 s, fp64 = 23.754166 s, total = 24.240595 s, fp16_fp = 9.5577495e-05, fp64_fp = 4.6388016e-13, fp16_iters = 3, fp64_iters = 11, residual = nan, status = ok
+  mixed run 2/5: fp16 = 0.48438238 s, fp64 = 23.760072 s, total = 24.244455 s, fp16_fp = 9.5577495e-05, fp64_fp = 4.6388016e-13, fp16_iters = 3, fp64_iters = 11, residual = nan, status = ok
+  mixed run 3/5: fp16 = 0.50464134 s, fp64 = 23.852448 s, total = 24.35709 s, fp16_fp = 9.5577495e-05, fp64_fp = 4.6388016e-13, fp16_iters = 3, fp64_iters = 11, residual = nan, status = ok
+  mixed run 4/5: fp16 = 0.48314012 s, fp64 = 23.713282 s, total = 24.196423 s, fp16_fp = 9.5577495e-05, fp64_fp = 4.6388016e-13, fp16_iters = 3, fp64_iters = 11, residual = nan, status = ok
+  mixed run 5/5: fp16 = 0.48635436 s, fp64 = 23.70993 s, total = 24.196285 s, fp16_fp = 9.5577495e-05, fp64_fp = 4.6388016e-13, fp16_iters = 3, fp64_iters = 11, residual = 1.9848242e-09, status = ok
+Averages FP16: syevd = 33.346016 s, original_ipt = 29.60889 s, mixed_total = 24.246969 s, mixed_residual = 1.9848242e-09, initial_fp = 9.5577495e-05, fp64_fp = 4.6388016e-13, fp16_iters = 3, fp64_iters = 11, status = ok
+Running mixed FP32->FP64 for epsilon=0.04 N=26000
+Mixed FP32->FP64 warmup for N=26000
+  mixed run 1/5: fp32 = 11.788039 s, fp64 = 17.831951 s, total = 29.61999 s, fp32_fp = 1.9233975e-07, fp64_fp = 4.5339815e-13, fp32_iters = 6, fp64_iters = 8, residual = nan, status = ok
+  mixed run 2/5: fp32 = 11.790647 s, fp64 = 17.890494 s, total = 29.681142 s, fp32_fp = 1.9233975e-07, fp64_fp = 4.5339815e-13, fp32_iters = 6, fp64_iters = 8, residual = nan, status = ok
+  mixed run 3/5: fp32 = 11.790166 s, fp64 = 17.80552 s, total = 29.595686 s, fp32_fp = 1.9233975e-07, fp64_fp = 4.5339815e-13, fp32_iters = 6, fp64_iters = 8, residual = nan, status = ok
+  mixed run 4/5: fp32 = 11.803185 s, fp64 = 17.914362 s, total = 29.717547 s, fp32_fp = 1.9233975e-07, fp64_fp = 4.5339815e-13, fp32_iters = 6, fp64_iters = 8, residual = nan, status = ok
+  mixed run 5/5: fp32 = 11.793982 s, fp64 = 17.821467 s, total = 29.61545 s, fp32_fp = 1.9233975e-07, fp64_fp = 4.5339815e-13, fp32_iters = 6, fp64_iters = 8, residual = 1.9434082e-09, status = ok
+Averages FP32: syevd = 33.346016 s, original_ipt = 29.60889 s, mixed_total = 29.645963 s, mixed_residual = 1.9434082e-09, initial_fp = 1.9233975e-07, fp64_fp = 4.5339815e-13, fp32_iters = 6, fp64_iters = 8, status = ok
+CUDA memory after cleanup: free 78.683 GiB / total 79.151 GiB
+
+===== epsilon = 0.05, N = 26000 =====
+CUDA memory before matrix: free 78.683 GiB / total 79.151 GiB
+host matrix generated in 3.6257949 s
+CUDA memory after matrix: free 73.646 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.05 N=26000
+CUSOLVER SYEVD warmup for N=26000
+  CUSOLVER SYEVD run 1/5: time = 33.348683 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/5: time = 33.348705 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/5: time = 33.354496 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/5: time = 33.345745 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/5: time = 33.350396 s, residual = 1.5078427e-08, status = ok
+Running original IPT for epsilon=0.05 N=26000
+Original IPT warmup for N=26000
+  original IPT run 1/5: time = 33.628449 s, fp = 6.1240711e-13, iterations = 16, residual = nan, status = ok
+  original IPT run 2/5: time = 33.763686 s, fp = 6.1240711e-13, iterations = 16, residual = nan, status = ok
+  original IPT run 3/5: time = 33.795475 s, fp = 6.1240711e-13, iterations = 16, residual = nan, status = ok
+  original IPT run 4/5: time = 33.672583 s, fp = 6.1240711e-13, iterations = 16, residual = nan, status = ok
+  original IPT run 5/5: time = 33.809127 s, fp = 6.1240711e-13, iterations = 16, residual = 3.4648917e-09, status = ok
+Running mixed FP16->FP64 for epsilon=0.05 N=26000
+Mixed FP16->FP64 warmup for N=26000
+  mixed run 1/5: fp16 = 0.49503286 s, fp64 = 27.680441 s, total = 28.175475 s, fp16_fp = 0.00018577795, fp64_fp = 6.1809262e-13, fp16_iters = 3, fp64_iters = 13, residual = nan, status = ok
+  mixed run 2/5: fp16 = 0.48436191 s, fp64 = 27.927351 s, total = 28.411713 s, fp16_fp = 0.00018577795, fp64_fp = 6.1809262e-13, fp16_iters = 3, fp64_iters = 13, residual = nan, status = ok
+  mixed run 3/5: fp16 = 0.48707452 s, fp64 = 27.819078 s, total = 28.306153 s, fp16_fp = 0.00018577795, fp64_fp = 6.1809262e-13, fp16_iters = 3, fp64_iters = 13, residual = nan, status = ok
+  mixed run 4/5: fp16 = 0.48679263 s, fp64 = 27.711155 s, total = 28.197948 s, fp16_fp = 0.00018577795, fp64_fp = 6.1809262e-13, fp16_iters = 3, fp64_iters = 13, residual = nan, status = ok
+  mixed run 5/5: fp16 = 0.48727915 s, fp64 = 27.580689 s, total = 28.067969 s, fp16_fp = 0.00018577795, fp64_fp = 6.1809262e-13, fp16_iters = 3, fp64_iters = 13, residual = 3.4946986e-09, status = ok
+Averages FP16: syevd = 33.349605 s, original_ipt = 33.733864 s, mixed_total = 28.231852 s, mixed_residual = 3.4946986e-09, initial_fp = 0.00018577795, fp64_fp = 6.1809262e-13, fp16_iters = 3, fp64_iters = 13, status = ok
+Running mixed FP32->FP64 for epsilon=0.05 N=26000
+Mixed FP32->FP64 warmup for N=26000
+  mixed run 1/5: fp32 = 11.816601 s, fp64 = 21.749204 s, total = 33.565806 s, fp32_fp = 7.211447e-07, fp64_fp = 6.1240369e-13, fp32_iters = 6, fp64_iters = 10, residual = nan, status = ok
+  mixed run 2/5: fp32 = 11.792443 s, fp64 = 21.679405 s, total = 33.471848 s, fp32_fp = 7.211447e-07, fp64_fp = 6.1240369e-13, fp32_iters = 6, fp64_iters = 10, residual = nan, status = ok
+  mixed run 3/5: fp32 = 11.794329 s, fp64 = 21.698747 s, total = 33.493077 s, fp32_fp = 7.211447e-07, fp64_fp = 6.1240369e-13, fp32_iters = 6, fp64_iters = 10, residual = nan, status = ok
+  mixed run 4/5: fp32 = 11.790365 s, fp64 = 21.732949 s, total = 33.523315 s, fp32_fp = 7.211447e-07, fp64_fp = 6.1240369e-13, fp32_iters = 6, fp64_iters = 10, residual = nan, status = ok
+  mixed run 5/5: fp32 = 11.808139 s, fp64 = 21.601187 s, total = 33.409326 s, fp32_fp = 7.211447e-07, fp64_fp = 6.1240369e-13, fp32_iters = 6, fp64_iters = 10, residual = 3.4657193e-09, status = ok
+Averages FP32: syevd = 33.349605 s, original_ipt = 33.733864 s, mixed_total = 33.492674 s, mixed_residual = 3.4657193e-09, initial_fp = 7.211447e-07, fp64_fp = 6.1240369e-13, fp32_iters = 6, fp64_iters = 10, status = ok
+CUDA memory after cleanup: free 78.683 GiB / total 79.151 GiB
+
+===== epsilon = 0.06, N = 26000 =====
+CUDA memory before matrix: free 78.683 GiB / total 79.151 GiB
+host matrix generated in 3.6273615 s
+CUDA memory after matrix: free 73.646 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.06 N=26000
+CUSOLVER SYEVD warmup for N=26000
+  CUSOLVER SYEVD run 1/5: time = 33.353084 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/5: time = 33.357856 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/5: time = 33.354164 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/5: time = 33.346982 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/5: time = 33.348568 s, residual = 1.5173826e-08, status = ok
+Running original IPT for epsilon=0.06 N=26000
+Original IPT warmup for N=26000
+  original IPT run 1/5: time = 39.572037 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 2/5: time = 39.504458 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 3/5: time = 39.477846 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 4/5: time = 39.56558 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 5/5: time = 39.672695 s, fp = 4.3051344e-13, iterations = 19, residual = 2.8008539e-09, status = ok
+Running mixed FP16->FP64 for epsilon=0.06 N=26000
+Mixed FP16->FP64 warmup for N=26000
+  mixed run 1/5: fp16 = 0.48586889 s, fp64 = 33.595329 s, total = 34.081199 s, fp16_fp = 0.00032058048, fp64_fp = 4.3401705e-13, fp16_iters = 3, fp64_iters = 16, residual = nan, status = ok
+  mixed run 2/5: fp16 = 0.48732158 s, fp64 = 33.680756 s, total = 34.168078 s, fp16_fp = 0.00032058048, fp64_fp = 4.3401705e-13, fp16_iters = 3, fp64_iters = 16, residual = nan, status = ok
+  mixed run 3/5: fp16 = 0.48594606 s, fp64 = 33.578605 s, total = 34.064552 s, fp16_fp = 0.00032058048, fp64_fp = 4.3401705e-13, fp16_iters = 3, fp64_iters = 16, residual = nan, status = ok
+  mixed run 4/5: fp16 = 0.48679804 s, fp64 = 33.552963 s, total = 34.039761 s, fp16_fp = 0.00032058048, fp64_fp = 4.3401705e-13, fp16_iters = 3, fp64_iters = 16, residual = nan, status = ok
+  mixed run 5/5: fp16 = 0.48676457 s, fp64 = 33.504699 s, total = 33.991464 s, fp16_fp = 0.00032058048, fp64_fp = 4.3401705e-13, fp16_iters = 3, fp64_iters = 16, residual = 2.8220832e-09, status = ok
+Averages FP16: syevd = 33.352131 s, original_ipt = 39.558523 s, mixed_total = 34.069011 s, mixed_residual = 2.8220832e-09, initial_fp = 0.00032058048, fp64_fp = 4.3401705e-13, fp16_iters = 3, fp64_iters = 16, status = ok
+Running mixed FP32->FP64 for epsilon=0.06 N=26000
+Mixed FP32->FP64 warmup for N=26000
+  mixed run 1/5: fp32 = 13.756615 s, fp64 = 25.612343 s, total = 39.368959 s, fp32_fp = 5.6177212e-07, fp64_fp = 4.3067282e-13, fp32_iters = 7, fp64_iters = 12, residual = nan, status = ok
+  mixed run 2/5: fp32 = 13.752789 s, fp64 = 25.832532 s, total = 39.585322 s, fp32_fp = 5.6177212e-07, fp64_fp = 4.3067282e-13, fp32_iters = 7, fp64_iters = 12, residual = nan, status = ok
+  mixed run 3/5: fp32 = 13.752969 s, fp64 = 25.51779 s, total = 39.270759 s, fp32_fp = 5.6177212e-07, fp64_fp = 4.3067282e-13, fp32_iters = 7, fp64_iters = 12, residual = nan, status = ok
+  mixed run 4/5: fp32 = 13.754873 s, fp64 = 25.6608 s, total = 39.415674 s, fp32_fp = 5.6177212e-07, fp64_fp = 4.3067282e-13, fp32_iters = 7, fp64_iters = 12, residual = nan, status = ok
+  mixed run 5/5: fp32 = 13.75837 s, fp64 = 25.768877 s, total = 39.527247 s, fp32_fp = 5.6177212e-07, fp64_fp = 4.3067282e-13, fp32_iters = 7, fp64_iters = 12, residual = 2.8022096e-09, status = ok
+Averages FP32: syevd = 33.352131 s, original_ipt = 39.558523 s, mixed_total = 39.433592 s, mixed_residual = 2.8022096e-09, initial_fp = 5.6177212e-07, fp64_fp = 4.3067282e-13, fp32_iters = 7, fp64_iters = 12, status = ok
+CUDA memory after cleanup: free 78.683 GiB / total 79.151 GiB
+===== sweep done =====
+Results dir: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision
+Summary: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_N26000_summary.txt
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision:
+total 556K
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 10 13:16 fp16_cusolver_sweep_3001770.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.6K Jun 10 13:16 fp16_cusolver_sweep_3001770.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.6K Jun 10 13:16 fp16_cusolver_sweep_3001770.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 10 13:24 fp16_cusolver_sweep_3001779.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.6K Jun 10 13:19 fp16_cusolver_sweep_3001779.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.6K Jun 10 13:19 fp16_cusolver_sweep_3001779.out
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   88 Jun 10 13:19 latest_fp16_cusolver_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/fp16_cusolver_sweep_3001779.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   97 Jun 10 18:33 latest_low_precision_cusolver_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/low_precision_cusolver_sweep_3002678.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   94 Jun 10 11:20 latest_mixed_precision_fp16_fp64.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/mixed_precision_fp16_fp64_3001511.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   94 Jun 10 12:49 latest_mixed_precision_fp32_fp64.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/mixed_precision/mixed_precision_fp32_fp64_3001716.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 10 14:08 low_precision_cusolver_sweep_3001817.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  39K Jun 10 14:06 low_precision_cusolver_sweep_3001817.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  39K Jun 10 14:06 low_precision_cusolver_sweep_3001817.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 10 15:22 low_precision_cusolver_sweep_3002003.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  59K Jun 10 15:20 low_precision_cusolver_sweep_3002003.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  59K Jun 10 15:20 low_precision_cusolver_sweep_3002003.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 15:26 low_precision_cusolver_sweep_3002191.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  13K Jun 10 15:44 low_precision_cusolver_sweep_3002191.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  13K Jun 10 15:44 low_precision_cusolver_sweep_3002191.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 15:45 low_precision_cusolver_sweep_3002194.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  39K Jun 10 16:39 low_precision_cusolver_sweep_3002194.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  39K Jun 10 16:39 low_precision_cusolver_sweep_3002194.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 18:33 low_precision_cusolver_sweep_3002678.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  27K Jun 10 19:42 low_precision_cusolver_sweep_3002678.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  27K Jun 10 19:42 low_precision_cusolver_sweep_3002678.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie   80 Jun 10 11:15 mixed_precision_fp16_fp64_3001494.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.7K Jun 10 11:14 mixed_precision_fp16_fp64_3001494.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.7K Jun 10 11:14 mixed_precision_fp16_fp64_3001494.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 11:19 mixed_precision_fp16_fp64_3001507.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 4.9K Jun 10 11:19 mixed_precision_fp16_fp64_3001507.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 11:20 mixed_precision_fp16_fp64_3001511.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  13K Jun 10 11:31 mixed_precision_fp16_fp64_3001511.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  13K Jun 10 11:31 mixed_precision_fp16_fp64_3001511.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 12:44 mixed_precision_fp32_fp64_3001705.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.0K Jun 10 12:44 mixed_precision_fp32_fp64_3001705.out
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 10 12:49 mixed_precision_fp32_fp64_3001716.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie  14K Jun 10 13:00 mixed_precision_fp32_fp64_3001716.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie  14K Jun 10 13:00 mixed_precision_fp32_fp64_3001716.out
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 10 11:19 smoke
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 10 12:44 smoke_fp32
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision:
+total 76K
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 10 14:25 backup_before_original_ipt_time_20260610_142519
+-rw-r--r-- 1 nudt_liujie nudt_liujie 9.2K Jun 10 19:42 low_precision_cusolver_sweep_N26000_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.9K Jun 10 18:41 low_precision_cusolver_sweep_epsilon_0_01.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.9K Jun 10 18:51 low_precision_cusolver_sweep_epsilon_0_02.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.9K Jun 10 19:02 low_precision_cusolver_sweep_epsilon_0_03.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.9K Jun 10 19:14 low_precision_cusolver_sweep_epsilon_0_04.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.9K Jun 10 19:27 low_precision_cusolver_sweep_epsilon_0_05.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.9K Jun 10 19:42 low_precision_cusolver_sweep_epsilon_0_06.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.7K Jun 10 15:44 low_precision_cusolver_sweep_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie  12K Jun 10 16:39 low_precision_cusolver_sweep_summary_eps_0_05_0_06.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.4K Jun 10 11:31 mixed_precision_fp16_fp64_results.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.7K Jun 10 11:31 mixed_precision_fp16_fp64_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.5K Jun 10 13:00 mixed_precision_fp32_fp64_results.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.7K Jun 10 13:00 mixed_precision_fp32_fp64_summary.txt
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 10 11:19 smoke
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun 10 12:44 smoke_fp32
+finished at: Wed Jun 10 19:42:29 CST 2026

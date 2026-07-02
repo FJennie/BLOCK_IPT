@@ -1,0 +1,2 @@
+hermitian_q_return iterations=80 values=(0.790073307861754, 1.15785121131016) residual=1.360e-16
+nonhermitian_q_return iterations=80 values=(0.990049506163792, 1.02) residual=2.857e-13

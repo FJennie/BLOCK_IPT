@@ -1,0 +1,80 @@
+===== ACX CUDA sweep job =====
+Tue Jun 16 10:14:53 CST 2026
+gsn1
+SLURM_JOB_ID=3020709
+SLURM_JOB_NODELIST=gsn1
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/ACX
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/ACX
+ACX_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX
+ACX_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX
+ACX_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/acx_cuda_sweep_summary.txt
+ACX_SWEEP_NS=4096
+ACX_EPSILON_VALUES=0.06
+ACX_TOL=1e-12
+ACX_MAXITER=1000
+ACX_REPEATS=1
+ACX_WARMUP_N=128
+ACX_APPEND_RESULTS=false
+ACX_COMPUTE_RESIDUAL=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Tue Jun 16 10:14:53 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:51:00.0 Off |                    0 |
+| N/A   28C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== ACX CUDA sweep =====
+root=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX
+logs=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX
+summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/acx_cuda_sweep_summary.txt
+N values = 4096
+epsilon values = 0.06
+tol=9.9999999999999998e-13 maxiter=1000 repeats=1 warmup_n=128 seed=20260615 gpu=NVIDIA A100-SXM4-80GB
+GPU memory at start: free 78.722 GiB / total 79.151 GiB
+
+===== epsilon=0.06 N=4096 =====
+GPU memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 0.59134584 s
+GPU memory after matrix: free 78.597 GiB / total 79.151 GiB
+ACX warmup for N=4096
+  ACX run 1/1: total=0.29167686 s, iter=0.28068226 s, finalize=0.0071911807 s, max_apply_res=2.1561788e-13, abs_res=1.163715e-12, iters=7, f_calls=16, converged=1, status=ok
+GPU memory after cleanup: free 78.722 GiB / total 79.151 GiB
+
+===== done failures=0 =====
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX:
+total 5.0K
+-rw-r--r-- 1 nudt_liujie nudt_liujie    0 Jun 16 10:14 acx_cuda_sweep_3020709.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.4K Jun 16 10:15 acx_cuda_sweep_3020709.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.4K Jun 16 10:15 acx_cuda_sweep_3020709.out
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   71 Jun 16 10:14 latest_acx_cuda_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/ACX/acx_cuda_sweep_3020709.log
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX:
+total 1.0K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 390 Jun 16 10:15 acx_cuda_sweep_epsilon_0_06.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 480 Jun 16 10:15 acx_cuda_sweep_summary.txt
+finished at: Tue Jun 16 10:15:06 CST 2026

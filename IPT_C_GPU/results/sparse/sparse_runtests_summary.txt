@@ -1,0 +1,4 @@
+IPT CUDA sparse CSC tests
+synthetic_banded_k5: vector_diff=4.3368086899420177e-18 value_diff=4.4408920985006262e-16 residual=1.1101872513755869e-16 status=PASS
+h20_fci_w_k1: vector_diff=1.5775988642611344e-20 value_diff=0 residual=2.1932331800459467e-22 status=PASS
+failures=0

@@ -1,0 +1,410 @@
+===== IPT_C GPU benchmark job =====
+Tue Jun  9 23:31:51 CST 2026
+gsn0
+SLURM_JOB_ID=2999805
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/adptive_logs
+IPT_RESULT_CSV=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/gpu_cusolver_vs_ipt_results.csv
+IPT_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/gpu_cusolver_vs_ipt_summary.txt
+IPT_BENCH_NS=32,64,128,256,512,1024,2048,4096,8192,16384,32768
+IPT_EPSILON=0.01
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=10
+IPT_SEED=20260603
+IPT_COMPUTE_RESIDUALS=true
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Tue Jun  9 23:31:51 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:27:00.0 Off |                    0 |
+| N/A   32C    P0              57W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== IPT_C GPU benchmark: CUSOLVER SYEVD vs IPT =====
+ROOT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+RESULT_DIR = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results
+RESULT_CSV = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/gpu_cusolver_vs_ipt_results.csv
+SUMMARY_TXT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/gpu_cusolver_vs_ipt_summary.txt
+N values = 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+epsilon = 0.01
+ipt_tol = 9.9999999999999998e-13
+ipt_maxiter = 1000
+timing_repeats = 10
+per_N_warmup = true
+seed = 20260603
+compute_residuals = true
+gpu_name = NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.691 GiB / total 79.151 GiB
+===== warmup =====
+===== warmup done =====
+
+===== N = 32 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+CUDA memory after matrix: free 78.691 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=32
+CUSOLVER SYEVD warmup for N=32
+  CUSOLVER SYEVD run 1/10: time = 0.00032491563 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/10: time = 0.00032380363 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/10: time = 0.00032227393 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/10: time = 0.00032088812 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/10: time = 0.00032310002 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 6/10: time = 0.00032262085 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 7/10: time = 0.00032191072 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 8/10: time = 0.00032224506 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 9/10: time = 0.00032201782 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 10/10: time = 0.00032322761 s, residual = 9.0169859e-14, status = ok
+CUSOLVER SYEVD average: time = 0.00032270034 s, residual = 9.0169859e-14, status = ok
+Running IPT for N=32
+IPT warmup for N=32
+  IPT run 1/10: time = 0.00088717602 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = nan, status = ok
+  IPT run 2/10: time = 0.0008794507 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = nan, status = ok
+  IPT run 3/10: time = 0.00087369792 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = nan, status = ok
+  IPT run 4/10: time = 0.00085778488 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = nan, status = ok
+  IPT run 5/10: time = 0.00086920708 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = nan, status = ok
+  IPT run 6/10: time = 0.00088989735 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = nan, status = ok
+  IPT run 7/10: time = 0.0008686129 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = nan, status = ok
+  IPT run 8/10: time = 0.0008774749 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = nan, status = ok
+  IPT run 9/10: time = 0.00087813428 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = nan, status = ok
+  IPT run 10/10: time = 0.00087108603 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = 2.9925681e-14, status = ok
+IPT average: time = 0.00087525221 s, fixed_point_residual = 5.7227123e-14, iterations = 7, residual = 2.9925681e-14, status = ok
+CUDA memory after cleanup: free 78.691 GiB / total 79.151 GiB
+
+===== N = 64 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+CUDA memory after matrix: free 78.691 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=64
+CUSOLVER SYEVD warmup for N=64
+  CUSOLVER SYEVD run 1/10: time = 0.0011572707 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/10: time = 0.0011513364 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/10: time = 0.0011488278 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/10: time = 0.0011503128 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/10: time = 0.0011480441 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 6/10: time = 0.0011518961 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 7/10: time = 0.001147165 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 8/10: time = 0.0011461801 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 9/10: time = 0.001147991 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 10/10: time = 0.0011475631 s, residual = 2.8696955e-13, status = ok
+CUSOLVER SYEVD average: time = 0.0011496587 s, residual = 2.8696955e-13, status = ok
+Running IPT for N=64
+IPT warmup for N=64
+  IPT run 1/10: time = 0.00088779302 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = nan, status = ok
+  IPT run 2/10: time = 0.00089370599 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = nan, status = ok
+  IPT run 3/10: time = 0.00088887475 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = nan, status = ok
+  IPT run 4/10: time = 0.00088775111 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = nan, status = ok
+  IPT run 5/10: time = 0.00089647621 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = nan, status = ok
+  IPT run 6/10: time = 0.00087914104 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = nan, status = ok
+  IPT run 7/10: time = 0.00087361317 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = nan, status = ok
+  IPT run 8/10: time = 0.00087401876 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = nan, status = ok
+  IPT run 9/10: time = 0.0008798209 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = nan, status = ok
+  IPT run 10/10: time = 0.00091310777 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = 1.9849194e-13, status = ok
+IPT average: time = 0.00088743027 s, fixed_point_residual = 1.6181499e-13, iterations = 7, residual = 1.9849194e-13, status = ok
+CUDA memory after cleanup: free 78.691 GiB / total 79.151 GiB
+
+===== N = 128 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+CUDA memory after matrix: free 78.691 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=128
+CUSOLVER SYEVD warmup for N=128
+  CUSOLVER SYEVD run 1/10: time = 0.0026681521 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/10: time = 0.0026644566 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/10: time = 0.0026632939 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/10: time = 0.0026636948 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/10: time = 0.0026653158 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 6/10: time = 0.0026622843 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 7/10: time = 0.0026611229 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 8/10: time = 0.0026589399 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 9/10: time = 0.0026599569 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 10/10: time = 0.002661047 s, residual = 9.9436237e-13, status = ok
+CUSOLVER SYEVD average: time = 0.0026628264 s, residual = 9.9436237e-13, status = ok
+Running IPT for N=128
+IPT warmup for N=128
+  IPT run 1/10: time = 0.00086738402 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = nan, status = ok
+  IPT run 2/10: time = 0.00086644059 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = nan, status = ok
+  IPT run 3/10: time = 0.000865635 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = nan, status = ok
+  IPT run 4/10: time = 0.00086541288 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = nan, status = ok
+  IPT run 5/10: time = 0.00087157497 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = nan, status = ok
+  IPT run 6/10: time = 0.00086641591 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = nan, status = ok
+  IPT run 7/10: time = 0.0008687689 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = nan, status = ok
+  IPT run 8/10: time = 0.00086642615 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = nan, status = ok
+  IPT run 9/10: time = 0.00089586712 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = nan, status = ok
+  IPT run 10/10: time = 0.0008808109 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = 4.948458e-13, status = ok
+IPT average: time = 0.00087147364 s, fixed_point_residual = 1.7001709e-13, iterations = 7, residual = 4.948458e-13, status = ok
+CUDA memory after cleanup: free 78.691 GiB / total 79.151 GiB
+
+===== N = 256 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+CUDA memory after matrix: free 78.691 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=256
+CUSOLVER SYEVD warmup for N=256
+  CUSOLVER SYEVD run 1/10: time = 0.0040785121 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/10: time = 0.0040455484 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/10: time = 0.004031972 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/10: time = 0.0040300689 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/10: time = 0.00401755 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 6/10: time = 0.0040276628 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 7/10: time = 0.0040217959 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 8/10: time = 0.0040186238 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 9/10: time = 0.0040233722 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 10/10: time = 0.004025185 s, residual = 3.4304962e-12, status = ok
+CUSOLVER SYEVD average: time = 0.0040320291 s, residual = 3.4304962e-12, status = ok
+Running IPT for N=256
+IPT warmup for N=256
+  IPT run 1/10: time = 0.0010112822 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = nan, status = ok
+  IPT run 2/10: time = 0.001014424 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = nan, status = ok
+  IPT run 3/10: time = 0.001006532 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = nan, status = ok
+  IPT run 4/10: time = 0.0010044212 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = nan, status = ok
+  IPT run 5/10: time = 0.00099931983 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = nan, status = ok
+  IPT run 6/10: time = 0.00099723088 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = nan, status = ok
+  IPT run 7/10: time = 0.00099864788 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = nan, status = ok
+  IPT run 8/10: time = 0.00099177193 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = nan, status = ok
+  IPT run 9/10: time = 0.0010036733 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = nan, status = ok
+  IPT run 10/10: time = 0.00099114608 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = 2.2886265e-12, status = ok
+IPT average: time = 0.0010018449 s, fixed_point_residual = 3.744825e-13, iterations = 7, residual = 2.2886265e-12, status = ok
+CUDA memory after cleanup: free 78.691 GiB / total 79.151 GiB
+
+===== N = 512 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+CUDA memory after matrix: free 78.689 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=512
+CUSOLVER SYEVD warmup for N=512
+  CUSOLVER SYEVD run 1/10: time = 0.0085139801 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/10: time = 0.0084941629 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/10: time = 0.0084856511 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/10: time = 0.0084758019 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/10: time = 0.0084986552 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 6/10: time = 0.0085062119 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 7/10: time = 0.0085094278 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 8/10: time = 0.008500942 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 9/10: time = 0.0084866714 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 10/10: time = 0.0083341128 s, residual = 1.0212041e-11, status = ok
+CUSOLVER SYEVD average: time = 0.0084805617 s, residual = 1.0212041e-11, status = ok
+Running IPT for N=512
+IPT warmup for N=512
+  IPT run 1/10: time = 0.0015253839 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = nan, status = ok
+  IPT run 2/10: time = 0.0015233359 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = nan, status = ok
+  IPT run 3/10: time = 0.0015386241 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = nan, status = ok
+  IPT run 4/10: time = 0.0015268861 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = nan, status = ok
+  IPT run 5/10: time = 0.0015350459 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = nan, status = ok
+  IPT run 6/10: time = 0.0015370478 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = nan, status = ok
+  IPT run 7/10: time = 0.001531451 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = nan, status = ok
+  IPT run 8/10: time = 0.0015103426 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = nan, status = ok
+  IPT run 9/10: time = 0.0015114718 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = nan, status = ok
+  IPT run 10/10: time = 0.0015198872 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = 7.9455426e-12, status = ok
+IPT average: time = 0.0015259476 s, fixed_point_residual = 6.05912e-13, iterations = 7, residual = 7.9455426e-12, status = ok
+CUDA memory after cleanup: free 78.691 GiB / total 79.151 GiB
+
+===== N = 1024 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+CUDA memory after matrix: free 78.683 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=1024
+CUSOLVER SYEVD warmup for N=1024
+  CUSOLVER SYEVD run 1/10: time = 0.016112366 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/10: time = 0.016105873 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/10: time = 0.016227816 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/10: time = 0.016036714 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/10: time = 0.016110484 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 6/10: time = 0.016019611 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 7/10: time = 0.016047546 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 8/10: time = 0.016006923 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 9/10: time = 0.016025961 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 10/10: time = 0.016074366 s, residual = 3.4468806e-11, status = ok
+CUSOLVER SYEVD average: time = 0.016076766 s, residual = 3.4468806e-11, status = ok
+Running IPT for N=1024
+IPT warmup for N=1024
+  IPT run 1/10: time = 0.0030531357 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = nan, status = ok
+  IPT run 2/10: time = 0.0030644941 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = nan, status = ok
+  IPT run 3/10: time = 0.0030833096 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = nan, status = ok
+  IPT run 4/10: time = 0.0030675558 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = nan, status = ok
+  IPT run 5/10: time = 0.0030445117 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = nan, status = ok
+  IPT run 6/10: time = 0.0030466681 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = nan, status = ok
+  IPT run 7/10: time = 0.0030544391 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = nan, status = ok
+  IPT run 8/10: time = 0.0030453103 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = nan, status = ok
+  IPT run 9/10: time = 0.0030442271 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = nan, status = ok
+  IPT run 10/10: time = 0.0030489573 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = 2.1939385e-11, status = ok
+IPT average: time = 0.0030552609 s, fixed_point_residual = 7.7068331e-13, iterations = 7, residual = 2.1939385e-11, status = ok
+CUDA memory after cleanup: free 78.691 GiB / total 79.151 GiB
+
+===== N = 2048 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+CUDA memory after matrix: free 78.659 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=2048
+CUSOLVER SYEVD warmup for N=2048
+  CUSOLVER SYEVD run 1/10: time = 0.044556667 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/10: time = 0.04452183 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/10: time = 0.044652343 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/10: time = 0.044456277 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/10: time = 0.044598277 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 6/10: time = 0.044562348 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 7/10: time = 0.044600726 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 8/10: time = 0.044530917 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 9/10: time = 0.0445998 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 10/10: time = 0.044544171 s, residual = 1.1387738e-10, status = ok
+CUSOLVER SYEVD average: time = 0.044562336 s, residual = 1.1387738e-10, status = ok
+Running IPT for N=2048
+IPT warmup for N=2048
+  IPT run 1/10: time = 0.01381263 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = nan, status = ok
+  IPT run 2/10: time = 0.014403715 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = nan, status = ok
+  IPT run 3/10: time = 0.01436258 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = nan, status = ok
+  IPT run 4/10: time = 0.024499219 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = nan, status = ok
+  IPT run 5/10: time = 0.018453752 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = nan, status = ok
+  IPT run 6/10: time = 0.01949313 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = nan, status = ok
+  IPT run 7/10: time = 0.014356281 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = nan, status = ok
+  IPT run 8/10: time = 0.014398546 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = nan, status = ok
+  IPT run 9/10: time = 0.023444089 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = nan, status = ok
+  IPT run 10/10: time = 0.021129449 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = 2.290067e-12, status = ok
+IPT average: time = 0.017835339 s, fixed_point_residual = 3.7015524e-14, iterations = 8, residual = 2.290067e-12, status = ok
+CUDA memory after cleanup: free 78.691 GiB / total 79.151 GiB
+
+===== N = 4096 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+CUDA memory after matrix: free 78.566 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=4096
+CUSOLVER SYEVD warmup for N=4096
+  CUSOLVER SYEVD run 1/10: time = 0.21571559 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/10: time = 0.21341469 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/10: time = 0.21592555 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/10: time = 0.21356726 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/10: time = 0.21594743 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 6/10: time = 0.21351716 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 7/10: time = 0.2159987 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 8/10: time = 0.21348593 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 9/10: time = 0.21572814 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 10/10: time = 0.21342457 s, residual = 4.0306763e-10, status = ok
+CUSOLVER SYEVD average: time = 0.2146725 s, residual = 4.0306763e-10, status = ok
+Running IPT for N=4096
+IPT warmup for N=4096
+  IPT run 1/10: time = 0.076851955 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = nan, status = ok
+  IPT run 2/10: time = 0.077390399 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = nan, status = ok
+  IPT run 3/10: time = 0.076590992 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = nan, status = ok
+  IPT run 4/10: time = 0.077018406 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = nan, status = ok
+  IPT run 5/10: time = 0.077441102 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = nan, status = ok
+  IPT run 6/10: time = 0.07712877 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = nan, status = ok
+  IPT run 7/10: time = 0.076832883 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = nan, status = ok
+  IPT run 8/10: time = 0.076859405 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = nan, status = ok
+  IPT run 9/10: time = 0.077350862 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = nan, status = ok
+  IPT run 10/10: time = 0.077295408 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = 6.6285319e-12, status = ok
+IPT average: time = 0.077076018 s, fixed_point_residual = 5.1066881e-14, iterations = 8, residual = 6.6285319e-12, status = ok
+CUDA memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== N = 8192 =====
+CUDA memory before matrix: free 78.689 GiB / total 79.151 GiB
+CUDA memory after matrix: free 78.189 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=8192
+CUSOLVER SYEVD warmup for N=8192
+  CUSOLVER SYEVD run 1/10: time = 1.4463801 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/10: time = 1.4505427 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/10: time = 1.4469428 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/10: time = 1.4498477 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/10: time = 1.4458612 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 6/10: time = 1.4496913 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 7/10: time = 1.4456073 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 8/10: time = 1.4500546 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 9/10: time = 1.4463843 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 10/10: time = 1.4488298 s, residual = 1.5276216e-09, status = ok
+CUSOLVER SYEVD average: time = 1.4480142 s, residual = 1.5276216e-09, status = ok
+Running IPT for N=8192
+IPT warmup for N=8192
+  IPT run 1/10: time = 0.57663968 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = nan, status = ok
+  IPT run 2/10: time = 0.56591188 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = nan, status = ok
+  IPT run 3/10: time = 0.56305862 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = nan, status = ok
+  IPT run 4/10: time = 0.56292638 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = nan, status = ok
+  IPT run 5/10: time = 0.56416893 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = nan, status = ok
+  IPT run 6/10: time = 0.56405376 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = nan, status = ok
+  IPT run 7/10: time = 0.5630717 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = nan, status = ok
+  IPT run 8/10: time = 0.56355618 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = nan, status = ok
+  IPT run 9/10: time = 0.56398935 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = nan, status = ok
+  IPT run 10/10: time = 0.56302058 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = 1.758886e-11, status = ok
+IPT average: time = 0.56503971 s, fixed_point_residual = 6.5213573e-14, iterations = 8, residual = 1.758886e-11, status = ok
+CUDA memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== N = 16384 =====
+CUDA memory before matrix: free 78.689 GiB / total 79.151 GiB
+CUDA memory after matrix: free 76.689 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=16384
+CUSOLVER SYEVD warmup for N=16384
+  CUSOLVER SYEVD run 1/10: time = 8.888239 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/10: time = 8.8848058 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/10: time = 8.8883258 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/10: time = 8.8852449 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/10: time = 8.8896823 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 6/10: time = 8.884421 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 7/10: time = 8.8889584 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 8/10: time = 8.8876442 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 9/10: time = 8.8879009 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 10/10: time = 8.8828439 s, residual = 5.7534512e-09, status = ok
+CUSOLVER SYEVD average: time = 8.8868066 s, residual = 5.7534512e-09, status = ok
+Running IPT for N=16384
+IPT warmup for N=16384
+  IPT run 1/10: time = 4.4408544 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = nan, status = ok
+  IPT run 2/10: time = 4.4439844 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = nan, status = ok
+  IPT run 3/10: time = 4.4503682 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = nan, status = ok
+  IPT run 4/10: time = 4.4484331 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = nan, status = ok
+  IPT run 5/10: time = 4.4538455 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = nan, status = ok
+  IPT run 6/10: time = 4.453575 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = nan, status = ok
+  IPT run 7/10: time = 4.4489034 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = nan, status = ok
+  IPT run 8/10: time = 4.4514435 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = nan, status = ok
+  IPT run 9/10: time = 4.4592658 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = nan, status = ok
+  IPT run 10/10: time = 4.461468 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = 4.7611928e-11, status = ok
+IPT average: time = 4.4512141 s, fixed_point_residual = 8.3375733e-14, iterations = 8, residual = 4.7611928e-11, status = ok
+CUDA memory after cleanup: free 78.689 GiB / total 79.151 GiB
+
+===== N = 32768 =====
+CUDA memory before matrix: free 78.689 GiB / total 79.151 GiB
+CUDA memory after matrix: free 70.689 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for N=32768
+CUSOLVER SYEVD warmup for N=32768
+CUSOLVER SYEVD average: time = 6.5116677e-05 s, residual = nan, status = failed, error = CUSOLVER_STATUS_INVALID_VALUE
+Running IPT for N=32768
+IPT warmup for N=32768
+  IPT run 1/10: time = 36.161011 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = nan, status = ok
+  IPT run 2/10: time = 36.148715 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = nan, status = ok
+  IPT run 3/10: time = 36.191796 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = nan, status = ok
+  IPT run 4/10: time = 36.129745 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = nan, status = ok
+  IPT run 5/10: time = 36.027288 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = nan, status = ok
+  IPT run 6/10: time = 36.278736 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = nan, status = ok
+  IPT run 7/10: time = 36.00529 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = nan, status = ok
+  IPT run 8/10: time = 36.149974 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = nan, status = ok
+  IPT run 9/10: time = 36.147095 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = nan, status = ok
+  IPT run 10/10: time = 36.022259 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = 1.1665737e-10, status = ok
+IPT average: time = 36.126191 s, fixed_point_residual = 9.9330192e-14, iterations = 8, residual = 1.1665737e-10, status = ok
+CUDA memory after cleanup: free 78.689 GiB / total 79.151 GiB
+===== benchmark done =====
+Results: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/gpu_cusolver_vs_ipt_results.csv
+Summary: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/gpu_cusolver_vs_ipt_summary.txt
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/adptive_logs:
+total 60K
+-rw-r--r-- 1 nudt_liujie nudt_liujie   0 Jun  9 23:31 gpu_cusolver_vs_ipt_2999805.err
+-rw-r--r-- 1 nudt_liujie nudt_liujie 30K Jun  9 23:42 gpu_cusolver_vs_ipt_2999805.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 30K Jun  9 23:42 gpu_cusolver_vs_ipt_2999805.out
+lrwxrwxrwx 1 nudt_liujie nudt_liujie  85 Jun  9 23:31 latest_gpu_cusolver_vs_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/adptive_logs/gpu_cusolver_vs_ipt_2999805.log
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results:
+total 20K
+drwxr-xr-x 3 nudt_liujie nudt_liujie 4.0K Jun  9 22:56 EPSILON_TEST
+drwxr-xr-x 2 nudt_liujie nudt_liujie 4.0K Jun  9 17:29 codex_smoke
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1.8K Jun  9 23:42 gpu_cusolver_vs_ipt_results.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.8K Jun  9 23:42 gpu_cusolver_vs_ipt_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie  798 Jun  5 16:00 runtests_summary.csv
+finished at: Tue Jun  9 23:42:42 CST 2026

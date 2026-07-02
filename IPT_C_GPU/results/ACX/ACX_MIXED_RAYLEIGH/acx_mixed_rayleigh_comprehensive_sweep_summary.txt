@@ -1,0 +1,26 @@
+started_at=2026-06-18T19:07:11+0800 methods=cusolver_syevd,original_ipt,original_acx,acx_mixed_tf32_fp64,acx_mixed_rayleigh_tf32_fp64 repeats=5 tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 gpu=NVIDIA A100-SXM4-80GB
+epsilon=0.06 N=4096 started_at=2026-06-18T19:07:11+0800
+epsilon=0.06 N=4096 finished_at=2026-06-18T19:07:18+0800 cusolver=0.21482353284955025 ipt=0.1514035572297871 acx=0.21200631242245435 mixed=0.17074329666793348 rayleigh=0.35281761223450303 ipt_f_calls=17 acx_f_calls=11 mixed_f_calls=14 rayleigh_f_calls=9 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.06 N=8192 started_at=2026-06-18T19:07:18+0800
+epsilon=0.06 N=8192 finished_at=2026-06-18T19:08:02+0800 cusolver=1.4472364163957536 ipt=1.1992995108477771 acx=1.4357385070063173 mixed=1.1396127995103598 rayleigh=1.3067386507056653 ipt_f_calls=18 acx_f_calls=11 mixed_f_calls=14 rayleigh_f_calls=9 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.06 N=16384 started_at=2026-06-18T19:08:02+0800
+epsilon=0.06 N=16384 finished_at=2026-06-18T19:12:48+0800 cusolver=8.893248159065843 ipt=9.5422520061954863 acx=11.465072317514569 mixed=7.7298356591723856 rayleigh=6.9335079254582528 ipt_f_calls=18 acx_f_calls=13 mixed_f_calls=14 rayleigh_f_calls=9 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.08 N=4096 started_at=2026-06-18T19:12:48+0800
+epsilon=0.08 N=4096 finished_at=2026-06-18T19:12:55+0800 cusolver=0.21475166035816073 ipt=0.18619773723185062 acx=0.24241688679903745 mixed=0.17043028250336648 rayleigh=0.35214297492057084 ipt_f_calls=21 acx_f_calls=13 mixed_f_calls=14 rayleigh_f_calls=9 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.08 N=8192 started_at=2026-06-18T19:12:55+0800
+epsilon=0.08 N=8192 finished_at=2026-06-18T19:13:44+0800 cusolver=1.4470518904738128 ipt=1.5164522849023343 acx=1.6918105123564602 mixed=1.527455423772335 rayleigh=1.3254069106653332 ipt_f_calls=23 acx_f_calls=13 mixed_f_calls=19 rayleigh_f_calls=11 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.08 N=16384 started_at=2026-06-18T19:13:44+0800
+epsilon=0.08 N=16384 finished_at=2026-06-18T19:19:26+0800 cusolver=8.8934548192657523 ipt=12.054781098011881 acx=14.023286490235478 mixed=12.118173059076071 rayleigh=7.0942906864918767 ipt_f_calls=23 acx_f_calls=16 mixed_f_calls=21 rayleigh_f_calls=11 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.1 N=4096 started_at=2026-06-18T19:19:26+0800
+epsilon=0.1 N=4096 finished_at=2026-06-18T19:19:35+0800 cusolver=0.21472073132172226 ipt=0.2363668942824006 acx=0.29562111059203744 mixed=0.22897511702030898 rayleigh=0.36016544736921785 ipt_f_calls=27 acx_f_calls=16 mixed_f_calls=19 rayleigh_f_calls=11 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.1 N=8192 started_at=2026-06-18T19:19:35+0800
+epsilon=0.1 N=8192 finished_at=2026-06-18T19:20:30+0800 cusolver=1.4476512181572616 ipt=1.9601837291382254 acx=2.0639438225887714 mixed=1.7844318475574255 rayleigh=1.3253112394362687 ipt_f_calls=30 acx_f_calls=16 mixed_f_calls=21 rayleigh_f_calls=11 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.1 N=16384 started_at=2026-06-18T19:20:30+0800
+epsilon=0.1 N=16384 finished_at=2026-06-18T19:26:30+0800 cusolver=8.8944564405828714 ipt=16.591721183527262 acx=14.003624334838241 mixed=10.421129842288792 rayleigh=7.0936853620223701 ipt_f_calls=32 acx_f_calls=16 mixed_f_calls=19 rayleigh_f_calls=11 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.12 N=4096 started_at=2026-06-18T19:26:30+0800
+epsilon=0.12 N=4096 finished_at=2026-06-18T19:26:39+0800 cusolver=0.21483479030430316 ipt=0.31167358318343757 acx=0.29543958762660621 mixed=0.32101128771901133 rayleigh=0.36129142483696342 ipt_f_calls=36 acx_f_calls=16 mixed_f_calls=29 rayleigh_f_calls=16 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.12 N=8192 started_at=2026-06-18T19:26:39+0800
+epsilon=0.12 N=8192 finished_at=2026-06-18T19:27:44+0800 cusolver=1.4469115369021892 ipt=2.4684964665211737 acx=2.69316491112113 mixed=2.2021635950542988 rayleigh=1.3723162750713527 ipt_f_calls=38 acx_f_calls=21 mixed_f_calls=29 rayleigh_f_calls=16 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+epsilon=0.12 N=16384 started_at=2026-06-18T19:27:44+0800
+epsilon=0.12 N=16384 finished_at=2026-06-18T19:35:15+0800 cusolver=8.8926697827875607 ipt=22.674805179983377 acx=18.237171693425626 mixed=15.021114530414343 rayleigh=7.4683804033324126 ipt_f_calls=44 acx_f_calls=21 mixed_f_calls=29 rayleigh_f_calls=16 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/ACX/ACX_MIXED_RAYLEIGH/acx_mixed_rayleigh_comprehensive_sweep.csv
+finished_at=2026-06-18T19:35:15+0800 failures=0

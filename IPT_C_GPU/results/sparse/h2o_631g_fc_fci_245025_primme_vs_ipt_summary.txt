@@ -1,0 +1,29 @@
+warmup PRIMME skipped RUN_PRIMME=0
+warmup IPT status=0 time_sec=14.775906062219292 eigenvalue=-76.136654319857257 residual=0.0038617310483808438 error=
+
+matrix=h2o_631g_frozen_o1s_core_cas8e12o_fci
+n=245025
+nnz=349160625
+k=1
+repeats=1
+tol=1e-10
+ipt_maxiter=5
+run_primme=0
+primme_max_matvecs=300
+matrix_inf_norm=86.771519885564018
+integral_generation_time_sec=0.63445526920258999
+pyscf_site_packages=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+basis=6-31g
+frozen_core_orbitals=1
+norb=12
+active_electrons=8
+neleca=4
+nelecb=4
+na=495
+nb=495
+ecore=-52.201150897058454
+nuclear_repulsion=9.0843645119760303
+hartree_fock_energy=-75.9833863945274
+
+IPT_CUDA_SPARSE avg_time_sec=12.955915031023324 std_time_sec=0 avg_iterations=5 avg_matvecs=5 avg_eigenvalue=-76.136654319857257 avg_residual=0.0038617310483808815
+18

@@ -1,0 +1,2 @@
+method,repeat,k,time_sec,iterations,matvecs,first_eigenvalue,max_relative_residual,status,error,tol,maxiter
+IPT_CUDA_SPARSE,1,10,0.37952806008979678,0,0,nan,nan,3,CUDA runtime error,9.9999999999999998e-13,1000

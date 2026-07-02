@@ -1,0 +1,124 @@
+===== N2/STO-6G full FCI IPT sparse benchmark =====
+Tue Jun 23 14:54:48 CST 2026
+gsn0
+SLURM_JOB_ID=3049213
+CUDA_VISIBLE_DEVICES=0
+IPT_REPEATS=1
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+RUN_PRIMME=0
+RUN_WARMUP=0
+IPT_EST_NNZ_PER_COL=900
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+numpy 1.21.5 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/numpy/__init__.py
+scipy 1.7.3 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/scipy/__init__.py
+pyscf 2.0.1 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/pyscf/__init__.py
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+Tue Jun 23 14:54:51 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:CA:00.0 Off |                    0 |
+| N/A   30C    P0              62W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 -I/fs1/home/nudt_liujie/ftt/primme-3.2.3/include -I/fs1/software/python/3.8_miniconda_4.10.3/include/python3.8 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu /fs1/home/nudt_liujie/ftt/primme-3.2.3/lib/libprimme.a -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt_cuda -lcublas -lcusparse -lcudart -L/fs1/software/python/3.8_miniconda_4.10.3/lib -lpython3.8 -L/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2 -lopenblas -lpthread -ldl -lutil -lrt -Xlinker -rpath -Xlinker /fs1/software/gcc/12.2.0/lib64 -Xlinker -rpath -Xlinker /fs1/software/python/3.8_miniconda_4.10.3/lib -Xlinker -rpath -Xlinker /fs1/software/cp2k/8.1-gcc8.4-openmpi/lib -lgfortran /fs1/software/gcc/12.2.0/lib64/libstdc++.so -lm
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu:1098:21: warning: missing terminating " character
+ 1098 |                     "residual=%.17g error=%s
+      |                     ^
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu:1099:1: warning: missing terminating " character
+ 1099 | ",
+      | ^
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu:1104:30: warning: missing terminating " character
+ 1104 |             fprintf(summary, "warmup PRIMME skipped RUN_PRIMME=0
+      |                              ^
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu:1105:1: warning: missing terminating " character
+ 1105 | ");
+      | ^
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu:1111:17: warning: missing terminating " character
+ 1111 |                 "residual=%.17g error=%s
+      |                 ^
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu:1113:1: warning: missing terminating " character
+ 1113 | ",
+      | ^
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu:1117:26: warning: missing terminating " character
+ 1117 |         fprintf(summary, "warmup skipped RUN_WARMUP=0
+      |                          ^
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu:1119:1: warning: missing terminating " character
+ 1119 | ");
+      | ^
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1098): error: missing closing quote
+                      "residual=%.17g error=%s
+                      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1099): error: missing closing quote
+  ",
+  ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1100): error: expected a ")"
+                      warm_primme.status, warm_primme.time_sec,
+                      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1104): error: missing closing quote
+              fprintf(summary, "warmup PRIMME skipped RUN_PRIMME=0
+                               ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1105): error: missing closing quote
+  ");
+  ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1106): error: expected a ")"
+          }
+          ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1106): error: expected a ";"
+          }
+          ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1111): error: missing closing quote
+                  "residual=%.17g error=%s
+                  ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1113): error: missing closing quote
+  ",
+  ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1114): error: expected a ")"
+                  warm_ipt.status, warm_ipt.time_sec, warm_ipt.eigenvalue,
+                  ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1117): error: missing closing quote
+          fprintf(summary, "warmup skipped RUN_WARMUP=0
+                           ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1119): error: missing closing quote
+  ");
+  ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1120): error: expected a ")"
+      }
+      ^
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu(1120): error: expected a ";"
+      }
+      ^
+
+14 errors detected in the compilation of "/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/N2/benchmark_n2_sto6g_fci_14400_ipt.cu".

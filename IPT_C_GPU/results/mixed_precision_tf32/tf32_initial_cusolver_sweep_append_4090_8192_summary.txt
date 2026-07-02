@@ -1,0 +1,50 @@
+IPT_C mixed precision sweep: FP16/TF32 initial + FP64 refine vs cuSolver Dsyevd
+started_at = 2026-06-13T12:25:13+0800
+ipt_c_root = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results_dir = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32
+summary_txt = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_append_4090_8192_summary.txt
+fp16_tol = 0.001
+fp16_maxiter = 1000
+tf32_tol = 9.9999999999999995e-07
+tf32_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 5
+per_case_warmup = true
+seed = 20260603
+N_values = 4090, 8192
+epsilon_values = 0.01, 0.02, 0.03, 0.04, 0.05, 0.06
+compute_residuals = true
+append_results = true
+skip_existing = false
+run_fp16 = false
+run_tf32 = true
+cuda_runtime_version = 12020
+cuda_driver_version = 12020
+gpu_name = NVIDIA A100-SXM4-80GB
+
+epsilon=0.01 N=4090 started_at=2026-06-13T12:25:13+0800
+epsilon=0.01 N=4090 initial_precision=tf32 finished_at=2026-06-13T12:25:15+0800 status=ok time_syevd=0.21857891716063022 residual_syevd=4.0558753516278669e-10 time_original_ipt=0.078013480920344588 residual_original_ipt=6.621959002014413e-12 original_ipt_iterations=8 original_ipt_fp=5.136727632273465e-14 time_initial=0.015288869105279445 time_fp64=0.052681272476911546 time_mixed=0.067970452457666392 residual_mixed=6.6092158217639014e-12 initial_iterations=4 fp64_iterations=5 initial_fp=3.6965057724132174e-08 fp64_fp=7.7438609962084045e-14 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_01.csv
+epsilon=0.01 N=8192 started_at=2026-06-13T12:25:15+0800
+epsilon=0.01 N=8192 initial_precision=tf32 finished_at=2026-06-13T12:25:33+0800 status=ok time_syevd=1.448477182071656 residual_syevd=1.5276216379040918e-09 time_original_ipt=0.56695652538910513 residual_original_ipt=1.758886018181272e-11 original_ipt_iterations=8 original_ipt_fp=6.5213573181514535e-14 time_initial=0.043140788283199075 time_fp64=0.38134774165228008 time_mixed=0.42448878511786459 residual_mixed=2.0864008535517568e-11 initial_iterations=4 fp64_iterations=5 initial_fp=3.788397270038808e-08 fp64_fp=1.1634655598666991e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_01.csv
+epsilon=0.02 N=4090 started_at=2026-06-13T12:25:33+0800
+epsilon=0.02 N=4090 initial_precision=tf32 finished_at=2026-06-13T12:25:35+0800 status=ok time_syevd=0.21836018906906246 residual_syevd=4.0803598925492259e-10 time_original_ipt=0.095200429391115907 residual_original_ipt=2.630511319719792e-11 original_ipt_iterations=10 original_ipt_fp=9.736444782295978e-14 time_initial=0.015384639333933591 time_fp64=0.061128158215433361 time_mixed=0.076513055711984634 residual_mixed=2.9570057120064576e-11 initial_iterations=4 fp64_iterations=6 initial_fp=5.3254592361750239e-07 fp64_fp=1.2746395547299625e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_02.csv
+epsilon=0.02 N=8192 started_at=2026-06-13T12:25:35+0800
+epsilon=0.02 N=8192 initial_precision=tf32 finished_at=2026-06-13T12:25:53+0800 status=ok time_syevd=1.4484459757804871 residual_syevd=1.5413710880634777e-09 time_original_ipt=0.69614528901875017 residual_original_ipt=7.3946235722405837e-11 original_ipt_iterations=10 original_ipt_fp=1.2759830359349087e-13 time_initial=0.04346187440678477 time_fp64=0.44669686229899525 time_mixed=0.49015898993238805 residual_mixed=8.7814569645378579e-11 initial_iterations=4 fp64_iterations=6 initial_fp=5.4425601144522456e-07 fp64_fp=2.1768122278424947e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_02.csv
+epsilon=0.03 N=4090 started_at=2026-06-13T12:25:53+0800
+epsilon=0.03 N=4090 initial_precision=tf32 finished_at=2026-06-13T12:25:56+0800 status=ok time_syevd=0.21851282948628067 residual_syevd=4.033430050418093e-10 time_original_ipt=0.10404682187363505 residual_original_ipt=3.1423591195708748e-10 original_ipt_iterations=11 original_ipt_fp=7.3467539377416234e-13 time_initial=0.017631136160343886 time_fp64=0.069852436240762469 time_mixed=0.087484015803784135 residual_mixed=1.0575587192561794e-10 initial_iterations=5 fp64_iterations=7 initial_fp=2.5623536032599484e-07 fp64_fp=2.8051067312808328e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_03.csv
+epsilon=0.03 N=8192 started_at=2026-06-13T12:25:56+0800
+epsilon=0.03 N=8192 initial_precision=tf32 finished_at=2026-06-13T12:26:16+0800 status=ok time_syevd=1.4496040644124151 residual_syevd=1.5155939276058577e-09 time_original_ipt=0.75982902925461526 residual_original_ipt=8.7929145944490025e-10 original_ipt_iterations=11 original_ipt_fp=9.7118798939236657e-13 time_initial=0.052365587186068298 time_fp64=0.51012674616649745 time_mixed=0.56249260045588012 residual_mixed=3.2629887240169335e-10 initial_iterations=5 fp64_iterations=7 initial_fp=2.7129909642845611e-07 fp64_fp=4.0102802708541162e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_03.csv
+epsilon=0.04 N=4090 started_at=2026-06-13T12:26:16+0800
+epsilon=0.04 N=4090 initial_precision=tf32 finished_at=2026-06-13T12:26:18+0800 status=ok time_syevd=0.218507185485214 residual_syevd=4.0255460103067851e-10 time_original_ipt=0.1205525298602879 residual_original_ipt=2.8139337022398481e-10 original_ipt_iterations=13 original_ipt_fp=4.9027062539362846e-13 time_initial=0.019699609186500312 time_fp64=0.069916145410388708 time_mixed=0.089616090897470718 residual_mixed=3.7139385856745307e-10 initial_iterations=6 fp64_iterations=7 initial_fp=1.6748750658576776e-07 fp64_fp=9.3534836376216908e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_04.csv
+epsilon=0.04 N=8192 started_at=2026-06-13T12:26:18+0800
+epsilon=0.04 N=8192 initial_precision=tf32 finished_at=2026-06-13T12:26:39+0800 status=ok time_syevd=1.4489104107022286 residual_syevd=1.5325842747850873e-09 time_original_ipt=0.88699731826782224 residual_original_ipt=1.0911266749393179e-09 original_ipt_iterations=13 original_ipt_fp=8.8489704332339998e-13 time_initial=0.061607902124524119 time_fp64=0.57575709801167252 time_mixed=0.6373652776703238 residual_mixed=1.8307228828315809e-10 initial_iterations=6 fp64_iterations=8 initial_fp=1.872115326142433e-07 fp64_fp=2.4087587032975378e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_04.csv
+epsilon=0.05 N=4090 started_at=2026-06-13T12:26:39+0800
+epsilon=0.05 N=4090 initial_precision=tf32 finished_at=2026-06-13T12:26:42+0800 status=ok time_syevd=0.21856248788535595 residual_syevd=4.0379570013967044e-10 time_original_ipt=0.13772281343117357 residual_original_ipt=2.625813993324512e-10 original_ipt_iterations=15 original_ipt_fp=3.5700642613896471e-13 time_initial=0.019722307194024326 time_fp64=0.086585240252315995 time_mixed=0.10630787946283818 residual_mixed=1.8534699043337897e-10 initial_iterations=6 fp64_iterations=9 initial_fp=5.6044111129300216e-07 fp64_fp=2.6054074572256585e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_05.csv
+epsilon=0.05 N=8192 started_at=2026-06-13T12:26:42+0800
+epsilon=0.05 N=8192 initial_precision=tf32 finished_at=2026-06-13T12:27:05+0800 status=ok time_syevd=1.4492616281844675 residual_syevd=1.5291033922517238e-09 time_original_ipt=1.015313440002501 residual_original_ipt=1.3074312667490588e-09 original_ipt_iterations=15 original_ipt_fp=8.3808498099513764e-13 time_initial=0.06157815111801028 time_fp64=0.63799159536138172 time_mixed=0.69957007188349962 residual_mixed=7.757102042034324e-10 initial_iterations=6 fp64_iterations=9 initial_fp=6.3689053351564873e-07 fp64_fp=5.0014367747604412e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_05.csv
+epsilon=0.06 N=4090 started_at=2026-06-13T12:27:05+0800
+epsilon=0.06 N=4090 initial_precision=tf32 finished_at=2026-06-13T12:27:08+0800 status=ok time_syevd=0.21859791968017817 residual_syevd=4.0597197519769359e-10 time_original_ipt=0.15487463399767876 residual_original_ipt=4.3520502392055567e-10 original_ipt_iterations=17 original_ipt_fp=4.9823375144967697e-13 time_initial=0.02182959681376815 time_fp64=0.095167277008295054 time_mixed=0.11699726283550263 residual_mixed=5.7358513349434519e-10 initial_iterations=7 fp64_iterations=10 initial_fp=4.320449150371842e-07 fp64_fp=6.9105616051604556e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_06.csv
+epsilon=0.06 N=8192 started_at=2026-06-13T12:27:08+0800
+epsilon=0.06 N=8192 initial_precision=tf32 finished_at=2026-06-13T12:27:32+0800 status=ok time_syevd=1.4493100457824766 residual_syevd=1.5292982804486161e-09 time_original_ipt=1.2095419995486736 residual_original_ipt=5.6830077238555364e-10 original_ipt_iterations=18 original_ipt_fp=2.9924221618218926e-13 time_initial=0.07034986643120647 time_fp64=0.76651932038366799 time_mixed=0.8368694712407887 residual_mixed=8.4448523338081424e-10 initial_iterations=7 fp64_iterations=11 initial_fp=4.8173485654742532e-07 fp64_fp=4.5624724011908477e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_06.csv
+finished_at = 2026-06-13T12:27:32+0800

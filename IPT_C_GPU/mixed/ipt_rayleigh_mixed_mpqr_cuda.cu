@@ -1,0 +1,538 @@
+#include <cublas_v2.h>
+#include <cuda_runtime.h>
+#include <cusolverDn.h>
+
+#include <limits.h>
+#include <math.h>
+#include <stddef.h>
+#include <time.h>
+
+#include "../src/mixed_precision/ipt_mixed_precision_cuda.cu"
+
+#ifndef IPT_RAYLEIGH_MIXED_CUDA_DECLS
+#define IPT_RAYLEIGH_MIXED_CUDA_DECLS
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct {
+    int n;
+    int k;
+    int tf32_iterations;
+    int fp64_iterations;
+    double tf32_time_sec;
+    double orthogonalize_time_sec;
+    double rayleigh_transform_time_sec;
+    double fp64_time_sec;
+    double backtransform_time_sec;
+    double total_time_sec;
+    double tf32_fixed_point_residual;
+    double fp64_fixed_point_residual;
+    double *d_vectors;
+    double *d_values;
+} IPTRayleighMixedCudaDeviceResult;
+
+void ipt_rayleigh_mixed_cuda_free_device_result(
+    IPTRayleighMixedCudaDeviceResult *result);
+int ipt_rayleigh_mixed_tf32_cuda_device_tol(
+    const double *d_matrix_col_major, int n, int k, double tf32_tol,
+    int tf32_maxiter, double fp64_tol, int fp64_maxiter,
+    cublasHandle_t handle, IPTRayleighMixedCudaDeviceResult *result);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+static void ipt_rayleigh_mixed_reset_device_result(
+    IPTRayleighMixedCudaDeviceResult *result)
+{
+    if (result == NULL) {
+        return;
+    }
+
+    result->n = 0;
+    result->k = 0;
+    result->tf32_iterations = 0;
+    result->fp64_iterations = 0;
+    result->tf32_time_sec = NAN;
+    result->orthogonalize_time_sec = NAN;
+    result->rayleigh_transform_time_sec = NAN;
+    result->fp64_time_sec = NAN;
+    result->backtransform_time_sec = NAN;
+    result->total_time_sec = NAN;
+    result->tf32_fixed_point_residual = NAN;
+    result->fp64_fixed_point_residual = NAN;
+    result->d_vectors = NULL;
+    result->d_values = NULL;
+}
+
+extern "C" void ipt_rayleigh_mixed_cuda_free_device_result(
+    IPTRayleighMixedCudaDeviceResult *result)
+{
+    if (result == NULL) {
+        return;
+    }
+
+    cudaFree(result->d_vectors);
+    cudaFree(result->d_values);
+    ipt_rayleigh_mixed_reset_device_result(result);
+}
+
+__global__ static void rayleigh_symmetrize_kernel(double *matrix, int n,
+                                                  int total)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx >= total) {
+        return;
+    }
+
+    {
+        int row = idx % n;
+        int col = idx / n;
+
+        if (row < col) {
+            double upper = matrix[row + col * n];
+            double lower = matrix[col + row * n];
+            double avg = 0.5 * (upper + lower);
+
+            matrix[row + col * n] = avg;
+            matrix[col + row * n] = avg;
+        }
+    }
+}
+
+static int rayleigh_normalize_columns(double *d_matrix_col_major, int n, int k,
+                                      cublasHandle_t handle)
+{
+    if (d_matrix_col_major == NULL || handle == NULL || n <= 0 || k <= 0) {
+        return IPT_CUDA_INVALID_ARGUMENT;
+    }
+
+    for (int col = 0; col < k; ++col) {
+        double norm = 0.0;
+        double scale = 0.0;
+        cublasStatus_t cublas_status =
+            cublasDnrm2(handle, n, d_matrix_col_major + (size_t)col * n, 1,
+                        &norm);
+
+        if (cublas_status != CUBLAS_STATUS_SUCCESS) {
+            return IPT_CUDA_CUBLAS_ERROR;
+        }
+        if (norm <= 0.0 || !isfinite(norm)) {
+            return IPT_CUDA_INVALID_ARGUMENT;
+        }
+
+        scale = 1.0 / norm;
+        cublas_status =
+            cublasDscal(handle, n, &scale,
+                        d_matrix_col_major + (size_t)col * n, 1);
+        if (cublas_status != CUBLAS_STATUS_SUCCESS) {
+            return IPT_CUDA_CUBLAS_ERROR;
+        }
+    }
+
+    return IPT_CUDA_SUCCESS;
+}
+
+__global__ static void rayleigh_double_to_float_kernel(const double *input,
+                                                       float *output,
+                                                       int total)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx < total) {
+        output[idx] = (float)input[idx];
+    }
+}
+
+__global__ static void rayleigh_extract_upper_float_to_double_kernel(
+    const float *geqrf_matrix, double *upper, int n, int k, int total)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx >= total) {
+        return;
+    }
+
+    {
+        int row = idx % k;
+        int col = idx / k;
+
+        upper[idx] = (row <= col) ? (double)geqrf_matrix[row + col * n] : 0.0;
+    }
+}
+
+static int rayleigh_orthogonalize_mixed_qr(double *d_q, int n, int k,
+                                          cublasHandle_t handle)
+{
+    int status = IPT_CUDA_SUCCESS;
+    cusolverDnHandle_t solver = NULL;
+    cusolverStatus_t solver_status;
+    cublasStatus_t cublas_status;
+    int lwork_sgeqrf = 0;
+    int lwork_dpotrf = 0;
+    int lwork = 0;
+    float *d_q_float = NULL;
+    float *d_tau_float = NULL;
+    float *d_swork = NULL;
+    double *d_r = NULL;
+    double *d_v = NULL;
+    double *d_gram = NULL;
+    double *d_dwork = NULL;
+    int *d_info = NULL;
+    int h_info = 0;
+    cudaError_t cuda_status;
+    const double one = 1.0;
+    const double zero = 0.0;
+    const int block_size = 256;
+    int q_total = 0;
+    int r_total = 0;
+
+    if (d_q == NULL || handle == NULL || n <= 0 || k <= 0 || k > n) {
+        return IPT_CUDA_INVALID_ARGUMENT;
+    }
+    if ((size_t)n * (size_t)k > (size_t)INT_MAX ||
+        (size_t)k * (size_t)k > (size_t)INT_MAX) {
+        return IPT_CUDA_INVALID_ARGUMENT;
+    }
+    q_total = n * k;
+    r_total = k * k;
+
+    solver_status = cusolverDnCreate(&solver);
+    if (solver_status != CUSOLVER_STATUS_SUCCESS) {
+        return IPT_CUDA_CUBLAS_ERROR;
+    }
+
+    cuda_status = cudaMalloc((void **)&d_q_float,
+                             (size_t)q_total * sizeof(float));
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    cuda_status = cudaMalloc((void **)&d_tau_float,
+                             (size_t)k * sizeof(float));
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    cuda_status = cudaMalloc((void **)&d_r, (size_t)r_total * sizeof(double));
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    cuda_status = cudaMalloc((void **)&d_v, (size_t)q_total * sizeof(double));
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    cuda_status =
+        cudaMalloc((void **)&d_gram, (size_t)r_total * sizeof(double));
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    cuda_status = cudaMalloc((void **)&d_info, sizeof(int));
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+
+    rayleigh_double_to_float_kernel<<<(q_total + block_size - 1) / block_size,
+                                      block_size>>>(d_q, d_q_float, q_total);
+    cuda_status = cudaGetLastError();
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+
+    solver_status = cusolverDnSgeqrf_bufferSize(solver, n, k, d_q_float, n,
+                                                &lwork_sgeqrf);
+    if (solver_status != CUSOLVER_STATUS_SUCCESS) {
+        status = IPT_CUDA_CUBLAS_ERROR;
+        goto cleanup;
+    }
+    solver_status = cusolverDnDpotrf_bufferSize(solver, CUBLAS_FILL_MODE_LOWER,
+                                                k, d_gram, k, &lwork_dpotrf);
+    if (solver_status != CUSOLVER_STATUS_SUCCESS) {
+        status = IPT_CUDA_CUBLAS_ERROR;
+        goto cleanup;
+    }
+
+    if (lwork_sgeqrf <= 0 || lwork_dpotrf <= 0) {
+        status = IPT_CUDA_INVALID_ARGUMENT;
+        goto cleanup;
+    }
+    cuda_status = cudaMalloc((void **)&d_swork,
+                             (size_t)lwork_sgeqrf * sizeof(float));
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    lwork = lwork_dpotrf;
+    cuda_status = cudaMalloc((void **)&d_dwork, (size_t)lwork * sizeof(double));
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+
+    solver_status = cusolverDnSgeqrf(solver, n, k, d_q_float, n, d_tau_float,
+                                     d_swork, lwork_sgeqrf, d_info);
+    if (solver_status != CUSOLVER_STATUS_SUCCESS) {
+        status = IPT_CUDA_CUBLAS_ERROR;
+        goto cleanup;
+    }
+    cuda_status = cudaDeviceSynchronize();
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    cuda_status = cudaMemcpy(&h_info, d_info, sizeof(int),
+                             cudaMemcpyDeviceToHost);
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    if (h_info != 0) {
+        status = IPT_CUDA_INVALID_ARGUMENT;
+        goto cleanup;
+    }
+
+    rayleigh_extract_upper_float_to_double_kernel<<<
+        (r_total + block_size - 1) / block_size, block_size>>>(d_q_float, d_r,
+                                                               n, k, r_total);
+    cuda_status = cudaGetLastError();
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    cuda_status = cudaMemcpy(d_v, d_q, (size_t)q_total * sizeof(double),
+                             cudaMemcpyDeviceToDevice);
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+
+    cublas_status = cublasDtrsm(handle, CUBLAS_SIDE_RIGHT,
+                                CUBLAS_FILL_MODE_UPPER, CUBLAS_OP_N,
+                                CUBLAS_DIAG_NON_UNIT, n, k, &one, d_r, k, d_v,
+                                n);
+    if (cublas_status != CUBLAS_STATUS_SUCCESS) {
+        status = IPT_CUDA_CUBLAS_ERROR;
+        goto cleanup;
+    }
+
+    cublas_status = cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N, k, k, n,
+                                &one, d_v, n, d_v, n, &zero, d_gram, k);
+    if (cublas_status != CUBLAS_STATUS_SUCCESS) {
+        status = IPT_CUDA_CUBLAS_ERROR;
+        goto cleanup;
+    }
+
+    solver_status = cusolverDnDpotrf(solver, CUBLAS_FILL_MODE_LOWER, k, d_gram,
+                                     k, d_dwork, lwork, d_info);
+    if (solver_status != CUSOLVER_STATUS_SUCCESS) {
+        status = IPT_CUDA_CUBLAS_ERROR;
+        goto cleanup;
+    }
+    cuda_status = cudaMemcpy(&h_info, d_info, sizeof(int),
+                             cudaMemcpyDeviceToHost);
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    if (h_info != 0) {
+        status = IPT_CUDA_INVALID_ARGUMENT;
+        goto cleanup;
+    }
+
+    cublas_status = cublasDtrsm(handle, CUBLAS_SIDE_RIGHT,
+                                CUBLAS_FILL_MODE_LOWER, CUBLAS_OP_T,
+                                CUBLAS_DIAG_NON_UNIT, n, k, &one, d_gram, k,
+                                d_v, n);
+    if (cublas_status != CUBLAS_STATUS_SUCCESS) {
+        status = IPT_CUDA_CUBLAS_ERROR;
+        goto cleanup;
+    }
+    cuda_status = cudaMemcpy(d_q, d_v, (size_t)q_total * sizeof(double),
+                             cudaMemcpyDeviceToDevice);
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+    cuda_status = cudaDeviceSynchronize();
+    if (cuda_status != cudaSuccess) {
+        status = IPT_CUDA_CUDA_ERROR;
+        goto cleanup;
+    }
+
+cleanup:
+    cudaFree(d_q_float);
+    cudaFree(d_tau_float);
+    cudaFree(d_swork);
+    cudaFree(d_r);
+    cudaFree(d_v);
+    cudaFree(d_gram);
+    cudaFree(d_dwork);
+    cudaFree(d_info);
+    if (solver != NULL) {
+        cusolverDnDestroy(solver);
+    }
+
+    return status;
+}
+
+#define RAYLEIGH_CUDA_CHECK(call)                                             \
+    do {                                                                      \
+        cudaError_t rayleigh_cuda_status = (call);                            \
+        if (rayleigh_cuda_status != cudaSuccess) {                            \
+            status = IPT_CUDA_CUDA_ERROR;                                     \
+            goto cleanup;                                                     \
+        }                                                                     \
+    } while (0)
+
+#define RAYLEIGH_CUBLAS_CHECK(call)                                           \
+    do {                                                                      \
+        cublasStatus_t rayleigh_cublas_status = (call);                       \
+        if (rayleigh_cublas_status != CUBLAS_STATUS_SUCCESS) {                \
+            status = IPT_CUDA_CUBLAS_ERROR;                                   \
+            goto cleanup;                                                     \
+        }                                                                     \
+    } while (0)
+
+extern "C" int ipt_rayleigh_mixed_tf32_cuda_device_tol(
+    const double *d_matrix_col_major, int n, int k, double tf32_tol,
+    int tf32_maxiter, double fp64_tol, int fp64_maxiter,
+    cublasHandle_t handle, IPTRayleighMixedCudaDeviceResult *result)
+{
+    int status = IPT_CUDA_SUCCESS;
+    double *d_q = NULL;
+    double *d_aq = NULL;
+    double *d_b = NULL;
+    double *d_z = NULL;
+    double *d_values = NULL;
+    double *d_vectors = NULL;
+    double stage_start = 0.0;
+    double tf32_residual_check_time = 0.0;
+    double raw_tf32_time = 0.0;
+    size_t q_elements = 0;
+    size_t b_elements = 0;
+    const double one = 1.0;
+    const double zero = 0.0;
+
+    ipt_rayleigh_mixed_reset_device_result(result);
+
+    if (d_matrix_col_major == NULL || handle == NULL || result == NULL ||
+        n <= 0 || k <= 0 || k > n || tf32_tol <= 0.0 || fp64_tol <= 0.0 ||
+        tf32_maxiter <= 0 || fp64_maxiter <= 0) {
+        return IPT_CUDA_INVALID_ARGUMENT;
+    }
+
+    q_elements = (size_t)n * (size_t)k;
+    b_elements = (size_t)k * (size_t)k;
+    if (q_elements > (size_t)INT_MAX || b_elements > (size_t)INT_MAX) {
+        return IPT_CUDA_INVALID_ARGUMENT;
+    }
+
+    stage_start = ipt_mixed_now_seconds();
+    status = ipt_tf32_initial_device_tol(
+        d_matrix_col_major, n, k, tf32_tol, tf32_maxiter, handle, &d_q,
+        &result->tf32_iterations, &result->tf32_fixed_point_residual,
+        &tf32_residual_check_time);
+    if (status != IPT_CUDA_SUCCESS) {
+        goto cleanup;
+    }
+    RAYLEIGH_CUDA_CHECK(cudaDeviceSynchronize());
+    raw_tf32_time = ipt_mixed_now_seconds() - stage_start;
+    result->tf32_time_sec = raw_tf32_time - tf32_residual_check_time;
+    if (result->tf32_time_sec < 0.0) {
+        result->tf32_time_sec = 0.0;
+    }
+
+    stage_start = ipt_mixed_now_seconds();
+    status = rayleigh_normalize_columns(d_q, n, k, handle);
+    if (status != IPT_CUDA_SUCCESS) {
+        goto cleanup;
+    }
+    status = rayleigh_orthogonalize_mixed_qr(d_q, n, k, handle);
+    if (status != IPT_CUDA_SUCCESS) {
+        goto cleanup;
+    }
+    RAYLEIGH_CUDA_CHECK(cudaDeviceSynchronize());
+    result->orthogonalize_time_sec = ipt_mixed_now_seconds() - stage_start;
+
+    stage_start = ipt_mixed_now_seconds();
+    RAYLEIGH_CUDA_CHECK(cudaMalloc((void **)&d_aq,
+                                   q_elements * sizeof(double)));
+    RAYLEIGH_CUDA_CHECK(cudaMalloc((void **)&d_b,
+                                   b_elements * sizeof(double)));
+
+    RAYLEIGH_CUBLAS_CHECK(cublasDgemm(
+        handle, CUBLAS_OP_N, CUBLAS_OP_N, n, k, n, &one, d_matrix_col_major, n,
+        d_q, n, &zero, d_aq, n));
+    RAYLEIGH_CUBLAS_CHECK(cublasDgemm(
+        handle, CUBLAS_OP_T, CUBLAS_OP_N, k, k, n, &one, d_q, n, d_aq, n,
+        &zero, d_b, k));
+
+    {
+        const int block_size = 256;
+        int blocks = ((int)b_elements + block_size - 1) / block_size;
+
+        rayleigh_symmetrize_kernel<<<blocks, block_size>>>(
+            d_b, k, (int)b_elements);
+        RAYLEIGH_CUDA_CHECK(cudaGetLastError());
+    }
+    RAYLEIGH_CUDA_CHECK(cudaDeviceSynchronize());
+    result->rayleigh_transform_time_sec =
+        ipt_mixed_now_seconds() - stage_start;
+
+    stage_start = ipt_mixed_now_seconds();
+    status = ipt_cuda_device_tol(d_b, k, k, fp64_tol, fp64_maxiter, handle,
+                                 &d_z, &d_values, &result->fp64_iterations,
+                                 &result->fp64_fixed_point_residual);
+    if (status != IPT_CUDA_SUCCESS) {
+        goto cleanup;
+    }
+    RAYLEIGH_CUDA_CHECK(cudaDeviceSynchronize());
+    result->fp64_time_sec = ipt_mixed_now_seconds() - stage_start;
+
+    stage_start = ipt_mixed_now_seconds();
+    RAYLEIGH_CUDA_CHECK(cudaMalloc((void **)&d_vectors,
+                                   q_elements * sizeof(double)));
+    RAYLEIGH_CUBLAS_CHECK(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, k,
+                                      k, &one, d_q, n, d_z, k, &zero,
+                                      d_vectors, n));
+    RAYLEIGH_CUDA_CHECK(cudaDeviceSynchronize());
+    result->backtransform_time_sec = ipt_mixed_now_seconds() - stage_start;
+
+    result->total_time_sec =
+        result->tf32_time_sec + result->orthogonalize_time_sec +
+        result->rayleigh_transform_time_sec + result->fp64_time_sec +
+        result->backtransform_time_sec;
+    result->n = n;
+    result->k = k;
+    result->d_vectors = d_vectors;
+    result->d_values = d_values;
+    d_vectors = NULL;
+    d_values = NULL;
+
+cleanup:
+    cudaFree(d_q);
+    cudaFree(d_aq);
+    cudaFree(d_b);
+    cudaFree(d_z);
+    cudaFree(d_values);
+    cudaFree(d_vectors);
+
+    if (status != IPT_CUDA_SUCCESS) {
+        ipt_rayleigh_mixed_cuda_free_device_result(result);
+    }
+
+    return status;
+}
+
+#undef RAYLEIGH_CUDA_CHECK
+#undef RAYLEIGH_CUBLAS_CHECK

@@ -1,0 +1,87 @@
+===== NH3/STO-6G full FCI IPT sparse benchmark =====
+Wed Jun 24 11:27:02 CST 2026
+th-hpc4-ln0
+SLURM_JOB_ID=
+CUDA_VISIBLE_DEVICES=
+IPT_REPEATS=1
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_K=10
+IPT_DEBUG_PREPARATION=1
+RUN_PRIMME=0
+RUN_WARMUP=0
+IPT_EST_NNZ_PER_COL=600
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+numpy 1.21.5 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/numpy/__init__.py
+scipy 1.7.3 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/scipy/__init__.py
+pyscf 2.0.1 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/pyscf/__init__.py
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+test/sparse/NH3/run_nh3_sto6g_fci_3136_ipt.sh: line 61: nvidia-smi: command not found
+===== build =====
++ nvcc -O3 -std=c++14 -lineinfo -arch=sm_80 -I/fs1/home/nudt_liujie/ftt/primme-3.2.3/include -I/fs1/software/python/3.8_miniconda_4.10.3/include/python3.8 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/benchmark_nh3_sto6g_fci_3136_ipt.cu /fs1/home/nudt_liujie/ftt/primme-3.2.3/lib/libprimme.a -o /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/benchmark_nh3_sto6g_fci_3136_ipt_cuda -lcublas -lcusparse -lcudart -L/fs1/software/python/3.8_miniconda_4.10.3/lib -lpython3.8 -L/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3 -lopenblas -lpthread -ldl -lutil -lrt -Xlinker -rpath -Xlinker /fs1/software/gcc/12.2.0/lib64 -Xlinker -rpath -Xlinker /fs1/software/python/3.8_miniconda_4.10.3/lib -Xlinker -rpath -Xlinker /fs1/software/cp2k/8.1-gcc8.4-openmpi/lib -lgfortran /fs1/software/gcc/12.2.0/lib64/libstdc++.so -lm
++ set +x
+===== run =====
+Generating NH3/STO-6G full FCI integrals with PySCF...
+PYSCF_SITE_PACKAGES=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+Generated CI strings: na=56 nb=56 n=3136
+Link counts per string: one=20 two=400
+CSC generation progress 3136/3136 columns nnz=990976 elapsed=0.15 sec
+NH3/STO-6G full FCI CSC benchmark: n=3136 nnz=990976 k=10 repeats=1 tol=1.000e-12 run_primme=0
+Matrix/integral generation time 3.051598 sec is excluded from PRIMME/IPT timings.
+[NH3 benchmark] sorted diagonal first 10 entries (requested k=10 threshold=0.10000000000000001)
+[NH3 benchmark] rank=0 original_index=0 diagonal=-55.988398491054774 gap_to_next=0.52916495219155024
+[NH3 benchmark] rank=1 original_index=2 diagonal=-55.459233538863224 gap_to_next=1.4210854715202004e-14
+[NH3 benchmark] rank=2 original_index=1 diagonal=-55.459233538863209 gap_to_next=0.027820160888552437
+[NH3 benchmark] rank=3 original_index=4 diagonal=-55.431413377974657 gap_to_next=7.1054273576010019e-15
+[NH3 benchmark] rank=4 original_index=3 diagonal=-55.43141337797465 gap_to_next=7.5366914416008512e-06
+[NH3 benchmark] rank=5 original_index=5 diagonal=-55.431405841283208 gap_to_next=0
+[NH3 benchmark] rank=6 original_index=6 diagonal=-55.431405841283208 gap_to_next=0.19780133696328051
+[NH3 benchmark] rank=7 original_index=8 diagonal=-55.233604504319928 gap_to_next=7.1054273576010019e-15
+[NH3 benchmark] rank=8 original_index=7 diagonal=-55.233604504319921 gap_to_next=1.0978110651649331e-05
+[NH3 benchmark] rank=9 original_index=10 diagonal=-55.233593526209269
+[IPT preparation] n=3136 k=10 abs_threshold=0 eps_multiplier=1000 rel_gap_tol=9.9999999999999998e-13 alpha=5 eta=0.10000000000000001 max_block_size=64 max_lift_rounds=3 sorted_changed=1 hermitian=1
+[IPT preparation] round=1 target_vs_all_blocks=1
+[IPT preparation] diag[0]=-55.988398491054774 gap_to_next_index=0.52916495219155024
+[IPT preparation] diag[1]=-55.459233538863224 gap_to_next_index=1.4210854715202004e-14
+[IPT preparation] diag[2]=-55.459233538863209 gap_to_next_index=0.027820160888552437
+[IPT preparation] diag[3]=-55.431413377974657 gap_to_next_index=7.1054273576010019e-15
+[IPT preparation] diag[4]=-55.43141337797465 gap_to_next_index=7.5366914416008512e-06
+[IPT preparation] diag[5]=-55.431405841283208 gap_to_next_index=0
+[IPT preparation] diag[6]=-55.431405841283208 gap_to_next_index=0.19780133696328051
+[IPT preparation] diag[7]=-55.233604504319928 gap_to_next_index=7.1054273576010019e-15
+[IPT preparation] diag[8]=-55.233604504319921 gap_to_next_index=1.0978110651649331e-05
+[IPT preparation] diag[9]=-55.233593526209269
+[IPT preparation] block[0]=1:18 size=18 diag_first=-55.459233538863224 diag_last=-55.127266798896919 max_adjacent_index_gap=0.19780133696328051
+[IPT preparation] round=1 lift succeeded total_rotations=1 bad_gaps=0 min_abs_gap=7.2956857479766768e-06
+[IPT preparation] post_lift_diag[0]=-55.988398491054774 gap_to_next=0.49258018532392356
+[IPT preparation] post_lift_diag[1]=-55.49581830573085 gap_to_next=0.020686487952310983
+[IPT preparation] post_lift_diag[2]=-55.475131817778539 gap_to_next=8.6301600674687506e-06
+[IPT preparation] post_lift_diag[3]=-55.475123187618472 gap_to_next=0.046084535554804518
+[IPT preparation] post_lift_diag[4]=-55.429038652063667 gap_to_next=0.034257920828899557
+[IPT preparation] post_lift_diag[5]=-55.394780731234768 gap_to_next=7.2956857479766768e-06
+[IPT preparation] post_lift_diag[6]=-55.39477343554902 gap_to_next=0.06761158792392763
+[IPT preparation] post_lift_diag[7]=-55.327161847625092 gap_to_next=1.8506116163052866e-05
+[IPT preparation] post_lift_diag[8]=-55.327143341508929 gap_to_next=0.030647257230107527
+[IPT preparation] post_lift_diag[9]=-55.296496084278822
+CUDA error at /fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/../../../src/ipt_cuda.cu:1195: CUDA driver version is insufficient for CUDA runtime version
+repeat 1 IPT k=10 time=3.795281e-01 max_residual=nan first_eigenvalue=nan
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/debug/nh3_sto6g_fci_3136_ipt_trials.csv
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/debug/nh3_sto6g_fci_3136_ipt_summary.txt
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/debug:
+total 16K
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   86 Jun 24 11:21 latest_near_degeneracy_debug.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/debug/near_degeneracy_debug_manual.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie   87 Jun 24 11:27 latest_nh3_sto6g_fci_3136_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/debug/nh3_sto6g_fci_3136_ipt_manual.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.4K Jun 24 11:21 near_degeneracy_debug_manual.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.9K Jun 24 11:27 nh3_sto6g_fci_3136_ipt_manual.log
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/debug:
+total 1.0K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 687 Jun 24 11:27 nh3_sto6g_fci_3136_ipt_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 210 Jun 24 11:27 nh3_sto6g_fci_3136_ipt_trials.csv
+finished at: Wed Jun 24 11:27:44 CST 2026

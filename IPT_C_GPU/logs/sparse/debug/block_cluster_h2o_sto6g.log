@@ -1,0 +1,22 @@
+H2O/STO-6G dense FCI n=441 k=10
+options alpha=5 rel_gap_tol=1e-12 abs_gap=0 riccati_iters=1 fixed_point_iters=100 damping=1
+generation_time_sec=3.260360
+tau_num=1.6804335115723296e-11
+clusters:
+  0:0 size=1 sep_min=0.43181109793356143 eig_range=[-75.731617400685764, -75.731617400685764]
+  1:12 size=12 sep_min=0.056046317088354253 eig_range=[-75.347492475994272, -74.763021228635409]
+selected eigenpairs:
+   0 cluster=0:0 value=-75.731617400685764 exact=-75.731617400685778 abs_error=1.421e-14 residual=9.029e-15
+   1 cluster=1:12 value=-75.347492475994272 exact=-75.347492475994287 abs_error=1.421e-14 residual=1.404e-16
+   2 cluster=1:12 value=-75.28883596807357 exact=-75.288835968073599 abs_error=2.842e-14 residual=2.322e-16
+   3 cluster=1:12 value=-75.246847868134083 exact=-75.246847868134182 abs_error=9.948e-14 residual=1.477e-15
+   4 cluster=1:12 value=-75.244426755592201 exact=-75.24442675559213 abs_error=7.105e-14 residual=1.597e-15
+   5 cluster=1:12 value=-75.210057383519015 exact=-75.2100573835191 abs_error=8.527e-14 residual=1.166e-15
+   6 cluster=1:12 value=-75.170800457681878 exact=-75.170800457681906 abs_error=2.842e-14 residual=6.402e-16
+   7 cluster=1:12 value=-75.145332322791106 exact=-75.145332322791063 abs_error=4.263e-14 residual=1.736e-15
+   8 cluster=1:12 value=-75.065418449366774 exact=-75.065418449366803 abs_error=2.842e-14 residual=3.703e-16
+   9 cluster=1:12 value=-75.05294636282575 exact=-75.052946362825779 abs_error=2.842e-14 residual=5.409e-16
+max_abs_error=9.9475983006414026e-14
+max_relative_residual=9.0289024000466667e-15
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/h2o_sto6g_block_cluster_debug.csv
+metadata norb=7 nelec=10 na=21 nb=21 hf_energy=-75.679997365380345

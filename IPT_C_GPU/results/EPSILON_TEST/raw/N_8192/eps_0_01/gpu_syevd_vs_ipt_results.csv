@@ -1,0 +1,2 @@
+N,epsilon,time_syevd_sec,time_ipt_sec,residual_syevd,residual_ipt,ipt_fixed_point_residual,ipt_iterations,gpu_name,status,error
+8192,0.01,1.4521904210560024,0.56267909798771143,1.5276216379040918e-09,1.758886018181272e-11,6.5213573181514535e-14,8,NVIDIA A100-SXM4-80GB,ok,

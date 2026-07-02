@@ -1,0 +1,1141 @@
+#include <Python.h>
+#include <cuda_runtime.h>
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <limits>
+#include <numeric>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "/fs1/home/nudt_liujie/ftt/primme-3.2.3/include/primme.h"
+
+#include "../../../src/ipt_cuda.cu"
+
+#define DEFAULT_RESULTS_DIR "/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse"
+#define DEFAULT_PYSCF_SITE_PACKAGES                                               \
+    "/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages"
+#define DEFAULT_REPEATS 1
+#define DEFAULT_TOL 1.0e-12
+#define DEFAULT_IPT_MAXITER 1000
+#define DEFAULT_PRIMME_MAX_MATVECS 1000
+
+typedef struct {
+    int n;
+    int nnz;
+    const int *col_ptr;
+    const int *row_ind;
+    const double *values;
+} CscMatrixView;
+
+typedef struct {
+    int n;
+    int nnz;
+    std::vector<int> col_ptr;
+    std::vector<int> row_ind;
+    std::vector<double> values;
+} CscMatrix;
+
+typedef struct {
+    int norb;
+    int active_electrons;
+    int neleca;
+    int nelecb;
+    int na;
+    int nb;
+    double ecore;
+    double nuclear_repulsion;
+    double hartree_fock_energy;
+    double generation_time_sec;
+    std::vector<double> h1;
+    std::vector<double> eri;
+} ActiveSpaceData;
+
+typedef struct {
+    int p;
+    int q;
+    int target;
+    int sign;
+} OneLink;
+
+typedef struct {
+    int p;
+    int q;
+    int r;
+    int s;
+    int target;
+    int sign;
+} TwoLink;
+
+typedef struct {
+    const char *method;
+    int repeat;
+    double time_sec;
+    int iterations;
+    long long matvecs;
+    double eigenvalue;
+    double residual;
+    int status;
+    char error[128];
+} TrialResult;
+
+static const char *N2_STO6G_FCI_PYTHON = R"PY(
+def build_n2_sto6g_full_fci_integrals():
+    import numpy as np
+    from functools import reduce
+    from numpy import dot
+    from pyscf import ao2mo, fci, gto, scf
+
+    coordinates = """
+N 0.000000 0.000000 -0.548800;
+N 0.000000 0.000000 0.548800
+"""
+
+    mol = gto.M(atom=coordinates, basis="sto-6g", symmetry=False, verbose=0)
+    hf = scf.RHF(mol)
+    hf.verbose = 0
+    hf.kernel()
+    if not hf.converged:
+        raise RuntimeError("PySCF RHF did not converge for N2/STO-6G full FCI")
+
+    nelec = mol.nelectron
+    norb = hf.mo_coeff.shape[1]
+    neleca, nelecb = fci.addons._unpack_nelec(nelec)
+    na = fci.cistring.num_strings(norb, neleca)
+    nb = fci.cistring.num_strings(norb, nelecb)
+
+    h1eff = reduce(dot, (hf.mo_coeff.T, hf.get_hcore(), hf.mo_coeff))
+    eri = ao2mo.incore.general(hf._eri, (hf.mo_coeff,) * 4, compact=False)
+    ecore = float(hf.energy_nuc())
+
+    return (
+        int(norb),
+        int(nelec),
+        int(neleca),
+        int(nelecb),
+        int(na),
+        int(nb),
+        float(ecore),
+        float(hf.energy_nuc()),
+        float(hf.e_tot),
+        np.asarray(h1eff, dtype=np.float64).reshape(-1).tolist(),
+        np.asarray(eri, dtype=np.float64).reshape(-1).tolist(),
+    )
+)PY";
+
+static double now_seconds(void)
+{
+    using clock = std::chrono::steady_clock;
+    return std::chrono::duration<double>(clock::now().time_since_epoch())
+        .count();
+}
+
+static const char *results_dir(void)
+{
+    const char *dir = getenv("IPT_C_RESULTS_DIR");
+
+    if (dir == NULL || dir[0] == '\0') {
+        dir = getenv("IPT_SPARSE_RESULTS_DIR");
+    }
+
+    return (dir == NULL || dir[0] == '\0') ? DEFAULT_RESULTS_DIR : dir;
+}
+
+static const char *pyscf_site_packages(void)
+{
+    const char *site = getenv("PYSCF_SITE_PACKAGES");
+
+    return (site == NULL || site[0] == '\0') ? DEFAULT_PYSCF_SITE_PACKAGES
+                                             : site;
+}
+
+static int env_int(const char *name, int default_value)
+{
+    const char *raw = getenv(name);
+
+    if (raw == NULL || raw[0] == '\0') {
+        return default_value;
+    }
+
+    int value = atoi(raw);
+    return value > 0 ? value : default_value;
+}
+
+static long long env_ll(const char *name, long long default_value)
+{
+    const char *raw = getenv(name);
+
+    if (raw == NULL || raw[0] == '\0') {
+        return default_value;
+    }
+
+    long long value = atoll(raw);
+    return value > 0 ? value : default_value;
+}
+
+static double env_double(const char *name, double default_value)
+{
+    const char *raw = getenv(name);
+
+    if (raw == NULL || raw[0] == '\0') {
+        return default_value;
+    }
+
+    double value = atof(raw);
+    return value > 0.0 ? value : default_value;
+}
+
+static int env_bool(const char *name, int default_value)
+{
+    const char *raw = getenv(name);
+
+    if (raw == NULL || raw[0] == '\0') {
+        return default_value;
+    }
+
+    return atoi(raw) != 0;
+}
+
+static void prepend_env_path(const char *name, const char *path)
+{
+    const char *old_value = getenv(name);
+    std::string new_value;
+
+    if (path == NULL || path[0] == '\0') {
+        return;
+    }
+
+    if (old_value == NULL || old_value[0] == '\0') {
+        new_value = path;
+    } else {
+        new_value = std::string(path) + ":" + old_value;
+    }
+
+    setenv(name, new_value.c_str(), 1);
+}
+
+static int ensure_directory(const char *path)
+{
+    char command[4096];
+
+    snprintf(command, sizeof(command), "mkdir -p '%s'", path);
+    return system(command);
+}
+
+static bool py_long_to_int(PyObject *object, int *value, const char *name)
+{
+    long parsed = PyLong_AsLong(object);
+
+    if (PyErr_Occurred() != NULL || parsed < 0 ||
+        parsed > (long)std::numeric_limits<int>::max()) {
+        fprintf(stderr, "could not parse Python integer field %s\n", name);
+        PyErr_Clear();
+        return false;
+    }
+
+    *value = (int)parsed;
+    return true;
+}
+
+static bool py_float_to_double(PyObject *object, double *value,
+                               const char *name)
+{
+    double parsed = PyFloat_AsDouble(object);
+
+    if (PyErr_Occurred() != NULL || !std::isfinite(parsed)) {
+        fprintf(stderr, "could not parse Python float field %s\n", name);
+        PyErr_Clear();
+        return false;
+    }
+
+    *value = parsed;
+    return true;
+}
+
+static bool py_sequence_to_double_vector(PyObject *object,
+                                         std::vector<double> *values,
+                                         const char *name)
+{
+    PyObject *sequence = PySequence_Fast(object, name);
+
+    if (sequence == NULL) {
+        PyErr_Print();
+        return false;
+    }
+
+    Py_ssize_t size = PySequence_Fast_GET_SIZE(sequence);
+    values->resize((size_t)size);
+
+    for (Py_ssize_t i = 0; i < size; ++i) {
+        double parsed = 0.0;
+        if (!py_float_to_double(PySequence_Fast_GET_ITEM(sequence, i),
+                                &parsed, name)) {
+            Py_DECREF(sequence);
+            return false;
+        }
+        (*values)[(size_t)i] = parsed;
+    }
+
+    Py_DECREF(sequence);
+    return true;
+}
+
+static bool parse_integral_tuple(PyObject *tuple, ActiveSpaceData *data)
+{
+    if (!PyTuple_Check(tuple) || PyTuple_Size(tuple) != 11) {
+        fprintf(stderr, "PySCF generator returned an unexpected object\n");
+        return false;
+    }
+
+    if (!py_long_to_int(PyTuple_GET_ITEM(tuple, 0), &data->norb, "norb") ||
+        !py_long_to_int(PyTuple_GET_ITEM(tuple, 1),
+                        &data->active_electrons, "active_electrons") ||
+        !py_long_to_int(PyTuple_GET_ITEM(tuple, 2), &data->neleca,
+                        "neleca") ||
+        !py_long_to_int(PyTuple_GET_ITEM(tuple, 3), &data->nelecb,
+                        "nelecb") ||
+        !py_long_to_int(PyTuple_GET_ITEM(tuple, 4), &data->na, "na") ||
+        !py_long_to_int(PyTuple_GET_ITEM(tuple, 5), &data->nb, "nb") ||
+        !py_float_to_double(PyTuple_GET_ITEM(tuple, 6), &data->ecore,
+                            "ecore") ||
+        !py_float_to_double(PyTuple_GET_ITEM(tuple, 7),
+                            &data->nuclear_repulsion,
+                            "nuclear_repulsion") ||
+        !py_float_to_double(PyTuple_GET_ITEM(tuple, 8),
+                            &data->hartree_fock_energy,
+                            "hartree_fock_energy") ||
+        !py_sequence_to_double_vector(PyTuple_GET_ITEM(tuple, 9), &data->h1,
+                                      "h1") ||
+        !py_sequence_to_double_vector(PyTuple_GET_ITEM(tuple, 10),
+                                      &data->eri, "eri")) {
+        return false;
+    }
+
+    if (data->norb != 10 || data->active_electrons != 14 ||
+        data->neleca != 7 || data->nelecb != 7 || data->na != 120 ||
+        data->nb != 120 || data->h1.size() != 100U ||
+        data->eri.size() != 10000U) {
+        fprintf(stderr,
+                "unexpected N2/STO-6G full FCI active space: norb=%d "
+                "nelec=%d (%d,%d) na=%d nb=%d h1=%zu eri=%zu\n",
+                data->norb, data->active_electrons, data->neleca,
+                data->nelecb, data->na, data->nb, data->h1.size(),
+                data->eri.size());
+        return false;
+    }
+
+    return true;
+}
+
+static bool generate_active_space_integrals(ActiveSpaceData *data)
+{
+    const char *site = pyscf_site_packages();
+    double start = now_seconds();
+
+    prepend_env_path("PYTHONPATH", site);
+
+    printf("Generating N2/STO-6G full FCI integrals with "
+           "PySCF...\n");
+    printf("PYSCF_SITE_PACKAGES=%s\n", site);
+    fflush(stdout);
+
+    Py_Initialize();
+    if (!Py_IsInitialized()) {
+        fprintf(stderr, "failed to initialize embedded Python\n");
+        return false;
+    }
+
+    PyObject *main_module = PyImport_AddModule("__main__");
+    PyObject *globals = PyModule_GetDict(main_module);
+    PyObject *module_result =
+        PyRun_String(N2_STO6G_FCI_PYTHON, Py_file_input, globals, globals);
+
+    if (module_result == NULL) {
+        PyErr_Print();
+        Py_Finalize();
+        return false;
+    }
+    Py_DECREF(module_result);
+
+    PyObject *result = PyRun_String(
+        "build_n2_sto6g_full_fci_integrals()", Py_eval_input, globals,
+        globals);
+
+    if (result == NULL) {
+        PyErr_Print();
+        Py_Finalize();
+        return false;
+    }
+
+    bool ok = parse_integral_tuple(result, data);
+    Py_DECREF(result);
+    Py_Finalize();
+
+    data->generation_time_sec = now_seconds() - start;
+    return ok;
+}
+
+static inline int eri_index(int p, int q, int r, int s, int norb)
+{
+    return (((p * norb + q) * norb + r) * norb + s);
+}
+
+static inline int h1_index(int p, int q, int norb)
+{
+    return p * norb + q;
+}
+
+static int popcount_u32(unsigned int value)
+{
+    return __builtin_popcount(value);
+}
+
+static bool apply_annihilate(unsigned int bits, int orbital,
+                             unsigned int *out_bits, int *sign)
+{
+    unsigned int mask = 1U << orbital;
+
+    if ((bits & mask) == 0U) {
+        return false;
+    }
+
+    if ((popcount_u32(bits & (mask - 1U)) & 1) != 0) {
+        *sign = -*sign;
+    }
+    *out_bits = bits ^ mask;
+    return true;
+}
+
+static bool apply_create(unsigned int bits, int orbital, unsigned int *out_bits,
+                         int *sign)
+{
+    unsigned int mask = 1U << orbital;
+
+    if ((bits & mask) != 0U) {
+        return false;
+    }
+
+    if ((popcount_u32(bits & (mask - 1U)) & 1) != 0) {
+        *sign = -*sign;
+    }
+    *out_bits = bits | mask;
+    return true;
+}
+
+static bool apply_one_body(unsigned int bits, int p, int q,
+                           unsigned int *out_bits, int *sign)
+{
+    unsigned int work = bits;
+
+    *sign = 1;
+    if (!apply_annihilate(work, q, &work, sign)) {
+        return false;
+    }
+    if (!apply_create(work, p, &work, sign)) {
+        return false;
+    }
+
+    *out_bits = work;
+    return true;
+}
+
+static bool apply_two_body(unsigned int bits, int p, int q, int r, int s,
+                           unsigned int *out_bits, int *sign)
+{
+    unsigned int work = bits;
+
+    *sign = 1;
+    if (!apply_annihilate(work, q, &work, sign)) {
+        return false;
+    }
+    if (!apply_annihilate(work, s, &work, sign)) {
+        return false;
+    }
+    if (!apply_create(work, r, &work, sign)) {
+        return false;
+    }
+    if (!apply_create(work, p, &work, sign)) {
+        return false;
+    }
+
+    *out_bits = work;
+    return true;
+}
+
+static void generate_strings_rec(int norb, int nelec, int start, int left,
+                                 unsigned int bits,
+                                 std::vector<unsigned int> *strings)
+{
+    if (left == 0) {
+        strings->push_back(bits);
+        return;
+    }
+
+    for (int orb = start; orb <= norb - left; ++orb) {
+        generate_strings_rec(norb, nelec, orb + 1, left - 1,
+                             bits | (1U << orb), strings);
+    }
+}
+
+static std::vector<unsigned int> generate_strings(int norb, int nelec)
+{
+    std::vector<unsigned int> strings;
+
+    generate_strings_rec(norb, nelec, 0, nelec, 0U, &strings);
+    return strings;
+}
+
+static void build_address_table(const std::vector<unsigned int> &strings,
+                                int norb, std::vector<int> *address)
+{
+    address->assign((size_t)1U << (size_t)norb, -1);
+
+    for (size_t i = 0; i < strings.size(); ++i) {
+        (*address)[(size_t)strings[i]] = (int)i;
+    }
+}
+
+static void build_links(const std::vector<unsigned int> &strings,
+                        const std::vector<int> &address, int norb,
+                        std::vector<std::vector<OneLink>> *one_links,
+                        std::vector<std::vector<TwoLink>> *two_links)
+{
+    one_links->assign(strings.size(), std::vector<OneLink>());
+    two_links->assign(strings.size(), std::vector<TwoLink>());
+
+    for (size_t idx = 0; idx < strings.size(); ++idx) {
+        unsigned int bits = strings[idx];
+        std::vector<int> occ;
+
+        for (int orb = 0; orb < norb; ++orb) {
+            if (((bits >> orb) & 1U) != 0U) {
+                occ.push_back(orb);
+            }
+        }
+
+        (*one_links)[idx].reserve((size_t)occ.size() *
+                                  (size_t)(norb - (int)occ.size() + 1));
+        for (int q : occ) {
+            for (int p = 0; p < norb; ++p) {
+                unsigned int target_bits = 0U;
+                int sign = 1;
+                if (apply_one_body(bits, p, q, &target_bits, &sign)) {
+                    int target = address[(size_t)target_bits];
+                    if (target >= 0) {
+                        OneLink link = {p, q, target, sign};
+                        (*one_links)[idx].push_back(link);
+                    }
+                }
+            }
+        }
+
+        (*two_links)[idx].reserve((size_t)occ.size() * (size_t)occ.size() *
+                                  (size_t)norb * (size_t)norb / 4U);
+        for (int q : occ) {
+            for (int s : occ) {
+                for (int r = 0; r < norb; ++r) {
+                    for (int p = 0; p < norb; ++p) {
+                        unsigned int target_bits = 0U;
+                        int sign = 1;
+                        if (apply_two_body(bits, p, q, r, s, &target_bits,
+                                           &sign)) {
+                            int target = address[(size_t)target_bits];
+                            if (target >= 0) {
+                                TwoLink link = {p, q, r, s, target, sign};
+                                (*two_links)[idx].push_back(link);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+static double determinant_diagonal(const ActiveSpaceData &data,
+                                   unsigned int alpha_bits,
+                                   unsigned int beta_bits)
+{
+    int norb = data.norb;
+    double value = data.ecore;
+    std::vector<int> occ_alpha;
+    std::vector<int> occ_beta;
+
+    for (int orb = 0; orb < norb; ++orb) {
+        if (((alpha_bits >> orb) & 1U) != 0U) {
+            occ_alpha.push_back(orb);
+            value += data.h1[(size_t)h1_index(orb, orb, norb)];
+        }
+        if (((beta_bits >> orb) & 1U) != 0U) {
+            occ_beta.push_back(orb);
+            value += data.h1[(size_t)h1_index(orb, orb, norb)];
+        }
+    }
+
+    for (const std::vector<int> *occ : {&occ_alpha, &occ_beta}) {
+        for (int i : *occ) {
+            for (int j : *occ) {
+                value += 0.5 *
+                         (data.eri[(size_t)eri_index(i, i, j, j, norb)] -
+                          data.eri[(size_t)eri_index(i, j, j, i, norb)]);
+            }
+        }
+    }
+
+    for (int i : occ_alpha) {
+        for (int j : occ_beta) {
+            value += data.eri[(size_t)eri_index(i, i, j, j, norb)];
+        }
+    }
+
+    return value;
+}
+
+static void add_entry(std::vector<std::pair<int, double>> *entries,
+                      const std::vector<int> &inverse_perm, int old_row,
+                      double value)
+{
+    if (value != 0.0) {
+        entries->push_back(
+            std::make_pair(inverse_perm[(size_t)old_row], value));
+    }
+}
+
+static bool generate_hamiltonian_csc(const ActiveSpaceData &data,
+                                     CscMatrix *matrix)
+{
+    int norb = data.norb;
+    int na = data.na;
+    int nb = data.nb;
+    int n = na * nb;
+    std::vector<unsigned int> alpha_strings =
+        generate_strings(norb, data.neleca);
+    std::vector<unsigned int> beta_strings =
+        generate_strings(norb, data.nelecb);
+    std::vector<int> alpha_address;
+    std::vector<int> beta_address;
+    std::vector<std::vector<OneLink>> alpha_one;
+    std::vector<std::vector<OneLink>> beta_one;
+    std::vector<std::vector<TwoLink>> alpha_two;
+    std::vector<std::vector<TwoLink>> beta_two;
+    std::vector<double> diagonal((size_t)n, 0.0);
+    std::vector<int> perm((size_t)n, 0);
+    std::vector<int> inverse_perm((size_t)n, 0);
+    double start = now_seconds();
+    const char *reserve_raw = getenv("IPT_EST_NNZ_PER_COL");
+    long long reserve_per_col =
+        reserve_raw == NULL || reserve_raw[0] == '\0' ? 1500LL
+                                                      : atoll(reserve_raw);
+
+    if ((int)alpha_strings.size() != na || (int)beta_strings.size() != nb) {
+        fprintf(stderr, "CI string count mismatch\n");
+        return false;
+    }
+
+    build_address_table(alpha_strings, norb, &alpha_address);
+    build_address_table(beta_strings, norb, &beta_address);
+    build_links(alpha_strings, alpha_address, norb, &alpha_one, &alpha_two);
+    build_links(beta_strings, beta_address, norb, &beta_one, &beta_two);
+
+    printf("Generated CI strings: na=%d nb=%d n=%d\n", na, nb, n);
+    printf("Link counts per string: one=%zu two=%zu\n", alpha_one[0].size(),
+           alpha_two[0].size());
+    fflush(stdout);
+
+    for (int ia = 0; ia < na; ++ia) {
+        for (int ib = 0; ib < nb; ++ib) {
+            int idx = ia * nb + ib;
+            diagonal[(size_t)idx] = determinant_diagonal(
+                data, alpha_strings[(size_t)ia], beta_strings[(size_t)ib]);
+            perm[(size_t)idx] = idx;
+        }
+    }
+
+    std::stable_sort(perm.begin(), perm.end(),
+                     [&diagonal](int a, int b) {
+                         return diagonal[(size_t)a] < diagonal[(size_t)b];
+                     });
+    for (int sorted = 0; sorted < n; ++sorted) {
+        inverse_perm[(size_t)perm[(size_t)sorted]] = sorted;
+    }
+
+    matrix->n = n;
+    matrix->nnz = 0;
+    matrix->col_ptr.assign((size_t)n + 1U, 0);
+    matrix->row_ind.clear();
+    matrix->values.clear();
+    if (reserve_per_col > 0) {
+        size_t reserve_nnz =
+            (size_t)std::min<long long>((long long)n * reserve_per_col,
+                                        (long long)std::numeric_limits<int>::max());
+        matrix->row_ind.reserve(reserve_nnz);
+        matrix->values.reserve(reserve_nnz);
+    }
+
+    for (int sorted_col = 0; sorted_col < n; ++sorted_col) {
+        int old_col = perm[(size_t)sorted_col];
+        int ia = old_col / nb;
+        int ib = old_col - ia * nb;
+        std::vector<std::pair<int, double>> entries;
+
+        entries.reserve(2048U);
+        matrix->col_ptr[(size_t)sorted_col] = (int)matrix->row_ind.size();
+
+        add_entry(&entries, inverse_perm, old_col, data.ecore);
+
+        for (const OneLink &link : alpha_one[(size_t)ia]) {
+            int old_row = link.target * nb + ib;
+            double value =
+                data.h1[(size_t)h1_index(link.p, link.q, norb)] *
+                (double)link.sign;
+            add_entry(&entries, inverse_perm, old_row, value);
+        }
+        for (const OneLink &link : beta_one[(size_t)ib]) {
+            int old_row = ia * nb + link.target;
+            double value =
+                data.h1[(size_t)h1_index(link.p, link.q, norb)] *
+                (double)link.sign;
+            add_entry(&entries, inverse_perm, old_row, value);
+        }
+        for (const TwoLink &link : alpha_two[(size_t)ia]) {
+            int old_row = link.target * nb + ib;
+            double value = 0.5 *
+                           data.eri[(size_t)eri_index(link.p, link.q, link.r,
+                                                      link.s, norb)] *
+                           (double)link.sign;
+            add_entry(&entries, inverse_perm, old_row, value);
+        }
+        for (const TwoLink &link : beta_two[(size_t)ib]) {
+            int old_row = ia * nb + link.target;
+            double value = 0.5 *
+                           data.eri[(size_t)eri_index(link.p, link.q, link.r,
+                                                      link.s, norb)] *
+                           (double)link.sign;
+            add_entry(&entries, inverse_perm, old_row, value);
+        }
+        for (const OneLink &a : alpha_one[(size_t)ia]) {
+            for (const OneLink &b : beta_one[(size_t)ib]) {
+                int old_row = a.target * nb + b.target;
+                double value =
+                    data.eri[(size_t)eri_index(a.p, a.q, b.p, b.q, norb)] *
+                    (double)(a.sign * b.sign);
+                add_entry(&entries, inverse_perm, old_row, value);
+            }
+        }
+
+        std::sort(entries.begin(), entries.end(),
+                  [](const std::pair<int, double> &a,
+                     const std::pair<int, double> &b) {
+                      return a.first < b.first;
+                  });
+
+        for (size_t i = 0; i < entries.size(); ++i) {
+            int row = entries[i].first;
+            double value = entries[i].second;
+
+            while (i + 1U < entries.size() && entries[i + 1U].first == row) {
+                ++i;
+                value += entries[i].second;
+            }
+
+            if (value != 0.0) {
+                if (matrix->row_ind.size() >=
+                    (size_t)std::numeric_limits<int>::max()) {
+                    fprintf(stderr, "CSC nnz exceeds int range\n");
+                    return false;
+                }
+                matrix->row_ind.push_back(row);
+                matrix->values.push_back(value);
+            }
+        }
+
+        if ((sorted_col + 1) % 5000 == 0 || sorted_col + 1 == n) {
+            double elapsed = now_seconds() - start;
+            printf("CSC generation progress %d/%d columns nnz=%zu "
+                   "elapsed=%.2f sec\n",
+                   sorted_col + 1, n, matrix->row_ind.size(), elapsed);
+            fflush(stdout);
+        }
+    }
+
+    matrix->col_ptr[(size_t)n] = (int)matrix->row_ind.size();
+    matrix->nnz = (int)matrix->row_ind.size();
+    return true;
+}
+
+static CscMatrixView matrix_view(const CscMatrix &matrix)
+{
+    CscMatrixView view = {matrix.n, matrix.nnz, matrix.col_ptr.data(),
+                          matrix.row_ind.data(), matrix.values.data()};
+    return view;
+}
+
+static void csc_matvec_block(const CscMatrixView *matrix, const double *x,
+                             int ldx, double *y, int ldy, int block_size)
+{
+    for (int block = 0; block < block_size; ++block) {
+        const double *xb = x + (size_t)block * (size_t)ldx;
+        double *yb = y + (size_t)block * (size_t)ldy;
+
+        std::fill(yb, yb + matrix->n, 0.0);
+
+        for (int col = 0; col < matrix->n; ++col) {
+            double x_value = xb[col];
+
+            if (x_value == 0.0) {
+                continue;
+            }
+
+            for (int p = matrix->col_ptr[col]; p < matrix->col_ptr[col + 1];
+                 ++p) {
+                yb[matrix->row_ind[p]] += matrix->values[p] * x_value;
+            }
+        }
+    }
+}
+
+static void primme_matvec(void *x, PRIMME_INT *ldx, void *y, PRIMME_INT *ldy,
+                          int *block_size, primme_params *primme, int *ierr)
+{
+    const CscMatrixView *matrix = (const CscMatrixView *)primme->matrix;
+
+    csc_matvec_block(matrix, (const double *)x, (int)*ldx, (double *)y,
+                     (int)*ldy, *block_size);
+    *ierr = 0;
+}
+
+static double inf_norm(const CscMatrixView *matrix)
+{
+    std::vector<double> row_sum((size_t)matrix->n, 0.0);
+    double norm = 0.0;
+
+    for (int col = 0; col < matrix->n; ++col) {
+        for (int p = matrix->col_ptr[col]; p < matrix->col_ptr[col + 1]; ++p) {
+            row_sum[(size_t)matrix->row_ind[p]] += fabs(matrix->values[p]);
+        }
+    }
+
+    for (double value : row_sum) {
+        norm = std::max(norm, value);
+    }
+
+    return norm;
+}
+
+static double relative_residual(const CscMatrixView *matrix,
+                                const double *vector, double eigenvalue)
+{
+    std::vector<double> av((size_t)matrix->n, 0.0);
+    double residual_norm_sq = 0.0;
+    double vector_norm_sq = 0.0;
+
+    csc_matvec_block(matrix, vector, matrix->n, av.data(), matrix->n, 1);
+
+    for (int row = 0; row < matrix->n; ++row) {
+        double residual = av[(size_t)row] - eigenvalue * vector[row];
+
+        residual_norm_sq += residual * residual;
+        vector_norm_sq += vector[row] * vector[row];
+    }
+
+    {
+        double denom = std::max(1.0, fabs(eigenvalue)) *
+                       std::max(1.0, sqrt(vector_norm_sq));
+        return sqrt(residual_norm_sq) / denom;
+    }
+}
+
+static TrialResult run_primme_once(const CscMatrixView *matrix, double tol,
+                                   long long max_matvecs, double matrix_norm,
+                                   int repeat)
+{
+    TrialResult result = {"PRIMME_DYNAMIC", repeat, NAN, 0, 0, NAN, NAN, 0,
+                          ""};
+    primme_params primme;
+    double eval = 0.0;
+    double rnorm = 0.0;
+    std::vector<double> evec((size_t)matrix->n, 0.0);
+    int ret = 0;
+
+    primme_initialize(&primme);
+    primme.n = matrix->n;
+    primme.numEvals = 1;
+    primme.matrix = (void *)matrix;
+    primme.matrixMatvec = primme_matvec;
+    primme.target = primme_smallest;
+    primme.eps = tol;
+    primme.aNorm = matrix_norm;
+    primme.maxMatvecs = max_matvecs;
+    primme.printLevel = 0;
+    primme.outputFile = stdout;
+    primme_set_method(PRIMME_DYNAMIC, &primme);
+
+    {
+        double start = now_seconds();
+        ret = dprimme(&eval, evec.data(), &rnorm, &primme);
+        result.time_sec = now_seconds() - start;
+    }
+
+    result.iterations = (int)primme.stats.numOuterIterations;
+    result.matvecs = (long long)primme.stats.numMatvecs;
+    result.eigenvalue = eval;
+
+    if (ret != 0) {
+        result.status = ret;
+        snprintf(result.error, sizeof(result.error), "dprimme returned %d",
+                 ret);
+    } else {
+        result.residual = relative_residual(matrix, evec.data(), eval);
+    }
+
+    primme_free(&primme);
+    return result;
+}
+
+static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
+                                int maxiter, int repeat)
+{
+    TrialResult result = {"IPT_CUDA_SPARSE", repeat, NAN, 0, 0, NAN, NAN, 0,
+                          ""};
+    IPTCudaResult ipt = {0, 0, 0, NULL, NULL};
+    int status = IPT_CUDA_SUCCESS;
+
+    {
+        double start = now_seconds();
+        status = ipt_cuda_sparse_csc_tol(matrix->col_ptr, matrix->row_ind,
+                                         matrix->values, matrix->n, 1,
+                                         matrix->nnz, tol, maxiter, &ipt);
+        cudaDeviceSynchronize();
+        result.time_sec = now_seconds() - start;
+    }
+
+    result.status = status;
+    if (status != IPT_CUDA_SUCCESS) {
+        snprintf(result.error, sizeof(result.error), "%s",
+                 ipt_cuda_status_string(status));
+    } else {
+        result.iterations = ipt.iterations;
+        result.matvecs = (long long)ipt.iterations;
+        result.eigenvalue = ipt.values[0];
+        result.residual =
+            relative_residual(matrix, ipt.vectors, result.eigenvalue);
+    }
+
+    ipt_cuda_free_result(&ipt);
+    return result;
+}
+
+static void write_trial(FILE *csv, const TrialResult &result, double tol,
+                        int maxiter)
+{
+    fprintf(csv,
+            "%s,%d,%.17g,%d,%lld,%.17g,%.17g,%d,%s,%.17g,%d\n",
+            result.method, result.repeat, result.time_sec, result.iterations,
+            result.matvecs, result.eigenvalue, result.residual, result.status,
+            result.error, tol, maxiter);
+    fflush(csv);
+}
+
+static double average(const std::vector<TrialResult> &results,
+                      double TrialResult::*field)
+{
+    double sum = 0.0;
+
+    if (results.empty()) {
+        return NAN;
+    }
+
+    for (const TrialResult &result : results) {
+        sum += result.*field;
+    }
+
+    return sum / (double)results.size();
+}
+
+static double average_ll(const std::vector<TrialResult> &results,
+                         long long TrialResult::*field)
+{
+    double sum = 0.0;
+
+    if (results.empty()) {
+        return NAN;
+    }
+
+    for (const TrialResult &result : results) {
+        sum += (double)(result.*field);
+    }
+
+    return sum / (double)results.size();
+}
+
+static double average_int(const std::vector<TrialResult> &results,
+                          int TrialResult::*field)
+{
+    double sum = 0.0;
+
+    if (results.empty()) {
+        return NAN;
+    }
+
+    for (const TrialResult &result : results) {
+        sum += (double)(result.*field);
+    }
+
+    return sum / (double)results.size();
+}
+
+static double stddev(const std::vector<TrialResult> &results,
+                     double TrialResult::*field, double avg)
+{
+    double sum = 0.0;
+
+    if (results.empty()) {
+        return NAN;
+    }
+
+    for (const TrialResult &result : results) {
+        double delta = result.*field - avg;
+        sum += delta * delta;
+    }
+
+    return sqrt(sum / (double)results.size());
+}
+
+static void write_summary(FILE *summary, const char *method,
+                          const std::vector<TrialResult> &results)
+{
+    double avg_time = average(results, &TrialResult::time_sec);
+    double std_time = stddev(results, &TrialResult::time_sec, avg_time);
+
+    fprintf(summary,
+            "%s avg_time_sec=%.17g std_time_sec=%.17g avg_iterations=%.17g "
+            "avg_matvecs=%.17g avg_eigenvalue=%.17g avg_residual=%.17g\n",
+            method, avg_time, std_time,
+            average_int(results, &TrialResult::iterations),
+            average_ll(results, &TrialResult::matvecs),
+            average(results, &TrialResult::eigenvalue),
+            average(results, &TrialResult::residual));
+}
+
+int main(void)
+{
+    ActiveSpaceData active = {0, 0, 0, 0, 0, 0, NAN, NAN, NAN, NAN,
+                              std::vector<double>(), std::vector<double>()};
+    CscMatrix owned_matrix = {0, 0, std::vector<int>(), std::vector<int>(),
+                              std::vector<double>()};
+    int repeats = env_int("IPT_REPEATS", DEFAULT_REPEATS);
+    int run_primme = env_bool("RUN_PRIMME", 0);
+    int run_warmup = env_bool("RUN_WARMUP", 0);
+    double tol = env_double("IPT_TOL", DEFAULT_TOL);
+    int ipt_maxiter = env_int("IPT_MAXITER", DEFAULT_IPT_MAXITER);
+    long long primme_max_matvecs =
+        env_ll("PRIMME_MAX_MATVECS", DEFAULT_PRIMME_MAX_MATVECS);
+    const char *dir = results_dir();
+    char csv_path[4096];
+    char summary_path[4096];
+    FILE *csv = NULL;
+    FILE *summary = NULL;
+    std::vector<TrialResult> primme_results;
+    std::vector<TrialResult> ipt_results;
+
+    if (!generate_active_space_integrals(&active)) {
+        fprintf(stderr,
+                "failed to generate N2/STO-6G full FCI active integrals\n");
+        return 1;
+    }
+
+    if (!generate_hamiltonian_csc(active, &owned_matrix)) {
+        fprintf(stderr,
+                "failed to generate N2/STO-6G full FCI CSC matrix\n");
+        return 1;
+    }
+
+    CscMatrixView matrix = matrix_view(owned_matrix);
+    double matrix_norm = inf_norm(&matrix);
+
+    ensure_directory(dir);
+    snprintf(csv_path, sizeof(csv_path),
+             "%s/n2_sto6g_fci_14400_ipt_trials.csv", dir);
+    snprintf(summary_path, sizeof(summary_path),
+             "%s/n2_sto6g_fci_14400_ipt_summary.txt", dir);
+
+    csv = fopen(csv_path, "w");
+    summary = fopen(summary_path, "w");
+    if (csv == NULL || summary == NULL) {
+        fprintf(stderr, "could not open result files in %s\n", dir);
+        if (csv != NULL) {
+            fclose(csv);
+        }
+        if (summary != NULL) {
+            fclose(summary);
+        }
+        return 2;
+    }
+
+    fprintf(csv,
+            "method,repeat,time_sec,iterations,matvecs,eigenvalue,"
+            "relative_residual,status,error,tol,maxiter\n");
+
+    printf("N2/STO-6G full FCI FCI CSC benchmark: n=%d "
+           "nnz=%d repeats=%d tol=%.3e run_primme=%d\n",
+           matrix.n, matrix.nnz, repeats, tol, run_primme);
+    printf("Matrix/integral generation time %.6f sec is excluded from "
+           "PRIMME/IPT timings.\n",
+           active.generation_time_sec);
+    fflush(stdout);
+
+    fprintf(summary, "warmup skipped RUN_WARMUP=0\n\n");
+
+    for (int repeat = 1; repeat <= repeats; ++repeat) {
+        if (run_primme) {
+            TrialResult primme_result =
+                run_primme_once(&matrix, tol, primme_max_matvecs, matrix_norm,
+                                repeat);
+            primme_results.push_back(primme_result);
+            write_trial(csv, primme_result, tol, (int)primme_max_matvecs);
+        }
+
+        TrialResult ipt_result =
+            run_ipt_once(&matrix, tol, ipt_maxiter, repeat);
+        ipt_results.push_back(ipt_result);
+        write_trial(csv, ipt_result, tol, ipt_maxiter);
+
+        printf("repeat %d IPT time=%.6e residual=%.3e eigenvalue=%.15g\n",
+               repeat, ipt_result.time_sec, ipt_result.residual,
+               ipt_result.eigenvalue);
+        fflush(stdout);
+    }
+
+    fprintf(summary,
+            "matrix=n2_sto6g_fci\nn=%d\nnnz=%d\n"
+            "k=1\nrepeats=%d\ntol=%.17g\nipt_maxiter=%d\n"
+            "run_primme=%d\nprimme_max_matvecs=%lld\n"
+            "matrix_inf_norm=%.17g\n"
+            "integral_generation_time_sec=%.17g\n"
+            "pyscf_site_packages=%s\nbasis=sto-6g\nfrozen_core_orbitals=0\n"
+            "norb=%d\nactive_electrons=%d\nneleca=%d\nnelecb=%d\n"
+            "na=%d\nnb=%d\necore=%.17g\nnuclear_repulsion=%.17g\n"
+            "hartree_fock_energy=%.17g\n\n",
+            matrix.n, matrix.nnz, repeats, tol, ipt_maxiter, run_primme,
+            primme_max_matvecs, matrix_norm, active.generation_time_sec,
+            pyscf_site_packages(), active.norb, active.active_electrons,
+            active.neleca, active.nelecb, active.na, active.nb, active.ecore,
+            active.nuclear_repulsion, active.hartree_fock_energy);
+
+    if (run_primme) {
+        write_summary(summary, "PRIMME_DYNAMIC", primme_results);
+    }
+    write_summary(summary, "IPT_CUDA_SPARSE", ipt_results);
+
+    fclose(csv);
+    fclose(summary);
+
+    printf("wrote %s\n", csv_path);
+    printf("wrote %s\n", summary_path);
+    return 0;
+}

@@ -1,0 +1,34 @@
+IPT_C mixed precision sweep: FP16/TF32 initial + FP64 refine vs cuSolver Dsyevd
+started_at = 2026-06-13T15:57:30+0800
+ipt_c_root = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results_dir = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32
+summary_txt = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_append_4090_8192_eps_0_07_0_08_summary.txt
+fp16_tol = 0.001
+fp16_maxiter = 1000
+tf32_tol = 9.9999999999999995e-07
+tf32_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 5
+per_case_warmup = true
+seed = 20260603
+N_values = 4090, 8192
+epsilon_values = 0.07, 0.08
+compute_residuals = true
+append_results = true
+skip_existing = false
+run_fp16 = false
+run_tf32 = true
+cuda_runtime_version = 12020
+cuda_driver_version = 12020
+gpu_name = NVIDIA A100-SXM4-80GB
+
+epsilon=0.07 N=4090 started_at=2026-06-13T15:57:31+0800
+epsilon=0.07 N=4090 initial_precision=tf32 finished_at=2026-06-13T15:57:34+0800 status=ok time_syevd=0.21843826798722149 residual_syevd=4.0590374165217781e-10 time_original_ipt=0.1693720600567758 residual_original_ipt=6.0094794758519731e-10 original_ipt_iterations=19 original_ipt_fp=5.925379040015864e-13 time_initial=0.023709173500537872 time_fp64=0.10253868345171213 time_mixed=0.1262482987716794 residual_mixed=6.3019502913607762e-10 initial_iterations=8 fp64_iterations=11 initial_fp=3.9940237310853655e-07 fp64_fp=6.1169926328726419e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_07.csv
+epsilon=0.07 N=8192 started_at=2026-06-13T15:57:34+0800
+epsilon=0.07 N=8192 initial_precision=tf32 finished_at=2026-06-13T15:57:59+0800 status=ok time_syevd=1.4479260683059691 residual_syevd=1.539220238690979e-09 time_original_ipt=1.3232860716991126 residual_original_ipt=1.0932162944997119e-09 original_ipt_iterations=20 original_ipt_fp=4.9393949975543366e-13 time_initial=0.080553322751075032 time_fp64=0.8264408692717552 time_mixed=0.90699473777785899 residual_mixed=8.1310642922479344e-10 initial_iterations=8 fp64_iterations=12 initial_fp=4.4814349179087863e-07 fp64_fp=3.4683073037315535e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_07.csv
+epsilon=0.08 N=4090 started_at=2026-06-13T15:57:59+0800
+epsilon=0.08 N=4090 initial_precision=tf32 finished_at=2026-06-13T15:58:03+0800 status=ok time_syevd=0.2184182764030993 residual_syevd=4.0325917788025567e-10 time_original_ipt=0.18821440096944569 residual_original_ipt=9.4276432593786533e-10 original_ipt_iterations=21 original_ipt_fp=8.2257655706337809e-13 time_initial=0.023828393127769232 time_fp64=0.12012271173298358 time_mixed=0.14395143743604422 residual_mixed=6.9607702512439558e-10 initial_iterations=8 fp64_iterations=13 initial_fp=9.1466769807092401e-07 fp64_fp=5.879788621260734e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_08.csv
+epsilon=0.08 N=8192 started_at=2026-06-13T15:58:03+0800
+epsilon=0.08 N=8192 initial_precision=tf32 finished_at=2026-06-13T15:58:30+0800 status=ok time_syevd=1.4483983490616084 residual_syevd=1.5242367506157271e-09 time_original_ipt=1.4569151429459453 residual_original_ipt=2.5112509647422291e-09 original_ipt_iterations=22 original_ipt_fp=9.9497126191793351e-13 time_initial=0.088320331927388904 time_fp64=0.9540996224619448 time_mixed=1.0424202658236026 residual_mixed=1.4217609401603338e-09 initial_iterations=9 fp64_iterations=14 initial_fp=4.9060836665240296e-07 fp64_fp=5.7094655328581326e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_initial_cusolver_sweep_epsilon_0_08.csv
+finished_at = 2026-06-13T15:58:30+0800

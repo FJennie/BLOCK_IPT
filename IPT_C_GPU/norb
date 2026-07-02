@@ -1,0 +1,32 @@
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:23:#define DEFAULT_REPEATS 1
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:24:#define DEFAULT_TOL 1.0e-12
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:25:#define DEFAULT_IPT_MAXITER 1000
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:295:    if (!py_long_to_int(PyTuple_GET_ITEM(tuple, 0), &data->norb, "norb") ||
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:297:                        &data->active_electrons, "active_electrons") ||
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:298:        !py_long_to_int(PyTuple_GET_ITEM(tuple, 2), &data->neleca,
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:300:        !py_long_to_int(PyTuple_GET_ITEM(tuple, 3), &data->nelecb,
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:302:        !py_long_to_int(PyTuple_GET_ITEM(tuple, 4), &data->na, "na") ||
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:303:        !py_long_to_int(PyTuple_GET_ITEM(tuple, 5), &data->nb, "nb") ||
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:304:        !py_float_to_double(PyTuple_GET_ITEM(tuple, 6), &data->ecore,
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:307:                            &data->nuclear_repulsion,
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:310:                            &data->hartree_fock_energy,
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:312:        !py_sequence_to_double_vector(PyTuple_GET_ITEM(tuple, 9), &data->h1,
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:315:                                      &data->eri, "eri")) {
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:319:    if (data->norb != 10 || data->active_electrons != 14 ||
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:320:        data->neleca != 7 || data->nelecb != 7 || data->na != 120 ||
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:321:        data->nb != 120 || data->h1.size() != 100U ||
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:322:        data->eri.size() != 10000U) {
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:326:                data->norb, data->active_electrons, data->neleca,
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:327:                data->nelecb, data->na, data->nb, data->h1.size(),
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:328:                data->eri.size());
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:379:    data->generation_time_sec = now_seconds() - start;
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:1031:    int repeats = env_int("IPT_REPEATS", DEFAULT_REPEATS);
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:1033:    int run_warmup = env_bool("RUN_WARMUP", 0);
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:1034:    double tol = env_double("IPT_TOL", DEFAULT_TOL);
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:1035:    int ipt_maxiter = env_int("IPT_MAXITER", DEFAULT_IPT_MAXITER);
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:1092:    if (run_warmup) {
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:1097:                    "warmup PRIMME status=%d time_sec=%.17g eigenvalue=%.17g "
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:1104:            fprintf(summary, "warmup PRIMME skipped RUN_PRIMME=0
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:1110:                "warmup IPT status=%d time_sec=%.17g eigenvalue=%.17g "
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:1117:        fprintf(summary, "warmup skipped RUN_WARMUP=0
+test/sparse/CO/benchmark_co_sto6g_fci_14400_ipt.cu:1153:            run_warmup, primme_max_matvecs, matrix_norm, active.generation_time_sec,

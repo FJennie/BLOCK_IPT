@@ -1,0 +1,3 @@
+method,k,avg_solve_time_sec,avg_api_total_time_sec,avg_preparation_time_sec,avg_transfer_setup_time_sec,avg_iteration_time_sec,avg_rayleigh_ritz_time_sec,avg_iterations,avg_matvecs,last_first_eigenvalue,last_max_relative_residual,last_relative_fixed_point_residual,eigenvalue_abs_residual,status,error,tol,maxiter
+PRIMME_CUBLAS,1,0.060024180868640545,0.06199777089059353,0,0.0019735900219529866,0,0,65,110,-56.054516870360757,8.5225508641271757e-13,nan,0,0,,9.9999999999999998e-13,5000
+IPT_CUDA_BLOCK_CLUSTER,1,0.0224411362,0.33473183740861712,0.30789707179999998,0.0019332524,0.022100585799999996,0.00034055040000000004,100,101,-56.05451687036075,1.6213535686042839e-16,1.6102665463803315e-15,7.1054273576010019e-15,0,,9.9999999999999998e-13,100

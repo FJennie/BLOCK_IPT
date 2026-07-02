@@ -1,0 +1,30 @@
+IPT_C mixed precision sweep: FP16/FP32 initial + FP64 refine vs cuSolver Dsyevd
+started_at = 2026-06-10T15:26:38+0800
+ipt_c_root = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+results_dir = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision
+summary_txt = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_summary.txt
+fp16_tol = 0.001
+fp16_maxiter = 1000
+fp32_tol = 9.9999999999999995e-07
+fp32_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 5
+per_case_warmup = true
+seed = 20260603
+N_values = 4096, 8192, 16384, 32768
+epsilon_values = 0.04
+compute_residuals = true
+append_results = true
+skip_existing = true
+cuda_runtime_version = 12020
+cuda_driver_version = 12020
+gpu_name = NVIDIA A100-SXM4-80GB
+
+epsilon=0.04 N=4096 skipped_existing_at=2026-06-10T15:26:38+0800 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_epsilon_0_04.csv
+epsilon=0.04 N=8192 skipped_existing_at=2026-06-10T15:26:38+0800 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_epsilon_0_04.csv
+epsilon=0.04 N=16384 skipped_existing_at=2026-06-10T15:26:38+0800 csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_epsilon_0_04.csv
+epsilon=0.04 N=32768 started_at=2026-06-10T15:26:38+0800
+epsilon=0.04 N=32768 initial_precision=fp16 finished_at=2026-06-10T15:44:55+0800 status=partial_failed time_syevd=6.5766740590333939e-05 residual_syevd=nan time_original_ipt=60.816800327505916 residual_original_ipt=2.7300223569950917e-09 original_ipt_iterations=14 original_ipt_fp=4.873106276366147e-13 time_initial=0.90768790002912281 time_fp64=48.953583522513512 time_mixed=49.861272068787365 residual_mixed=2.809090892557625e-09 initial_iterations=3 fp64_iterations=11 initial_fp=9.5674062866632045e-05 fp64_fp=5.0244688550800557e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_epsilon_0_04.csv
+epsilon=0.04 N=32768 initial_precision=fp32 finished_at=2026-06-10T15:44:55+0800 status=partial_failed time_syevd=6.5766740590333939e-05 residual_syevd=nan time_original_ipt=60.816800327505916 residual_original_ipt=2.7300223569950917e-09 original_ipt_iterations=14 original_ipt_fp=4.873106276366147e-13 time_initial=23.391340375598521 time_fp64=36.542849188297986 time_mixed=59.934190239012239 residual_mixed=2.7278565341786453e-09 initial_iterations=6 fp64_iterations=8 initial_fp=1.9432954936390936e-07 fp64_fp=4.8685406302777144e-13 repeats=5 per_case_warmup=true csv=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision/low_precision_cusolver_sweep_epsilon_0_04.csv
+finished_at = 2026-06-10T15:44:55+0800

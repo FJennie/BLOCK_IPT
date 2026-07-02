@@ -1,0 +1,15 @@
+warmup PRIMME status=0 time_sec=0.0010918979533016682 eigenvalue=-75.679997365383059 residual=3.0212258967948354e-16 error=
+warmup IPT status=0 time_sec=0.41566595388576388 eigenvalue=-75.679997365383073 residual=8.7234457138944729e-16 error=
+
+matrix=h20_fci_w_from_julia_test
+n=10
+nnz=100
+k=1
+repeats=5
+tol=9.9999999999999998e-13
+ipt_maxiter=1000
+primme_max_matvecs=1000
+matrix_inf_norm=75.680000344671768
+
+PRIMME_DYNAMIC avg_time_sec=0.0013826269656419753 std_time_sec=0.002219213027656263 avg_iterations=6 avg_matvecs=10 avg_eigenvalue=-75.679997365383059 avg_residual=3.0212258967948354e-16
+IPT_CUDA_SPARSE avg_time_sec=0.0014230621978640555 std_time_sec=3.7117088900018427e-05 avg_iterations=8 avg_matvecs=8 avg_eigenvalue=-75.679997365383073 avg_residual=8.7234457138944729e-16

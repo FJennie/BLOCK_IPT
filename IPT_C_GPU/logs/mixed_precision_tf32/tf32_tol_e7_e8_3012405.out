@@ -1,0 +1,158 @@
+===== TF32 tolerance e-7/e-8 test =====
+Sat Jun 13 16:39:08 CST 2026
+gsn0
+SLURM_JOB_ID=3012405
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/mixed_precision_tf32
+RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32
+TMP_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_tol_tmp_3012405
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Sat Jun 13 16:39:08 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:2A:00.0 Off |                    0 |
+| N/A   28C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run TF32 tol=1e-7 -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-7.csv =====
+===== IPT_C mixed precision FP16/TF32 sweep vs cuSolver =====
+ROOT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+RESULT_DIR = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_tol_tmp_3012405/e-7
+SUMMARY_TXT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-7_summary_3012405.txt
+N values = 26000
+epsilon values = 0.06
+fp16_tol = 0.001
+fp16_maxiter = 1000
+tf32_tol = 9.9999999999999995e-08
+tf32_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 5
+seed = 20260603
+compute_residuals = true
+append_results = false
+skip_existing = false
+run_fp16 = false
+run_tf32 = true
+gpu_name = NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.691 GiB / total 79.151 GiB
+===== device warmup N=128 =====
+===== device warmup done =====
+
+===== epsilon = 0.06, N = 26000 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+host matrix generated in 4.0276808 s
+CUDA memory after matrix: free 73.654 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.06 N=26000
+CUSOLVER SYEVD warmup for N=26000
+  CUSOLVER SYEVD run 1/5: time = 33.279382 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/5: time = 33.281866 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/5: time = 33.284061 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/5: time = 33.28344 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/5: time = 33.282641 s, residual = 1.5173826e-08, status = ok
+Running original IPT for epsilon=0.06 N=26000
+Original IPT warmup for N=26000
+  original IPT run 1/5: time = 39.643554 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 2/5: time = 39.669127 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 3/5: time = 39.97944 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 4/5: time = 39.497723 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 5/5: time = 39.689869 s, fp = 4.3051344e-13, iterations = 19, residual = 2.8008539e-09, status = ok
+Running mixed TF32->FP64 for epsilon=0.06 N=26000
+Mixed TF32->FP64 warmup for N=26000
+  mixed run 1/5: tf32 = 312.71559 s, fp64 = 21.769481 s, total = 334.48507 s, tf32_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, residual = nan, status = ok
+  mixed run 2/5: tf32 = 312.72624 s, fp64 = 22.209765 s, total = 334.93601 s, tf32_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, residual = nan, status = ok
+  mixed run 3/5: tf32 = 312.80446 s, fp64 = 21.824274 s, total = 334.62874 s, tf32_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, residual = nan, status = ok
+  mixed run 4/5: tf32 = 313.495 s, fp64 = 21.814015 s, total = 335.30902 s, tf32_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, residual = nan, status = ok
+  mixed run 5/5: tf32 = 313.31022 s, fp64 = 21.707951 s, total = 335.01817 s, tf32_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, residual = 3.4650174e-09, status = ok
+Averages TF32: syevd = 33.282278 s, original_ipt = 39.695943 s, mixed_total = 334.8754 s, mixed_residual = 3.4650174e-09, initial_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, status = ok
+CUDA memory after cleanup: free 78.689 GiB / total 79.151 GiB
+===== sweep done =====
+Results dir: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_tol_tmp_3012405/e-7
+Summary: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-7_summary_3012405.txt
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-7.csv
+N,epsilon,initial_precision,initial_tol,fp64_tol,initial_maxiter,fp64_maxiter,repeats,time_cusolver_syevd_sec,residual_cusolver_syevd,time_original_ipt_sec,residual_original_ipt,original_ipt_fixed_point_residual,original_ipt_iterations,time_initial_sec,time_fp64_refine_sec,time_mixed_total_sec,residual_mixed,initial_fixed_point_residual,fp64_fixed_point_residual,initial_iterations,fp64_iterations,initial_converged,fp64_converged,gpu_name,status,error
+26000,0.06,tf32,9.9999999999999995e-08,9.9999999999999998e-13,1000,1000,5,33.282277940772474,1.5173825793090459e-08,39.695942663867029,2.8008539478741995e-09,4.3051343881675503e-13,19,313.01030405294148,21.865097385831177,334.87540213754403,3.4650174087554434e-09,1.2595560768584242e-07,6.643154160137638e-13,1000,10,false,true,NVIDIA A100-SXM4-80GB,ok,
+
+===== run TF32 tol=1e-8 -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-8.csv =====
+===== IPT_C mixed precision FP16/TF32 sweep vs cuSolver =====
+ROOT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU
+RESULT_DIR = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_tol_tmp_3012405/e-8
+SUMMARY_TXT = /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-8_summary_3012405.txt
+N values = 26000
+epsilon values = 0.06
+fp16_tol = 0.001
+fp16_maxiter = 1000
+tf32_tol = 1e-08
+tf32_maxiter = 1000
+fp64_tol = 9.9999999999999998e-13
+fp64_maxiter = 1000
+timing_repeats = 5
+seed = 20260603
+compute_residuals = true
+append_results = false
+skip_existing = false
+run_fp16 = false
+run_tf32 = true
+gpu_name = NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.691 GiB / total 79.151 GiB
+===== device warmup N=128 =====
+===== device warmup done =====
+
+===== epsilon = 0.06, N = 26000 =====
+CUDA memory before matrix: free 78.691 GiB / total 79.151 GiB
+host matrix generated in 3.817744 s
+CUDA memory after matrix: free 73.654 GiB / total 79.151 GiB
+Running CUSOLVER SYEVD for epsilon=0.06 N=26000
+CUSOLVER SYEVD warmup for N=26000
+  CUSOLVER SYEVD run 1/5: time = 33.266475 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 2/5: time = 33.257014 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 3/5: time = 33.263357 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 4/5: time = 33.25857 s, residual = nan, status = ok
+  CUSOLVER SYEVD run 5/5: time = 33.264366 s, residual = 1.5173826e-08, status = ok
+Running original IPT for epsilon=0.06 N=26000
+Original IPT warmup for N=26000
+  original IPT run 1/5: time = 39.67134 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 2/5: time = 39.673653 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 3/5: time = 39.672104 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 4/5: time = 39.92673 s, fp = 4.3051344e-13, iterations = 19, residual = nan, status = ok
+  original IPT run 5/5: time = 39.82917 s, fp = 4.3051344e-13, iterations = 19, residual = 2.8008539e-09, status = ok
+Running mixed TF32->FP64 for epsilon=0.06 N=26000
+Mixed TF32->FP64 warmup for N=26000
+  mixed run 1/5: tf32 = 313.37282 s, fp64 = 21.843411 s, total = 335.21623 s, tf32_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, residual = nan, status = ok
+  mixed run 2/5: tf32 = 313.50409 s, fp64 = 21.823081 s, total = 335.32717 s, tf32_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, residual = nan, status = ok
+  mixed run 3/5: tf32 = 313.43731 s, fp64 = 21.807138 s, total = 335.24445 s, tf32_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, residual = nan, status = ok
+  mixed run 4/5: tf32 = 313.44878 s, fp64 = 21.864476 s, total = 335.31326 s, tf32_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, residual = nan, status = ok
+  mixed run 5/5: tf32 = 313.45155 s, fp64 = 21.777204 s, total = 335.22875 s, tf32_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, residual = 3.4650174e-09, status = ok
+Averages TF32: syevd = 33.261956 s, original_ipt = 39.754599 s, mixed_total = 335.26597 s, mixed_residual = 3.4650174e-09, initial_fp = 1.2595561e-07, fp64_fp = 6.6431542e-13, tf32_iters = 1000, fp64_iters = 10, status = ok
+CUDA memory after cleanup: free 78.689 GiB / total 79.151 GiB
+===== sweep done =====
+Results dir: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/tf32_tol_tmp_3012405/e-8
+Summary: /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-8_summary_3012405.txt
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-8.csv
+N,epsilon,initial_precision,initial_tol,fp64_tol,initial_maxiter,fp64_maxiter,repeats,time_cusolver_syevd_sec,residual_cusolver_syevd,time_original_ipt_sec,residual_original_ipt,original_ipt_fixed_point_residual,original_ipt_iterations,time_initial_sec,time_fp64_refine_sec,time_mixed_total_sec,residual_mixed,initial_fixed_point_residual,fp64_fixed_point_residual,initial_iterations,fp64_iterations,initial_converged,fp64_converged,gpu_name,status,error
+26000,0.06,tf32,1e-08,9.9999999999999998e-13,1000,1000,5,33.261956337559965,1.5173825793090459e-08,39.754599290713671,2.8008539478741995e-09,4.3051343881675503e-13,19,313.44290819521996,21.823062045965344,335.26597068887202,3.4650174087554434e-09,1.2595560768584242e-07,6.643154160137638e-13,1000,10,false,true,NVIDIA A100-SXM4-80GB,ok,
+
+===== final output =====
+-rw-r--r-- 1 nudt_liujie nudt_liujie 809 Jun 13 17:21 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-7.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 792 Jun 13 18:03 /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/mixed_precision_tf32/e-8.csv
+finished at: Sat Jun 13 18:03:12 CST 2026

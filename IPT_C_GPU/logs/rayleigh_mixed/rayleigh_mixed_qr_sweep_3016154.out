@@ -1,0 +1,78 @@
+===== Rayleigh mixed QR sweep job =====
+Sun Jun 14 22:18:56 CST 2026
+gsn0
+SLURM_JOB_ID=3016154
+SLURM_JOB_NODELIST=gsn0
+CUDA_VISIBLE_DEVICES=0
+IPT_C_ROOT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU
+SRC_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/src/mixed_precision
+TEST_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/rayleigh_mixed
+IPT_C_RESULTS_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed_seed_check
+IPT_C_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed_seed_check
+IPT_SUMMARY_TXT=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed_seed_check/rayleigh_qr_seed_20260603_N16384_epsilon_0_12_summary.txt
+IPT_SWEEP_NS=16384
+IPT_EPSILON_VALUES=0.12
+IPT_TF32_TOL=1e-6
+IPT_TF32_MAXITER=1000
+IPT_TOL=1e-12
+IPT_MAXITER=1000
+IPT_REPEATS=1
+IPT_WARMUP_N=128
+IPT_APPEND_RESULTS=false
+IPT_SKIP_EXISTING=false
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+
+Sun Jun 14 22:18:56 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off | 00000000:2A:00.0 Off |                    0 |
+| N/A   28C    P0              61W / 400W |      4MiB / 81920MiB |      0%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+
+===== build =====
+
+===== run =====
+===== Rayleigh mixed QR sweep =====
+results_dir=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed_seed_check logs_dir=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed_seed_check summary=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed_seed_check/rayleigh_qr_seed_20260603_N16384_epsilon_0_12_summary.txt
+N values = 16384
+epsilon values = 0.12
+tf32_tol=9.9999999999999995e-07 fp64_tol=9.9999999999999998e-13 repeats=1 gpu=NVIDIA A100-SXM4-80GB
+CUDA memory at start: free 78.722 GiB / total 79.151 GiB
+===== warmup N=128 =====
+===== warmup done =====
+
+===== epsilon=0.12 N=16384 =====
+CUDA memory before matrix: free 78.722 GiB / total 79.151 GiB
+host matrix generated in 14.861898 s
+CUDA memory after matrix: free 76.722 GiB / total 79.151 GiB
+Rayleigh mixed QR warmup for N=16384
+  rayleigh run 1/1: tf32=2.3804661 s, orth=1.9038786 s, transform=1.0453595 s, fp64=1.9897405 s, back=0.49010447 s, total=7.8095491 s, tf32_fp=9.9685259e-07, fp64_fp=1.5240752e-14, abs_res=4.5514539e-08, iters=33/3, status=ok
+CUDA memory after cleanup: free 78.722 GiB / total 79.151 GiB
+===== sweep done failures=0 =====
+
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed_seed_check:
+total 8.0K
+lrwxrwxrwx 1 nudt_liujie nudt_liujie  102 Jun 14 22:18 latest_rayleigh_mixed_qr_sweep.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/rayleigh_mixed_seed_check/rayleigh_mixed_qr_sweep_3016154.log
+-rw-r--r-- 1 nudt_liujie nudt_liujie 3.8K Jun 14 22:19 rayleigh_mixed_qr_sweep_3016154.log
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/rayleigh_mixed_seed_check:
+total 8.0K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 667 Jun 14 22:19 rayleigh_mixed_qr_sweep_epsilon_0_12.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 739 Jun 14 22:19 rayleigh_qr_seed_20260603_N16384_epsilon_0_12_summary.txt
+finished at: Sun Jun 14 22:19:32 CST 2026
