@@ -1,0 +1,2 @@
+selection_metric=max_relative_eigen_residual
+best_row=80,3e-9,3,failed,42,27,1,1.6592342187288894e-10,29,1.4974673316878227e-11,1.6592342187288894e-10,1.4974673316878227e-11,1.9095836023552692e-14,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/davidson_restart_sweep_v1/steps_80_clip_3e-9_active_2

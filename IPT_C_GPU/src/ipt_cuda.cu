@@ -89,6 +89,7 @@ typedef struct {
     double pair_28_residual;
     double pair_29_residual;
     double orthogonality_max_abs_error;
+    int restarted;
 } IPTDavidsonHistoryEntry;
 
 typedef struct {
@@ -127,6 +128,7 @@ typedef struct {
     char adaptive_added_indices[256];
     int davidson_history_count;
     IPTDavidsonHistoryEntry *davidson_history;
+    int davidson_restart_count;
 } IPTCudaResult;
 
 const char *ipt_cuda_status_string(int status);
@@ -310,6 +312,7 @@ extern "C" void ipt_cuda_free_result(IPTCudaResult *result)
     free(result->davidson_history);
     result->davidson_history_count = 0;
     result->davidson_history = NULL;
+    result->davidson_restart_count = 0;
 }
 
 // 释放 device 侧 d_vectors/d_values
@@ -2845,7 +2848,6 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
     }
     result->matvecs += basis_cols;
     if (ipt_cuda_env_flag("IPT_DAVIDSON_ENRICH")) {
-        const double locked_tolerance = 1.0e-10;
         const char *accept_raw =
             getenv("IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES");
         int steps = ipt_cuda_env_int("IPT_DAVIDSON_STEPS", 1);
@@ -2853,13 +2855,21 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             ipt_cuda_env_int("IPT_DAVIDSON_ACTIVE_MAX", 1);
         int ortho_repeats =
             ipt_cuda_env_int("IPT_DAVIDSON_ORTHO_REPEATS", 2);
+        int restart_every =
+            ipt_cuda_env_int("IPT_DAVIDSON_RESTART_EVERY", 20);
+        int restart_keep_extra =
+            ipt_cuda_env_int("IPT_DAVIDSON_RESTART_KEEP_EXTRA", 5);
         int accept_only_if_improves =
             accept_raw == NULL
                 ? 1
                 : ipt_cuda_env_flag(
                       "IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES");
         double select_tolerance = ipt_cuda_env_double(
-            "IPT_DAVIDSON_SELECT_TOL", 1.0e-10);
+            "IPT_DAVIDSON_SELECT_TOL", 1.0e-12);
+        double protect_tolerance = ipt_cuda_env_double(
+            "IPT_DAVIDSON_PROTECT_TOL", 1.0e-10);
+        double locked_tolerance = ipt_cuda_env_double(
+            "IPT_DAVIDSON_LOCKED_TOL", 1.0e-12);
         double matrix_norm = ipt_block_host_matrix_inf_norm(
             col_ptr, row_ind, matrix_values, n);
         std::vector<double> host_ritz_values((size_t)k, 0.0);
@@ -2869,13 +2879,17 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         std::vector<double> raw_basis(
             (size_t)n * (size_t)basis_cols, 0.0);
         std::vector<double> orthonormal_basis;
+        std::vector<std::vector<double>> recent_corrections;
         std::vector<IPTDavidsonHistoryEntry> history;
         double current_maximum = NAN;
         int current_max_index = -1;
+        int accepted_since_restart = 0;
 
         steps = std::max(1, steps);
         active_max = std::max(1, std::min(active_max, k));
         ortho_repeats = std::max(1, ortho_repeats);
+        restart_every = std::max(0, restart_every);
+        restart_keep_extra = std::max(1, restart_keep_extra);
         result->davidson_attempted = 1;
         result->davidson_denom_clip = ipt_cuda_env_double(
             "IPT_DAVIDSON_DENOM_CLIP", 1.0e-8);
@@ -2941,7 +2955,7 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                     }
                     if (current_residuals[(size_t)index] <=
                             select_tolerance ||
-                        current_residuals[(size_t)index] <
+                        current_residuals[(size_t)index] <=
                             locked_tolerance) {
                         continue;
                     }
@@ -3034,9 +3048,9 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         &trial_maximum, &trial_max_index);
                     for (int col = 0; col < k; ++col) {
                         if (current_residuals[(size_t)col] <
-                                locked_tolerance &&
+                                protect_tolerance &&
                             trial_residuals[(size_t)col] >=
-                                locked_tolerance) {
+                                protect_tolerance) {
                             locking_preserved = 0;
                             break;
                         }
@@ -3116,6 +3130,121 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                             trial_ritz_max;
                         result->ritz_vectors_has_nan_or_inf =
                             trial_ritz_invalid;
+                        for (size_t active = 0;
+                             active < active_indices.size(); ++active) {
+                            recent_corrections.push_back(
+                                std::vector<double>(
+                                    corrections_sorted.begin() +
+                                        active * (size_t)n,
+                                    corrections_sorted.begin() +
+                                        (active + 1U) * (size_t)n));
+                        }
+                        while ((int)recent_corrections.size() >
+                               restart_keep_extra) {
+                            recent_corrections.erase(
+                                recent_corrections.begin());
+                        }
+                        accepted_since_restart +=
+                            (int)active_indices.size();
+                        if (restart_every > 0 &&
+                            accepted_since_restart >= restart_every) {
+                            std::vector<double> restart_basis;
+                            std::vector<double> restart_orthonormal_basis;
+                            std::vector<std::vector<double>>
+                                retained_corrections;
+                            int restarted = 0;
+
+                            restart_basis.reserve(
+                                (size_t)n *
+                                (size_t)(k + restart_keep_extra));
+                            for (int col = 0; col < k; ++col) {
+                                for (int sorted = 0; sorted < n;
+                                     ++sorted) {
+                                    restart_basis.push_back(
+                                        host_ritz_vectors
+                                            [(size_t)perm[(size_t)sorted] +
+                                             (size_t)col * (size_t)n]);
+                                }
+                            }
+                            if (ipt_block_build_orthonormal_basis(
+                                    restart_basis, n, k,
+                                    ortho_repeats,
+                                    &restart_orthonormal_basis)) {
+                                for (const std::vector<double> &saved :
+                                     recent_corrections) {
+                                    std::vector<double> direction = saved;
+
+                                    if (!ipt_block_orthogonalize_direction(
+                                            &direction,
+                                            restart_orthonormal_basis, n,
+                                            (int)(
+                                                restart_orthonormal_basis
+                                                    .size() /
+                                                (size_t)n),
+                                            ortho_repeats)) {
+                                        continue;
+                                    }
+                                    restart_basis.insert(
+                                        restart_basis.end(),
+                                        direction.begin(),
+                                        direction.end());
+                                    restart_orthonormal_basis.insert(
+                                        restart_orthonormal_basis.end(),
+                                        direction.begin(),
+                                        direction.end());
+                                    retained_corrections.push_back(
+                                        direction);
+                                }
+                                {
+                                    double *d_restart_basis = NULL;
+                                    int restart_basis_cols =
+                                        (int)(restart_basis.size() /
+                                              (size_t)n);
+
+                                    CUDA_CHECK(cudaMalloc(
+                                        (void **)&d_restart_basis,
+                                        restart_basis.size() *
+                                            sizeof(double)));
+                                    CUDA_CHECK(cudaMemcpy(
+                                        d_restart_basis,
+                                        restart_basis.data(),
+                                        restart_basis.size() *
+                                            sizeof(double),
+                                        cudaMemcpyHostToDevice));
+                                    cudaFree(d_davidson_basis);
+                                    d_davidson_basis = d_restart_basis;
+                                    basis_cols = restart_basis_cols;
+                                    orthonormal_basis.swap(
+                                        restart_orthonormal_basis);
+                                    recent_corrections.swap(
+                                        retained_corrections);
+                                    accepted_since_restart = 0;
+                                    ++result->davidson_restart_count;
+                                    restarted = 1;
+                                    ipt_block_orthogonality_stats(
+                                        orthonormal_basis, n,
+                                        basis_cols,
+                                        &result
+                                             ->basis_orthogonality_frobenius_error,
+                                        &result
+                                             ->basis_orthogonality_max_abs_error,
+                                        &result
+                                             ->basis_has_nan_or_inf);
+                                }
+                            }
+                            if (restarted) {
+                                for (size_t offset = 0;
+                                     offset < active_indices.size();
+                                     ++offset) {
+                                    IPTDavidsonHistoryEntry &entry =
+                                        history[history.size() - 1U -
+                                                offset];
+
+                                    entry.basis_cols = basis_cols;
+                                    entry.restarted = 1;
+                                }
+                            }
+                        }
                     }
                     cudaFree(d_trial_basis);
                     cudaFree(d_trial_values);

@@ -146,6 +146,7 @@ typedef struct {
     int adaptive_target_block_end;
     std::string adaptive_added_indices;
     std::vector<IPTDavidsonHistoryEntry> davidson_history;
+    int davidson_restart_count;
     std::vector<double> eigenvalues;
     std::vector<double> relative_eigen_residuals;
     int status;
@@ -1478,6 +1479,7 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
             ipt.adaptive_target_block_start;
         result.adaptive_target_block_end = ipt.adaptive_target_block_end;
         result.adaptive_added_indices = ipt.adaptive_added_indices;
+        result.davidson_restart_count = ipt.davidson_restart_count;
         if (ipt.davidson_history_count > 0 &&
             ipt.davidson_history != NULL) {
             result.davidson_history.assign(
@@ -1570,6 +1572,7 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             "davidson_target_index=%d davidson_residual_before=%.17g "
             "davidson_residual_after=%.17g davidson_denom_clip=%.17g "
             "davidson_history_count=%zu "
+            "davidson_restart_count=%d "
             "adaptive_block_enabled=%d adaptive_coupling_tau=%.17g "
             "adaptive_limit_hit=%d adaptive_added_indices=%s "
             "adaptive_final_target_block_start=%d "
@@ -1594,6 +1597,7 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             result.davidson_target_index, result.davidson_residual_before,
             result.davidson_residual_after, result.davidson_denom_clip,
             result.davidson_history.size(),
+            result.davidson_restart_count,
             result.adaptive_block_enabled,
             result.adaptive_coupling_tau, result.adaptive_limit_hit,
             result.adaptive_added_indices.c_str(),
@@ -1622,14 +1626,14 @@ static void write_davidson_history(FILE *history_csv,
     for (const IPTDavidsonHistoryEntry &entry :
          result.davidson_history) {
         fprintf(history_csv,
-                "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g\n",
+                "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g,%d\n",
                 entry.davidson_step, entry.active_pair_index,
                 entry.residual_before, entry.residual_after,
                 entry.accepted, entry.basis_cols,
                 entry.max_relative_eigen_residual,
                 entry.max_relative_eigen_residual_index,
                 entry.pair_28_residual, entry.pair_29_residual,
-                entry.orthogonality_max_abs_error);
+                entry.orthogonality_max_abs_error, entry.restarted);
     }
 }
 
@@ -2037,7 +2041,7 @@ int main(void)
             "davidson_step,active_pair_index,residual_before,residual_after,"
             "accepted,basis_cols,max_relative_eigen_residual,"
             "max_relative_eigen_residual_index,pair_28_residual,"
-            "pair_29_residual,orthogonality_error\n");
+            "pair_29_residual,orthogonality_error,restarted\n");
 
     printf("CH4/STO-6G full FCI CSC benchmark: n=%d "
            "nnz=%d k=%d repeats=%d tol=%.3e run_primme=%d\n",
@@ -2057,19 +2061,26 @@ int main(void)
             "davidson_select_tol=%.17g\ndavidson_denom_clip=%.17g\n"
             "davidson_accept_only_if_improves=%d\n"
             "davidson_ortho_repeats=%d\n"
-            "davidson_locked_tolerance=1e-10\n",
+            "davidson_protect_tol=%.17g\n"
+            "davidson_locked_tol=%.17g\n"
+            "davidson_restart_every=%d\n"
+            "davidson_restart_keep_extra=%d\n",
             matrix_source, matrix.n, matrix.nnz, matrix_norm,
             cache_path == NULL || cache_path[0] == '\0' ? "(unset)"
                                                         : cache_path,
             ipt_cuda_env_int("IPT_DAVIDSON_STEPS", 1),
             ipt_cuda_env_int("IPT_DAVIDSON_ACTIVE_MAX", 1),
-            ipt_cuda_env_double("IPT_DAVIDSON_SELECT_TOL", 1.0e-10),
+            ipt_cuda_env_double("IPT_DAVIDSON_SELECT_TOL", 1.0e-12),
             ipt_cuda_env_double("IPT_DAVIDSON_DENOM_CLIP", 1.0e-8),
             getenv("IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES") == NULL
                 ? 1
                 : ipt_cuda_env_flag(
                       "IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES"),
-            ipt_cuda_env_int("IPT_DAVIDSON_ORTHO_REPEATS", 2));
+            ipt_cuda_env_int("IPT_DAVIDSON_ORTHO_REPEATS", 2),
+            ipt_cuda_env_double("IPT_DAVIDSON_PROTECT_TOL", 1.0e-10),
+            ipt_cuda_env_double("IPT_DAVIDSON_LOCKED_TOL", 1.0e-12),
+            ipt_cuda_env_int("IPT_DAVIDSON_RESTART_EVERY", 20),
+            ipt_cuda_env_int("IPT_DAVIDSON_RESTART_KEEP_EXTRA", 5));
     write_diagonal_diagnostics(summary, diag_gaps_path, diagnostics,
                                dump_diag_gaps);
     write_coupling_gap_diagnostics(summary, coupling_gap_path, diagnostics,
