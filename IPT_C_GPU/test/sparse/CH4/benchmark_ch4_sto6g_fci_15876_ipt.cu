@@ -133,6 +133,18 @@ typedef struct {
     double ritz_vectors_orthogonality_max_abs_error;
     int basis_has_nan_or_inf;
     int ritz_vectors_has_nan_or_inf;
+    int davidson_attempted;
+    int davidson_accepted;
+    int davidson_target_index;
+    double davidson_residual_before;
+    double davidson_residual_after;
+    double davidson_denom_clip;
+    int adaptive_block_enabled;
+    double adaptive_coupling_tau;
+    int adaptive_limit_hit;
+    int adaptive_target_block_start;
+    int adaptive_target_block_end;
+    std::string adaptive_added_indices;
     std::vector<double> eigenvalues;
     std::vector<double> relative_eigen_residuals;
     int status;
@@ -169,6 +181,10 @@ typedef struct {
     int too_large;
     int offending_block_size;
     int target_block_id;
+    int adaptive_enabled;
+    double adaptive_coupling_tau;
+    int adaptive_limit_hit;
+    std::vector<int> adaptive_added_indices;
 } Ch4Diagnostics;
 
 static const char *CH4_STO6G_FCI_PYTHON = R"PY(
@@ -1095,6 +1111,15 @@ static bool build_ch4_diagnostics(const CscMatrixView *matrix,
 
     diagnostics->oversample =
         ipt_cuda_env_int("IPT_BLOCK_CLUSTER_OVERSAMPLE", 0);
+    diagnostics->adaptive_enabled =
+        ipt_cuda_env_flag("IPT_BLOCK_CLUSTER_ADAPTIVE");
+    diagnostics->adaptive_coupling_tau = ipt_cuda_env_double(
+        "IPT_BLOCK_CLUSTER_COUPLING_TAU", 0.1);
+    diagnostics->adaptive_limit_hit = 0;
+    diagnostics->adaptive_added_indices.clear();
+    if (diagnostics->adaptive_enabled) {
+        diagnostics->oversample = 0;
+    }
     diagnostics->basis_target_k = requested_k;
     if (diagnostics->oversample > 0) {
         diagnostics->basis_target_k =
@@ -1137,6 +1162,16 @@ static bool build_ch4_diagnostics(const CscMatrixView *matrix,
     if (!diagnostics->too_large) {
         ipt_block_cluster_add_target_clusters(
             &diagnostics->blocks, matrix->n, diagnostics->basis_target_k);
+        if (diagnostics->adaptive_enabled) {
+            ipt_block_cluster_adaptive_expand(
+                diagnostics->sorted_col_ptr, diagnostics->sorted_row_ind,
+                diagnostics->sorted_values,
+                diagnostics->sorted_diagonal, requested_k,
+                diagnostics->max_block_size,
+                diagnostics->adaptive_coupling_tau, &diagnostics->blocks,
+                &diagnostics->adaptive_added_indices,
+                &diagnostics->adaptive_limit_hit);
+        }
     }
     for (size_t i = 0; i < diagnostics->blocks.size(); ++i) {
         int first = diagnostics->blocks[i].first;
@@ -1209,6 +1244,14 @@ static TrialResult run_primme_once(const CscMatrixView *matrix, double tol,
     result.basis_orthogonality_max_abs_error = NAN;
     result.ritz_vectors_orthogonality_frobenius_error = NAN;
     result.ritz_vectors_orthogonality_max_abs_error = NAN;
+    result.davidson_target_index = -1;
+    result.davidson_residual_before = NAN;
+    result.davidson_residual_after = NAN;
+    result.davidson_denom_clip = NAN;
+    result.adaptive_coupling_tau = NAN;
+    result.adaptive_target_block_start = -1;
+    result.adaptive_target_block_end = -1;
+    result.adaptive_added_indices = "none";
 
     if (k <= 0 || k > matrix->n) {
         result.status = IPT_CUDA_INVALID_ARGUMENT;
@@ -1366,6 +1409,14 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
     result.basis_orthogonality_max_abs_error = NAN;
     result.ritz_vectors_orthogonality_frobenius_error = NAN;
     result.ritz_vectors_orthogonality_max_abs_error = NAN;
+    result.davidson_target_index = -1;
+    result.davidson_residual_before = NAN;
+    result.davidson_residual_after = NAN;
+    result.davidson_denom_clip = NAN;
+    result.adaptive_coupling_tau = NAN;
+    result.adaptive_target_block_start = -1;
+    result.adaptive_target_block_end = -1;
+    result.adaptive_added_indices = "none";
 
     if (k <= 0 || k > matrix->n) {
         result.status = IPT_CUDA_INVALID_ARGUMENT;
@@ -1413,6 +1464,19 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
         result.basis_has_nan_or_inf = ipt.basis_has_nan_or_inf;
         result.ritz_vectors_has_nan_or_inf =
             ipt.ritz_vectors_has_nan_or_inf;
+        result.davidson_attempted = ipt.davidson_attempted;
+        result.davidson_accepted = ipt.davidson_accepted;
+        result.davidson_target_index = ipt.davidson_target_index;
+        result.davidson_residual_before = ipt.davidson_residual_before;
+        result.davidson_residual_after = ipt.davidson_residual_after;
+        result.davidson_denom_clip = ipt.davidson_denom_clip;
+        result.adaptive_block_enabled = ipt.adaptive_block_enabled;
+        result.adaptive_coupling_tau = ipt.adaptive_coupling_tau;
+        result.adaptive_limit_hit = ipt.adaptive_limit_hit;
+        result.adaptive_target_block_start =
+            ipt.adaptive_target_block_start;
+        result.adaptive_target_block_end = ipt.adaptive_target_block_end;
+        result.adaptive_added_indices = ipt.adaptive_added_indices;
         pairs_to_check = std::min(result.requested_k, result.returned_k);
         for (int col = 0; col < pairs_to_check; ++col) {
             const double *vector = ipt.vectors + (size_t)col * (size_t)matrix->n;
@@ -1495,6 +1559,13 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             "ritz_vectors_orthogonality_frobenius_error=%.17g "
             "ritz_vectors_orthogonality_max_abs_error=%.17g "
             "basis_has_nan_or_inf=%d ritz_vectors_has_nan_or_inf=%d "
+            "davidson_attempted=%d davidson_accepted=%d "
+            "davidson_target_index=%d davidson_residual_before=%.17g "
+            "davidson_residual_after=%.17g davidson_denom_clip=%.17g "
+            "adaptive_block_enabled=%d adaptive_coupling_tau=%.17g "
+            "adaptive_limit_hit=%d adaptive_added_indices=%s "
+            "adaptive_final_target_block_start=%d "
+            "adaptive_final_target_block_end=%d "
             "first_10_max_relative_eigen_residual=%.17g "
             "middle_10_max_relative_eigen_residual=%.17g "
             "last_10_max_relative_eigen_residual=%.17g\n",
@@ -1510,7 +1581,15 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             result.ritz_vectors_orthogonality_frobenius_error,
             result.ritz_vectors_orthogonality_max_abs_error,
             result.basis_has_nan_or_inf,
-            result.ritz_vectors_has_nan_or_inf, max_in_range(0, 10),
+            result.ritz_vectors_has_nan_or_inf,
+            result.davidson_attempted, result.davidson_accepted,
+            result.davidson_target_index, result.davidson_residual_before,
+            result.davidson_residual_after, result.davidson_denom_clip,
+            result.adaptive_block_enabled,
+            result.adaptive_coupling_tau, result.adaptive_limit_hit,
+            result.adaptive_added_indices.c_str(),
+            result.adaptive_target_block_start,
+            result.adaptive_target_block_end, max_in_range(0, 10),
             max_in_range(10, 20), max_in_range(20, 30));
 }
 
@@ -1612,6 +1691,7 @@ static void write_block_diagnostics(FILE *summary,
 {
     int target_first = -1;
     int target_last = -1;
+    std::string adaptive_added;
 
     if (diagnostics.target_block_id >= 0) {
         target_first =
@@ -1619,18 +1699,35 @@ static void write_block_diagnostics(FILE *summary,
         target_last =
             diagnostics.blocks[(size_t)diagnostics.target_block_id].second;
     }
+    for (size_t i = 0; i < diagnostics.adaptive_added_indices.size(); ++i) {
+        if (!adaptive_added.empty()) {
+            adaptive_added += ";";
+        }
+        adaptive_added +=
+            std::to_string(diagnostics.adaptive_added_indices[i]);
+    }
     fprintf(summary,
             "block_indexing=0-based_sorted\nrequested_k=%d\nbasis_cols=%d\n"
             "returned_k=%d\noversample=%d\nmax_block_size=%d\n"
             "number_of_blocks=%zu\ntarget_block_start=%d\n"
             "target_block_end=%d\ntarget_block_size=%d\n"
             "max_block_size_truncated=0\nmax_block_size_error=%d\n"
-            "max_block_size_offending_block_size=%d\n",
+            "max_block_size_offending_block_size=%d\n"
+            "adaptive_block_enabled=%d\n"
+            "adaptive_coupling_tau=%.17g\nadaptive_limit_hit=%d\n"
+            "adaptive_added_indices=%s\n"
+            "adaptive_final_target_block_start=%d\n"
+            "adaptive_final_target_block_end=%d\n",
             requested_k, diagnostics.basis_cols, returned_k,
             diagnostics.oversample, diagnostics.max_block_size,
             diagnostics.blocks.size(), target_first, target_last,
             target_first >= 0 ? target_last - target_first + 1 : 0,
-            diagnostics.too_large, diagnostics.offending_block_size);
+            diagnostics.too_large, diagnostics.offending_block_size,
+            diagnostics.adaptive_enabled,
+            diagnostics.adaptive_coupling_tau,
+            diagnostics.adaptive_limit_hit,
+            adaptive_added.empty() ? "none" : adaptive_added.c_str(),
+            target_first, target_last);
     fprintf(summary,
             "target_block_contains_indices_30_31_32_33_0based=%d,%d,%d,%d\n"
             "target_block_contains_positions_30_31_32_33_1based=%d,%d,%d,%d\n",

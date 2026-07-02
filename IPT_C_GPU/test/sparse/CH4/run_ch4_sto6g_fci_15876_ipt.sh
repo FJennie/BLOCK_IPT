@@ -27,6 +27,10 @@ export IPT_K="${IPT_K:-30}"
 export IPT_BLOCK_CLUSTER="${IPT_BLOCK_CLUSTER:-1}"
 export IPT_BLOCK_CLUSTER_OVERSAMPLE="${IPT_BLOCK_CLUSTER_OVERSAMPLE:-0}"
 export IPT_BLOCK_CLUSTER_QR="${IPT_BLOCK_CLUSTER_QR:-1}"
+export IPT_BLOCK_CLUSTER_ADAPTIVE="${IPT_BLOCK_CLUSTER_ADAPTIVE:-0}"
+export IPT_BLOCK_CLUSTER_COUPLING_TAU="${IPT_BLOCK_CLUSTER_COUPLING_TAU:-0.1}"
+export IPT_DAVIDSON_ENRICH="${IPT_DAVIDSON_ENRICH:-0}"
+export IPT_DAVIDSON_DENOM_CLIP="${IPT_DAVIDSON_DENOM_CLIP:-1e-8}"
 export PRIMME_MAX_MATVECS="${PRIMME_MAX_MATVECS:-1000}"
 export RUN_PRIMME="${RUN_PRIMME:-0}"
 export RUN_WARMUP="${RUN_WARMUP:-0}"
@@ -51,6 +55,10 @@ echo "IPT_K=$IPT_K"
 echo "IPT_BLOCK_CLUSTER=$IPT_BLOCK_CLUSTER"
 echo "IPT_BLOCK_CLUSTER_OVERSAMPLE=$IPT_BLOCK_CLUSTER_OVERSAMPLE"
 echo "IPT_BLOCK_CLUSTER_QR=$IPT_BLOCK_CLUSTER_QR"
+echo "IPT_BLOCK_CLUSTER_ADAPTIVE=$IPT_BLOCK_CLUSTER_ADAPTIVE"
+echo "IPT_BLOCK_CLUSTER_COUPLING_TAU=$IPT_BLOCK_CLUSTER_COUPLING_TAU"
+echo "IPT_DAVIDSON_ENRICH=$IPT_DAVIDSON_ENRICH"
+echo "IPT_DAVIDSON_DENOM_CLIP=$IPT_DAVIDSON_DENOM_CLIP"
 echo "IPT_CH4_MATRIX_CACHE=${IPT_CH4_MATRIX_CACHE:-}"
 echo "IPT_SAVE_MATRIX=${IPT_SAVE_MATRIX:-0}"
 echo "IPT_LOAD_MATRIX=${IPT_LOAD_MATRIX:-0}"
@@ -71,9 +79,13 @@ PY
 nvcc --version
 nvidia-smi || true
 echo "===== build ====="
-set -x
-nvcc -O3 -std=c++14 -lineinfo -arch=sm_80     -I"$PRIMME_ROOT/include"     -I"$PYTHON_ROOT/include/python3.8"     "$TEST_DIR/benchmark_ch4_sto6g_fci_15876_ipt.cu"     "$PRIMME_ROOT/lib/libprimme.a"     -o "$TEST_DIR/benchmark_ch4_sto6g_fci_15876_ipt_cuda"     -lcublas -lcusparse -lcusolver -lcudart     -L"$PYTHON_ROOT/lib" -lpython3.8     -L"$TEST_DIR" -lopenblas     -lpthread -ldl -lutil -lrt     -Xlinker -rpath -Xlinker "$GCC_LIB_DIR"     -Xlinker -rpath -Xlinker "$PYTHON_ROOT/lib"     -Xlinker -rpath -Xlinker "$OPENBLAS_DIR"     -lgfortran "$GCC_LIB_DIR/libstdc++.so" -lm
-set +x
+if [ "${IPT_SKIP_BUILD:-0}" = "1" ]; then
+    echo "IPT_SKIP_BUILD=1; using existing benchmark binary"
+else
+    set -x
+    nvcc -O3 -std=c++14 -lineinfo -arch=sm_80     -I"$PRIMME_ROOT/include"     -I"$PYTHON_ROOT/include/python3.8"     "$TEST_DIR/benchmark_ch4_sto6g_fci_15876_ipt.cu"     "$PRIMME_ROOT/lib/libprimme.a"     -o "$TEST_DIR/benchmark_ch4_sto6g_fci_15876_ipt_cuda"     -lcublas -lcusparse -lcusolver -lcudart     -L"$PYTHON_ROOT/lib" -lpython3.8     -L"$TEST_DIR" -lopenblas     -lpthread -ldl -lutil -lrt     -Xlinker -rpath -Xlinker "$GCC_LIB_DIR"     -Xlinker -rpath -Xlinker "$PYTHON_ROOT/lib"     -Xlinker -rpath -Xlinker "$OPENBLAS_DIR"     -lgfortran "$GCC_LIB_DIR/libstdc++.so" -lm
+    set +x
+fi
 echo "===== run ====="
 "$TEST_DIR/benchmark_ch4_sto6g_fci_15876_ipt_cuda"
 status=$?

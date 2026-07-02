@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 
 #include "ipt_preparation.cu"
 
@@ -98,6 +99,18 @@ typedef struct {
     double ritz_vectors_orthogonality_max_abs_error;
     int basis_has_nan_or_inf;
     int ritz_vectors_has_nan_or_inf;
+    int davidson_attempted;
+    int davidson_accepted;
+    int davidson_target_index;
+    double davidson_residual_before;
+    double davidson_residual_after;
+    double davidson_denom_clip;
+    int adaptive_block_enabled;
+    double adaptive_coupling_tau;
+    int adaptive_limit_hit;
+    int adaptive_target_block_start;
+    int adaptive_target_block_end;
+    char adaptive_added_indices[256];
 } IPTCudaResult;
 
 const char *ipt_cuda_status_string(int status);
@@ -266,6 +279,18 @@ extern "C" void ipt_cuda_free_result(IPTCudaResult *result)
     result->ritz_vectors_orthogonality_max_abs_error = NAN;
     result->basis_has_nan_or_inf = 0;
     result->ritz_vectors_has_nan_or_inf = 0;
+    result->davidson_attempted = 0;
+    result->davidson_accepted = 0;
+    result->davidson_target_index = -1;
+    result->davidson_residual_before = NAN;
+    result->davidson_residual_after = NAN;
+    result->davidson_denom_clip = NAN;
+    result->adaptive_block_enabled = 0;
+    result->adaptive_coupling_tau = NAN;
+    result->adaptive_limit_hit = 0;
+    result->adaptive_target_block_start = -1;
+    result->adaptive_target_block_end = -1;
+    result->adaptive_added_indices[0] = '\0';
 }
 
 // 释放 device 侧 d_vectors/d_values
@@ -1378,6 +1403,139 @@ static void ipt_block_orthogonality_stats(
     *max_abs_error = invalid ? NAN : max_error;
 }
 
+static double ipt_block_host_matrix_inf_norm(
+    const int *col_ptr, const int *row_ind, const double *values, int n)
+{
+    std::vector<double> row_sum((size_t)n, 0.0);
+    double norm = 0.0;
+
+    for (int col = 0; col < n; ++col) {
+        for (int p = col_ptr[col]; p < col_ptr[col + 1]; ++p) {
+            row_sum[(size_t)row_ind[p]] += fabs(values[p]);
+        }
+    }
+    for (int row = 0; row < n; ++row) {
+        norm = std::max(norm, row_sum[(size_t)row]);
+    }
+    return norm;
+}
+
+static double ipt_block_host_pair_residual(
+    const int *col_ptr, const int *row_ind, const double *values, int n,
+    const double *vector, double eigenvalue, double matrix_norm,
+    std::vector<double> *residual_vector)
+{
+    std::vector<double> av((size_t)n, 0.0);
+    double residual_norm_sq = 0.0;
+    double vector_norm_sq = 0.0;
+
+    for (int col = 0; col < n; ++col) {
+        double x = vector[col];
+
+        for (int p = col_ptr[col]; p < col_ptr[col + 1]; ++p) {
+            av[(size_t)row_ind[p]] += values[p] * x;
+        }
+    }
+    if (residual_vector != NULL) {
+        residual_vector->assign((size_t)n, 0.0);
+    }
+    for (int row = 0; row < n; ++row) {
+        double residual = av[(size_t)row] - eigenvalue * vector[row];
+
+        if (residual_vector != NULL) {
+            (*residual_vector)[(size_t)row] = residual;
+        }
+        residual_norm_sq += residual * residual;
+        vector_norm_sq += vector[row] * vector[row];
+    }
+    return sqrt(residual_norm_sq) /
+           (std::max(1.0, matrix_norm) *
+            std::max(1.0, sqrt(vector_norm_sq)));
+}
+
+static double ipt_block_host_max_residual(
+    const int *col_ptr, const int *row_ind, const double *values, int n,
+    int k, const std::vector<double> &ritz_values,
+    const std::vector<double> &ritz_vectors, double matrix_norm,
+    int *max_index)
+{
+    double maximum = NAN;
+
+    *max_index = -1;
+    for (int col = 0; col < k; ++col) {
+        double residual = ipt_block_host_pair_residual(
+            col_ptr, row_ind, values, n,
+            ritz_vectors.data() + (size_t)col * (size_t)n,
+            ritz_values[(size_t)col], matrix_norm, NULL);
+
+        if (!isfinite(maximum) || residual > maximum) {
+            maximum = residual;
+            *max_index = col;
+        }
+    }
+    return maximum;
+}
+
+static int ipt_block_build_davidson_correction(
+    const int *col_ptr, const int *row_ind, const double *values, int n,
+    int k, const std::vector<double> &diagonal,
+    const std::vector<double> &ritz_values,
+    const std::vector<double> &ritz_vectors, int target_index,
+    double denom_clip, std::vector<double> *correction)
+{
+    std::vector<double> residual;
+    const double *target =
+        ritz_vectors.data() + (size_t)target_index * (size_t)n;
+    double norm_sq = 0.0;
+
+    ipt_block_host_pair_residual(
+        col_ptr, row_ind, values, n, target,
+        ritz_values[(size_t)target_index], 1.0, &residual);
+    correction->assign((size_t)n, 0.0);
+    for (int row = 0; row < n; ++row) {
+        double denominator =
+            diagonal[(size_t)row] - ritz_values[(size_t)target_index];
+
+        if (fabs(denominator) < denom_clip) {
+            denominator = denominator < 0.0 ? -denom_clip : denom_clip;
+        }
+        (*correction)[(size_t)row] =
+            residual[(size_t)row] / denominator;
+    }
+    for (int pass = 0; pass < 2; ++pass) {
+        for (int col = 0; col < k; ++col) {
+            const double *vector =
+                ritz_vectors.data() + (size_t)col * (size_t)n;
+            double dot = 0.0;
+
+            for (int row = 0; row < n; ++row) {
+                dot += vector[row] * (*correction)[(size_t)row];
+            }
+            for (int row = 0; row < n; ++row) {
+                (*correction)[(size_t)row] -= dot * vector[row];
+            }
+        }
+    }
+    for (int row = 0; row < n; ++row) {
+        if (!isfinite((*correction)[(size_t)row])) {
+            return 0;
+        }
+        norm_sq += (*correction)[(size_t)row] *
+                   (*correction)[(size_t)row];
+    }
+    if (!isfinite(norm_sq) || norm_sq <= DBL_EPSILON) {
+        return 0;
+    }
+    {
+        double inverse_norm = 1.0 / sqrt(norm_sq);
+
+        for (int row = 0; row < n; ++row) {
+            (*correction)[(size_t)row] *= inverse_norm;
+        }
+    }
+    return 1;
+}
+
 static int ipt_block_cluster_solve_basis_gpu(
     cusparseHandle_t sparse_handle, cusparseSpMatDescr_t sparse_matrix,
     cublasHandle_t cublas_handle, const double *d_diagonal, int n, int m,
@@ -1922,6 +2080,146 @@ static void ipt_block_cluster_add_target_clusters(
     std::sort(ranges->begin(), ranges->end());
 }
 
+static void ipt_block_cluster_adaptive_expand(
+    const std::vector<int> &col_ptr, const std::vector<int> &row_ind,
+    const std::vector<double> &values, const std::vector<double> &diagonal,
+    int requested_k, int max_block_size, double coupling_tau,
+    std::vector<std::pair<int, int>> *ranges,
+    std::vector<int> *added_indices, int *limit_hit)
+{
+    const double eps_gap = 1.0e-14;
+    int n = (int)diagonal.size();
+
+    added_indices->clear();
+    *limit_hit = 0;
+    for (;;) {
+        int target_id = -1;
+        int first = -1;
+        int last = -1;
+        int best_outside = -1;
+        double best_ratio = 0.0;
+
+        for (size_t i = 0; i < ranges->size(); ++i) {
+            if ((*ranges)[i].first <= requested_k - 1 &&
+                requested_k - 1 <= (*ranges)[i].second) {
+                target_id = (int)i;
+                first = (*ranges)[i].first;
+                last = (*ranges)[i].second;
+                break;
+            }
+        }
+        if (target_id < 0) {
+            break;
+        }
+        for (int col = first; col <= last; ++col) {
+            for (int p = col_ptr[(size_t)col];
+                 p < col_ptr[(size_t)col + 1U]; ++p) {
+                int row = row_ind[(size_t)p];
+                double gap = 0.0;
+                double ratio = 0.0;
+
+                if (first <= row && row <= last) {
+                    continue;
+                }
+                gap = fabs(diagonal[(size_t)col] -
+                           diagonal[(size_t)row]);
+                ratio = fabs(values[(size_t)p]) / std::max(gap, eps_gap);
+                if (std::max(last, row) - std::min(first, row) + 1 >
+                    max_block_size) {
+                    if (ratio > coupling_tau) {
+                        *limit_hit = 1;
+                    }
+                    continue;
+                }
+                if (ratio > best_ratio) {
+                    best_ratio = ratio;
+                    best_outside = row;
+                }
+            }
+        }
+        if (best_outside < 0 || best_ratio <= coupling_tau) {
+            break;
+        }
+        {
+            int proposed_first = std::min(first, best_outside);
+            int proposed_last = std::max(last, best_outside);
+            bool expanded = true;
+
+            while (expanded) {
+                double scale = 1.0;
+                double degenerate_gap = 0.0;
+
+                expanded = false;
+                if (proposed_first > 0) {
+                    scale = std::max(
+                        1.0, std::max(fabs(diagonal[(size_t)proposed_first]),
+                                      fabs(diagonal[(size_t)proposed_first -
+                                                    1U])));
+                    degenerate_gap =
+                        std::max(eps_gap,
+                                 1000.0 *
+                                     std::numeric_limits<double>::epsilon() *
+                                     scale);
+                    if (fabs(diagonal[(size_t)proposed_first] -
+                             diagonal[(size_t)proposed_first - 1U]) <=
+                        degenerate_gap) {
+                        --proposed_first;
+                        expanded = true;
+                    }
+                }
+                if (proposed_last + 1 < n) {
+                    scale = std::max(
+                        1.0, std::max(fabs(diagonal[(size_t)proposed_last]),
+                                      fabs(diagonal[(size_t)proposed_last +
+                                                    1U])));
+                    degenerate_gap =
+                        std::max(eps_gap,
+                                 1000.0 *
+                                     std::numeric_limits<double>::epsilon() *
+                                     scale);
+                    if (fabs(diagonal[(size_t)proposed_last + 1U] -
+                             diagonal[(size_t)proposed_last]) <=
+                        degenerate_gap) {
+                        ++proposed_last;
+                        expanded = true;
+                    }
+                }
+            }
+            if (proposed_last - proposed_first + 1 > max_block_size) {
+                *limit_hit = 1;
+                break;
+            }
+            for (int index = proposed_first; index <= proposed_last; ++index) {
+                if (index < first || index > last) {
+                    added_indices->push_back(index);
+                }
+            }
+            (*ranges)[(size_t)target_id] =
+                std::make_pair(proposed_first, proposed_last);
+            std::sort(ranges->begin(), ranges->end());
+            {
+                std::vector<std::pair<int, int>> merged;
+
+                for (size_t i = 0; i < ranges->size(); ++i) {
+                    if (merged.empty() ||
+                        (*ranges)[i].first > merged.back().second) {
+                        merged.push_back((*ranges)[i]);
+                    } else {
+                        merged.back().second =
+                            std::max(merged.back().second,
+                                     (*ranges)[i].second);
+                    }
+                }
+                ranges->swap(merged);
+            }
+        }
+    }
+    std::sort(added_indices->begin(), added_indices->end());
+    added_indices->erase(
+        std::unique(added_indices->begin(), added_indices->end()),
+        added_indices->end());
+}
+
 static int ipt_block_cluster_solve_basis(
     const std::vector<int> &col_ptr, const std::vector<int> &row_ind,
     const std::vector<double> &values, const std::vector<double> &diagonal,
@@ -2184,6 +2482,10 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
     int basis_cols = 0;
     int oversample = 0;
     int basis_target_k = 0;
+    int adaptive_enabled = 0;
+    int adaptive_limit_hit = 0;
+    double adaptive_coupling_tau = 0.1;
+    std::vector<int> adaptive_added_indices;
     int block_maxiter = 0;
     int iterations_done = 0;
     double block_tol = 0.0;
@@ -2207,6 +2509,13 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         result->basis_orthogonality_max_abs_error = NAN;
         result->ritz_vectors_orthogonality_frobenius_error = NAN;
         result->ritz_vectors_orthogonality_max_abs_error = NAN;
+        result->davidson_target_index = -1;
+        result->davidson_residual_before = NAN;
+        result->davidson_residual_after = NAN;
+        result->davidson_denom_clip = NAN;
+        result->adaptive_coupling_tau = NAN;
+        result->adaptive_target_block_start = -1;
+        result->adaptive_target_block_end = -1;
     }
 
     if (col_ptr == NULL || row_ind == NULL || matrix_values == NULL ||
@@ -2239,7 +2548,14 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
 
     options = ipt_degeneracy_options(
         ipt_cuda_env_double("IPT_DEGENERACY_THRESHOLD", 0.0));
+    adaptive_enabled =
+        ipt_cuda_env_flag("IPT_BLOCK_CLUSTER_ADAPTIVE");
+    adaptive_coupling_tau = ipt_cuda_env_double(
+        "IPT_BLOCK_CLUSTER_COUPLING_TAU", 0.1);
     oversample = ipt_cuda_env_int("IPT_BLOCK_CLUSTER_OVERSAMPLE", 0);
+    if (adaptive_enabled) {
+        oversample = 0;
+    }
     basis_target_k = k;
     if (oversample > 0) {
         basis_target_k = oversample > n - k ? n : k + oversample;
@@ -2263,9 +2579,35 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         return IPT_CUDA_INVALID_ARGUMENT;
     }
     ipt_block_cluster_add_target_clusters(&ranges, n, basis_target_k);
+    if (adaptive_enabled) {
+        ipt_block_cluster_adaptive_expand(
+            sorted_col_ptr, sorted_row_ind, sorted_values, diagonal, k,
+            options.max_block_size, adaptive_coupling_tau, &ranges,
+            &adaptive_added_indices, &adaptive_limit_hit);
+    }
+    result->adaptive_block_enabled = adaptive_enabled;
+    result->adaptive_coupling_tau = adaptive_coupling_tau;
+    result->adaptive_limit_hit = adaptive_limit_hit;
+    {
+        std::string added;
+
+        for (size_t i = 0; i < adaptive_added_indices.size(); ++i) {
+            if (!added.empty()) {
+                added += ";";
+            }
+            added += std::to_string(adaptive_added_indices[i]);
+        }
+        snprintf(result->adaptive_added_indices,
+                 sizeof(result->adaptive_added_indices), "%s",
+                 added.empty() ? "none" : added.c_str());
+    }
 
     for (size_t i = 0; i < ranges.size(); ++i) {
         basis_cols += ranges[i].second - ranges[i].first + 1;
+        if (ranges[i].first <= k - 1 && k - 1 <= ranges[i].second) {
+            result->adaptive_target_block_start = ranges[i].first;
+            result->adaptive_target_block_end = ranges[i].second;
+        }
     }
     if (basis_cols < k) {
         return IPT_CUDA_INVALID_ARGUMENT;
@@ -2286,9 +2628,12 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         fprintf(stderr,
                 "IPT block-cluster: clusters=%zu basis_cols=%d "
                 "requested_k=%d basis_target_k=%d oversample=%d "
+                "adaptive=%d adaptive_tau=%.3e adaptive_added=%s "
                 "maxiter=%d tol=%.3e damping=%.3e\n",
                 ranges.size(), basis_cols, k, basis_target_k, oversample,
-                block_maxiter, block_tol, damping);
+                adaptive_enabled, adaptive_coupling_tau,
+                result->adaptive_added_indices, block_maxiter, block_tol,
+                damping);
         for (size_t i = 0; i < ranges.size(); ++i) {
             fprintf(stderr, "IPT block-cluster: block[%zu]=%d:%d size=%d\n",
                     i, ranges[i].first, ranges[i].second,
@@ -2391,6 +2736,123 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         goto cleanup;
     }
     result->matvecs += basis_cols;
+    if (ipt_cuda_env_flag("IPT_DAVIDSON_ENRICH")) {
+        std::vector<double> host_ritz_values((size_t)k, 0.0);
+        std::vector<double> host_ritz_vectors(
+            (size_t)n * (size_t)k, 0.0);
+        std::vector<double> correction;
+        std::vector<double> sorted_correction((size_t)n, 0.0);
+        double matrix_norm = ipt_block_host_matrix_inf_norm(
+            col_ptr, row_ind, matrix_values, n);
+        int worst_index = -1;
+
+        result->davidson_attempted = 1;
+        result->davidson_denom_clip = ipt_cuda_env_double(
+            "IPT_DAVIDSON_DENOM_CLIP", 1.0e-8);
+        if (result->davidson_denom_clip <= 0.0) {
+            result->davidson_denom_clip = 1.0e-8;
+        }
+        CUDA_CHECK(cudaMemcpy(host_ritz_vectors.data(), d_ritz_vectors,
+                              host_ritz_vectors.size() * sizeof(double),
+                              cudaMemcpyDeviceToHost));
+        CUDA_CHECK(cudaMemcpy(host_ritz_values.data(), d_ritz_values,
+                              host_ritz_values.size() * sizeof(double),
+                              cudaMemcpyDeviceToHost));
+        result->davidson_residual_before = ipt_block_host_max_residual(
+            col_ptr, row_ind, matrix_values, n, k, host_ritz_values,
+            host_ritz_vectors, matrix_norm, &worst_index);
+        result->davidson_target_index = worst_index;
+        if (worst_index >= 0 &&
+            ipt_block_build_davidson_correction(
+                col_ptr, row_ind, matrix_values, n, k, original_diagonal,
+                host_ritz_values, host_ritz_vectors, worst_index,
+                result->davidson_denom_clip, &correction)) {
+            double *d_enriched_basis = NULL;
+            double *d_enriched_values = NULL;
+            double *d_enriched_vectors = NULL;
+            double enriched_rr_time = 0.0;
+            double enriched_basis_frobenius = NAN;
+            double enriched_basis_max = NAN;
+            double enriched_ritz_frobenius = NAN;
+            double enriched_ritz_max = NAN;
+            int enriched_basis_invalid = 0;
+            int enriched_ritz_invalid = 0;
+            int enriched_used_qr = 0;
+            std::vector<double> enriched_values((size_t)k, 0.0);
+            std::vector<double> enriched_vectors(
+                (size_t)n * (size_t)k, 0.0);
+            int enriched_worst_index = -1;
+
+            for (int sorted = 0; sorted < n; ++sorted) {
+                sorted_correction[(size_t)sorted] =
+                    correction[(size_t)perm[(size_t)sorted]];
+            }
+            CUDA_CHECK(cudaMalloc(
+                (void **)&d_enriched_basis,
+                (size_t)n * (size_t)(basis_cols + 1) * sizeof(double)));
+            CUDA_CHECK(cudaMemcpy(
+                d_enriched_basis, d_combined_basis,
+                (size_t)n * (size_t)basis_cols * sizeof(double),
+                cudaMemcpyDeviceToDevice));
+            CUDA_CHECK(cudaMemcpy(
+                d_enriched_basis + (size_t)n * (size_t)basis_cols,
+                sorted_correction.data(), (size_t)n * sizeof(double),
+                cudaMemcpyHostToDevice));
+            status = ipt_block_cluster_rayleigh_ritz_gpu(
+                sparse_handle, sparse_matrix, cublas_handle,
+                d_enriched_basis, n, basis_cols + 1, k, d_perm,
+                &d_enriched_values, &d_enriched_vectors, &enriched_rr_time,
+                &enriched_used_qr, &enriched_basis_frobenius,
+                &enriched_basis_max, &enriched_basis_invalid,
+                &enriched_ritz_frobenius, &enriched_ritz_max,
+                &enriched_ritz_invalid);
+            cudaFree(d_enriched_basis);
+            if (status != IPT_CUDA_SUCCESS) {
+                cudaFree(d_enriched_values);
+                cudaFree(d_enriched_vectors);
+                goto cleanup;
+            }
+            result->rayleigh_ritz_time_sec += enriched_rr_time;
+            result->matvecs += basis_cols + 1;
+            CUDA_CHECK(cudaMemcpy(
+                enriched_vectors.data(), d_enriched_vectors,
+                enriched_vectors.size() * sizeof(double),
+                cudaMemcpyDeviceToHost));
+            CUDA_CHECK(cudaMemcpy(
+                enriched_values.data(), d_enriched_values,
+                enriched_values.size() * sizeof(double),
+                cudaMemcpyDeviceToHost));
+            result->davidson_residual_after = ipt_block_host_max_residual(
+                col_ptr, row_ind, matrix_values, n, k, enriched_values,
+                enriched_vectors, matrix_norm, &enriched_worst_index);
+            if (isfinite(result->davidson_residual_after) &&
+                result->davidson_residual_after <
+                    result->davidson_residual_before) {
+                cudaFree(d_ritz_values);
+                cudaFree(d_ritz_vectors);
+                d_ritz_values = d_enriched_values;
+                d_ritz_vectors = d_enriched_vectors;
+                d_enriched_values = NULL;
+                d_enriched_vectors = NULL;
+                ++basis_cols;
+                result->davidson_accepted = 1;
+                result->rayleigh_ritz_used_qr = enriched_used_qr;
+                result->basis_orthogonality_frobenius_error =
+                    enriched_basis_frobenius;
+                result->basis_orthogonality_max_abs_error =
+                    enriched_basis_max;
+                result->basis_has_nan_or_inf = enriched_basis_invalid;
+                result->ritz_vectors_orthogonality_frobenius_error =
+                    enriched_ritz_frobenius;
+                result->ritz_vectors_orthogonality_max_abs_error =
+                    enriched_ritz_max;
+                result->ritz_vectors_has_nan_or_inf =
+                    enriched_ritz_invalid;
+            }
+            cudaFree(d_enriched_values);
+            cudaFree(d_enriched_vectors);
+        }
+    }
     result->solve_time_sec =
         result->iteration_time_sec + result->rayleigh_ritz_time_sec;
 

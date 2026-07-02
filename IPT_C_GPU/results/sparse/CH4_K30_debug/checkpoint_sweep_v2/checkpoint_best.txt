@@ -1,0 +1,2 @@
+selection_metric=max_relative_eigen_residual
+best_row=200,3,failed,33,30,0.00066948386611412043,29,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/checkpoint_sweep_v2/iter_200

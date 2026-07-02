@@ -1,0 +1,10 @@
+iterations,exit_code,status,basis_cols,returned_k,max_relative_eigen_residual,max_relative_eigen_residual_index,result_dir
+50,3,failed,33,30,0.0010496764153332097,29,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/checkpoint_sweep_v2/iter_50
+100,3,failed,33,30,0.0008566285270643491,29,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/checkpoint_sweep_v2/iter_100
+150,3,failed,33,30,0.00068857692528108308,29,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/checkpoint_sweep_v2/iter_150
+200,3,failed,33,30,0.00066948386611412043,29,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/checkpoint_sweep_v2/iter_200
+300,3,failed,33,30,0.0010805531714578353,29,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/checkpoint_sweep_v2/iter_300
+400,3,failed,33,30,0.011595867763075276,29,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/checkpoint_sweep_v2/iter_400
+500,3,failed,33,30,0.01541998868647872,29,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/checkpoint_sweep_v2/iter_500
+700,3,failed,33,30,0.023136043940710792,29,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/checkpoint_sweep_v2/iter_700
+1000,3,failed,33,30,0.017212523212741856,29,/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/checkpoint_sweep_v2/iter_1000
