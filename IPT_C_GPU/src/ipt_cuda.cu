@@ -78,6 +78,20 @@ enum {
 };
 
 typedef struct {
+    int davidson_step;
+    int active_pair_index;
+    double residual_before;
+    double residual_after;
+    int accepted;
+    int basis_cols;
+    double max_relative_eigen_residual;
+    int max_relative_eigen_residual_index;
+    double pair_28_residual;
+    double pair_29_residual;
+    double orthogonality_max_abs_error;
+} IPTDavidsonHistoryEntry;
+
+typedef struct {
     int n;
     int k;
     int iterations;
@@ -111,6 +125,8 @@ typedef struct {
     int adaptive_target_block_start;
     int adaptive_target_block_end;
     char adaptive_added_indices[256];
+    int davidson_history_count;
+    IPTDavidsonHistoryEntry *davidson_history;
 } IPTCudaResult;
 
 const char *ipt_cuda_status_string(int status);
@@ -291,6 +307,9 @@ extern "C" void ipt_cuda_free_result(IPTCudaResult *result)
     result->adaptive_target_block_start = -1;
     result->adaptive_target_block_end = -1;
     result->adaptive_added_indices[0] = '\0';
+    free(result->davidson_history);
+    result->davidson_history_count = 0;
+    result->davidson_history = NULL;
 }
 
 // 释放 device 侧 d_vectors/d_values
@@ -1476,12 +1495,100 @@ static double ipt_block_host_max_residual(
     return maximum;
 }
 
+static void ipt_block_host_residuals(
+    const int *col_ptr, const int *row_ind, const double *values, int n,
+    int k, const std::vector<double> &ritz_values,
+    const std::vector<double> &ritz_vectors, double matrix_norm,
+    std::vector<double> *residuals, double *maximum, int *max_index)
+{
+    residuals->assign((size_t)k, NAN);
+    *maximum = NAN;
+    *max_index = -1;
+    for (int col = 0; col < k; ++col) {
+        double residual = ipt_block_host_pair_residual(
+            col_ptr, row_ind, values, n,
+            ritz_vectors.data() + (size_t)col * (size_t)n,
+            ritz_values[(size_t)col], matrix_norm, NULL);
+
+        (*residuals)[(size_t)col] = residual;
+        if (!isfinite(*maximum) || residual > *maximum) {
+            *maximum = residual;
+            *max_index = col;
+        }
+    }
+}
+
+static int ipt_block_orthogonalize_direction(
+    std::vector<double> *direction, const std::vector<double> &basis, int n,
+    int basis_cols, int repeats)
+{
+    double norm_sq = 0.0;
+
+    for (int pass = 0; pass < repeats; ++pass) {
+        for (int col = 0; col < basis_cols; ++col) {
+            const double *vector =
+                basis.data() + (size_t)col * (size_t)n;
+            double dot = 0.0;
+
+            for (int row = 0; row < n; ++row) {
+                dot += vector[row] * (*direction)[(size_t)row];
+            }
+            for (int row = 0; row < n; ++row) {
+                (*direction)[(size_t)row] -= dot * vector[row];
+            }
+        }
+    }
+    for (int row = 0; row < n; ++row) {
+        if (!isfinite((*direction)[(size_t)row])) {
+            return 0;
+        }
+        norm_sq += (*direction)[(size_t)row] *
+                   (*direction)[(size_t)row];
+    }
+    if (!isfinite(norm_sq) || norm_sq <= DBL_EPSILON) {
+        return 0;
+    }
+    {
+        double inverse_norm = 1.0 / sqrt(norm_sq);
+
+        for (int row = 0; row < n; ++row) {
+            (*direction)[(size_t)row] *= inverse_norm;
+        }
+    }
+    return 1;
+}
+
+static int ipt_block_build_orthonormal_basis(
+    const std::vector<double> &basis, int n, int basis_cols, int repeats,
+    std::vector<double> *orthonormal_basis)
+{
+    orthonormal_basis->clear();
+    orthonormal_basis->reserve((size_t)n * (size_t)basis_cols);
+    for (int col = 0; col < basis_cols; ++col) {
+        std::vector<double> direction(
+            basis.begin() + (size_t)col * (size_t)n,
+            basis.begin() + (size_t)(col + 1) * (size_t)n);
+        int existing_cols =
+            (int)(orthonormal_basis->size() / (size_t)n);
+
+        if (!ipt_block_orthogonalize_direction(
+                &direction, *orthonormal_basis, n, existing_cols,
+                repeats)) {
+            return 0;
+        }
+        orthonormal_basis->insert(orthonormal_basis->end(),
+                                  direction.begin(), direction.end());
+    }
+    return 1;
+}
+
 static int ipt_block_build_davidson_correction(
     const int *col_ptr, const int *row_ind, const double *values, int n,
     int k, const std::vector<double> &diagonal,
     const std::vector<double> &ritz_values,
     const std::vector<double> &ritz_vectors, int target_index,
-    double denom_clip, std::vector<double> *correction)
+    double denom_clip, int ortho_repeats,
+    std::vector<double> *correction)
 {
     std::vector<double> residual;
     const double *target =
@@ -1502,7 +1609,7 @@ static int ipt_block_build_davidson_correction(
         (*correction)[(size_t)row] =
             residual[(size_t)row] / denominator;
     }
-    for (int pass = 0; pass < 2; ++pass) {
+    for (int pass = 0; pass < ortho_repeats; ++pass) {
         for (int col = 0; col < k; ++col) {
             const double *vector =
                 ritz_vectors.data() + (size_t)col * (size_t)n;
@@ -2496,6 +2603,7 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
     double *d_values = NULL;
     double *d_diagonal = NULL;
     double *d_combined_basis = NULL;
+    double *d_davidson_basis = NULL;
     double *d_ritz_values = NULL;
     double *d_ritz_vectors = NULL;
     cublasHandle_t cublas_handle = NULL;
@@ -2737,15 +2845,37 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
     }
     result->matvecs += basis_cols;
     if (ipt_cuda_env_flag("IPT_DAVIDSON_ENRICH")) {
+        const double locked_tolerance = 1.0e-10;
+        const char *accept_raw =
+            getenv("IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES");
+        int steps = ipt_cuda_env_int("IPT_DAVIDSON_STEPS", 1);
+        int active_max =
+            ipt_cuda_env_int("IPT_DAVIDSON_ACTIVE_MAX", 1);
+        int ortho_repeats =
+            ipt_cuda_env_int("IPT_DAVIDSON_ORTHO_REPEATS", 2);
+        int accept_only_if_improves =
+            accept_raw == NULL
+                ? 1
+                : ipt_cuda_env_flag(
+                      "IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES");
+        double select_tolerance = ipt_cuda_env_double(
+            "IPT_DAVIDSON_SELECT_TOL", 1.0e-10);
+        double matrix_norm = ipt_block_host_matrix_inf_norm(
+            col_ptr, row_ind, matrix_values, n);
         std::vector<double> host_ritz_values((size_t)k, 0.0);
         std::vector<double> host_ritz_vectors(
             (size_t)n * (size_t)k, 0.0);
-        std::vector<double> correction;
-        std::vector<double> sorted_correction((size_t)n, 0.0);
-        double matrix_norm = ipt_block_host_matrix_inf_norm(
-            col_ptr, row_ind, matrix_values, n);
-        int worst_index = -1;
+        std::vector<double> current_residuals;
+        std::vector<double> raw_basis(
+            (size_t)n * (size_t)basis_cols, 0.0);
+        std::vector<double> orthonormal_basis;
+        std::vector<IPTDavidsonHistoryEntry> history;
+        double current_maximum = NAN;
+        int current_max_index = -1;
 
+        steps = std::max(1, steps);
+        active_max = std::max(1, std::min(active_max, k));
+        ortho_repeats = std::max(1, ortho_repeats);
         result->davidson_attempted = 1;
         result->davidson_denom_clip = ipt_cuda_env_double(
             "IPT_DAVIDSON_DENOM_CLIP", 1.0e-8);
@@ -2758,99 +2888,255 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         CUDA_CHECK(cudaMemcpy(host_ritz_values.data(), d_ritz_values,
                               host_ritz_values.size() * sizeof(double),
                               cudaMemcpyDeviceToHost));
-        result->davidson_residual_before = ipt_block_host_max_residual(
+        CUDA_CHECK(cudaMemcpy(raw_basis.data(), d_combined_basis,
+                              raw_basis.size() * sizeof(double),
+                              cudaMemcpyDeviceToHost));
+        ipt_block_host_residuals(
             col_ptr, row_ind, matrix_values, n, k, host_ritz_values,
-            host_ritz_vectors, matrix_norm, &worst_index);
-        result->davidson_target_index = worst_index;
-        if (worst_index >= 0 &&
-            ipt_block_build_davidson_correction(
-                col_ptr, row_ind, matrix_values, n, k, original_diagonal,
-                host_ritz_values, host_ritz_vectors, worst_index,
-                result->davidson_denom_clip, &correction)) {
-            double *d_enriched_basis = NULL;
-            double *d_enriched_values = NULL;
-            double *d_enriched_vectors = NULL;
-            double enriched_rr_time = 0.0;
-            double enriched_basis_frobenius = NAN;
-            double enriched_basis_max = NAN;
-            double enriched_ritz_frobenius = NAN;
-            double enriched_ritz_max = NAN;
-            int enriched_basis_invalid = 0;
-            int enriched_ritz_invalid = 0;
-            int enriched_used_qr = 0;
-            std::vector<double> enriched_values((size_t)k, 0.0);
-            std::vector<double> enriched_vectors(
-                (size_t)n * (size_t)k, 0.0);
-            int enriched_worst_index = -1;
+            host_ritz_vectors, matrix_norm, &current_residuals,
+            &current_maximum, &current_max_index);
+        result->davidson_residual_before = current_maximum;
+        result->davidson_target_index = current_max_index;
+        if (ipt_block_build_orthonormal_basis(
+                raw_basis, n, basis_cols, ortho_repeats,
+                &orthonormal_basis)) {
+            for (int step = 1; step <= steps; ++step) {
+                std::vector<int> candidates((size_t)k, 0);
+                std::vector<int> active_indices;
+                std::vector<double> trial_orthonormal_basis =
+                    orthonormal_basis;
+                std::vector<double> corrections_sorted;
+                double *d_trial_basis = NULL;
+                double *d_trial_values = NULL;
+                double *d_trial_vectors = NULL;
+                double trial_rr_time = 0.0;
+                double trial_basis_frobenius = NAN;
+                double trial_basis_max = NAN;
+                double trial_ritz_frobenius = NAN;
+                double trial_ritz_max = NAN;
+                int trial_basis_invalid = 0;
+                int trial_ritz_invalid = 0;
+                int trial_used_qr = 0;
+                std::vector<double> trial_values((size_t)k, 0.0);
+                std::vector<double> trial_vectors(
+                    (size_t)n * (size_t)k, 0.0);
+                std::vector<double> trial_residuals;
+                double trial_maximum = NAN;
+                int trial_max_index = -1;
+                int locking_preserved = 1;
+                int accepted = 0;
 
-            for (int sorted = 0; sorted < n; ++sorted) {
-                sorted_correction[(size_t)sorted] =
-                    correction[(size_t)perm[(size_t)sorted]];
+                for (int i = 0; i < k; ++i) {
+                    candidates[(size_t)i] = i;
+                }
+                std::stable_sort(
+                    candidates.begin(), candidates.end(),
+                    [&](int a, int b) {
+                        return current_residuals[(size_t)a] >
+                               current_residuals[(size_t)b];
+                    });
+                for (int index : candidates) {
+                    if ((int)active_indices.size() >= active_max) {
+                        break;
+                    }
+                    if (current_residuals[(size_t)index] <=
+                            select_tolerance ||
+                        current_residuals[(size_t)index] <
+                            locked_tolerance) {
+                        continue;
+                    }
+                    {
+                        std::vector<double> correction;
+                        std::vector<double> sorted_correction(
+                            (size_t)n, 0.0);
+
+                        if (!ipt_block_build_davidson_correction(
+                                col_ptr, row_ind, matrix_values, n, k,
+                                original_diagonal, host_ritz_values,
+                                host_ritz_vectors, index,
+                                result->davidson_denom_clip, ortho_repeats,
+                                &correction)) {
+                            continue;
+                        }
+                        for (int sorted = 0; sorted < n; ++sorted) {
+                            sorted_correction[(size_t)sorted] =
+                                correction[(size_t)perm[(size_t)sorted]];
+                        }
+                        if (!ipt_block_orthogonalize_direction(
+                                &sorted_correction,
+                                trial_orthonormal_basis, n,
+                                (int)(trial_orthonormal_basis.size() /
+                                      (size_t)n),
+                                ortho_repeats)) {
+                            continue;
+                        }
+                        trial_orthonormal_basis.insert(
+                            trial_orthonormal_basis.end(),
+                            sorted_correction.begin(),
+                            sorted_correction.end());
+                        corrections_sorted.insert(
+                            corrections_sorted.end(),
+                            sorted_correction.begin(),
+                            sorted_correction.end());
+                        active_indices.push_back(index);
+                    }
+                }
+                if (active_indices.empty()) {
+                    break;
+                }
+                {
+                    int trial_basis_cols =
+                        basis_cols + (int)active_indices.size();
+                    const double *current_basis =
+                        d_davidson_basis != NULL ? d_davidson_basis
+                                                : d_combined_basis;
+
+                    CUDA_CHECK(cudaMalloc(
+                        (void **)&d_trial_basis,
+                        (size_t)n * (size_t)trial_basis_cols *
+                            sizeof(double)));
+                    CUDA_CHECK(cudaMemcpy(
+                        d_trial_basis, current_basis,
+                        (size_t)n * (size_t)basis_cols * sizeof(double),
+                        cudaMemcpyDeviceToDevice));
+                    CUDA_CHECK(cudaMemcpy(
+                        d_trial_basis + (size_t)n * (size_t)basis_cols,
+                        corrections_sorted.data(),
+                        corrections_sorted.size() * sizeof(double),
+                        cudaMemcpyHostToDevice));
+                    status = ipt_block_cluster_rayleigh_ritz_gpu(
+                        sparse_handle, sparse_matrix, cublas_handle,
+                        d_trial_basis, n, trial_basis_cols, k, d_perm,
+                        &d_trial_values, &d_trial_vectors, &trial_rr_time,
+                        &trial_used_qr, &trial_basis_frobenius,
+                        &trial_basis_max, &trial_basis_invalid,
+                        &trial_ritz_frobenius, &trial_ritz_max,
+                        &trial_ritz_invalid);
+                    if (status != IPT_CUDA_SUCCESS) {
+                        cudaFree(d_trial_basis);
+                        cudaFree(d_trial_values);
+                        cudaFree(d_trial_vectors);
+                        goto cleanup;
+                    }
+                    result->rayleigh_ritz_time_sec += trial_rr_time;
+                    result->matvecs += trial_basis_cols;
+                    CUDA_CHECK(cudaMemcpy(
+                        trial_vectors.data(), d_trial_vectors,
+                        trial_vectors.size() * sizeof(double),
+                        cudaMemcpyDeviceToHost));
+                    CUDA_CHECK(cudaMemcpy(
+                        trial_values.data(), d_trial_values,
+                        trial_values.size() * sizeof(double),
+                        cudaMemcpyDeviceToHost));
+                    ipt_block_host_residuals(
+                        col_ptr, row_ind, matrix_values, n, k, trial_values,
+                        trial_vectors, matrix_norm, &trial_residuals,
+                        &trial_maximum, &trial_max_index);
+                    for (int col = 0; col < k; ++col) {
+                        if (current_residuals[(size_t)col] <
+                                locked_tolerance &&
+                            trial_residuals[(size_t)col] >=
+                                locked_tolerance) {
+                            locking_preserved = 0;
+                            break;
+                        }
+                    }
+                    accepted =
+                        locking_preserved &&
+                        (!accept_only_if_improves ||
+                         (isfinite(trial_maximum) &&
+                          trial_maximum < current_maximum));
+                    for (int index : active_indices) {
+                        IPTDavidsonHistoryEntry entry = {};
+
+                        entry.davidson_step = step;
+                        entry.active_pair_index = index;
+                        entry.residual_before =
+                            current_residuals[(size_t)index];
+                        entry.residual_after =
+                            trial_residuals[(size_t)index];
+                        entry.accepted = accepted;
+                        entry.basis_cols =
+                            accepted ? trial_basis_cols : basis_cols;
+                        entry.max_relative_eigen_residual =
+                            accepted ? trial_maximum : current_maximum;
+                        entry.max_relative_eigen_residual_index =
+                            accepted ? trial_max_index : current_max_index;
+                        entry.pair_28_residual =
+                            k > 28
+                                ? (accepted
+                                       ? trial_residuals[28]
+                                       : current_residuals[28])
+                                : NAN;
+                        entry.pair_29_residual =
+                            k > 29
+                                ? (accepted
+                                       ? trial_residuals[29]
+                                       : current_residuals[29])
+                                : NAN;
+                        entry.orthogonality_max_abs_error =
+                            accepted
+                                ? trial_ritz_max
+                                : result
+                                      ->ritz_vectors_orthogonality_max_abs_error;
+                        history.push_back(entry);
+                    }
+                    result->davidson_residual_after = trial_maximum;
+                    if (accepted) {
+                        cudaFree(d_davidson_basis);
+                        d_davidson_basis = d_trial_basis;
+                        d_trial_basis = NULL;
+                        cudaFree(d_ritz_values);
+                        cudaFree(d_ritz_vectors);
+                        d_ritz_values = d_trial_values;
+                        d_ritz_vectors = d_trial_vectors;
+                        d_trial_values = NULL;
+                        d_trial_vectors = NULL;
+                        basis_cols = trial_basis_cols;
+                        orthonormal_basis.swap(
+                            trial_orthonormal_basis);
+                        host_ritz_values.swap(trial_values);
+                        host_ritz_vectors.swap(trial_vectors);
+                        current_residuals.swap(trial_residuals);
+                        current_maximum = trial_maximum;
+                        current_max_index = trial_max_index;
+                        result->davidson_accepted = 1;
+                        result->rayleigh_ritz_used_qr = trial_used_qr;
+                        result->basis_orthogonality_frobenius_error =
+                            trial_basis_frobenius;
+                        result->basis_orthogonality_max_abs_error =
+                            trial_basis_max;
+                        result->basis_has_nan_or_inf =
+                            trial_basis_invalid;
+                        result
+                            ->ritz_vectors_orthogonality_frobenius_error =
+                            trial_ritz_frobenius;
+                        result
+                            ->ritz_vectors_orthogonality_max_abs_error =
+                            trial_ritz_max;
+                        result->ritz_vectors_has_nan_or_inf =
+                            trial_ritz_invalid;
+                    }
+                    cudaFree(d_trial_basis);
+                    cudaFree(d_trial_values);
+                    cudaFree(d_trial_vectors);
+                    if (!accepted) {
+                        break;
+                    }
+                }
             }
-            CUDA_CHECK(cudaMalloc(
-                (void **)&d_enriched_basis,
-                (size_t)n * (size_t)(basis_cols + 1) * sizeof(double)));
-            CUDA_CHECK(cudaMemcpy(
-                d_enriched_basis, d_combined_basis,
-                (size_t)n * (size_t)basis_cols * sizeof(double),
-                cudaMemcpyDeviceToDevice));
-            CUDA_CHECK(cudaMemcpy(
-                d_enriched_basis + (size_t)n * (size_t)basis_cols,
-                sorted_correction.data(), (size_t)n * sizeof(double),
-                cudaMemcpyHostToDevice));
-            status = ipt_block_cluster_rayleigh_ritz_gpu(
-                sparse_handle, sparse_matrix, cublas_handle,
-                d_enriched_basis, n, basis_cols + 1, k, d_perm,
-                &d_enriched_values, &d_enriched_vectors, &enriched_rr_time,
-                &enriched_used_qr, &enriched_basis_frobenius,
-                &enriched_basis_max, &enriched_basis_invalid,
-                &enriched_ritz_frobenius, &enriched_ritz_max,
-                &enriched_ritz_invalid);
-            cudaFree(d_enriched_basis);
-            if (status != IPT_CUDA_SUCCESS) {
-                cudaFree(d_enriched_values);
-                cudaFree(d_enriched_vectors);
+        }
+        result->davidson_residual_after = current_maximum;
+        if (!history.empty()) {
+            result->davidson_history = (IPTDavidsonHistoryEntry *)calloc(
+                history.size(), sizeof(IPTDavidsonHistoryEntry));
+            if (result->davidson_history == NULL) {
+                status = IPT_CUDA_ALLOCATION_FAILED;
                 goto cleanup;
             }
-            result->rayleigh_ritz_time_sec += enriched_rr_time;
-            result->matvecs += basis_cols + 1;
-            CUDA_CHECK(cudaMemcpy(
-                enriched_vectors.data(), d_enriched_vectors,
-                enriched_vectors.size() * sizeof(double),
-                cudaMemcpyDeviceToHost));
-            CUDA_CHECK(cudaMemcpy(
-                enriched_values.data(), d_enriched_values,
-                enriched_values.size() * sizeof(double),
-                cudaMemcpyDeviceToHost));
-            result->davidson_residual_after = ipt_block_host_max_residual(
-                col_ptr, row_ind, matrix_values, n, k, enriched_values,
-                enriched_vectors, matrix_norm, &enriched_worst_index);
-            if (isfinite(result->davidson_residual_after) &&
-                result->davidson_residual_after <
-                    result->davidson_residual_before) {
-                cudaFree(d_ritz_values);
-                cudaFree(d_ritz_vectors);
-                d_ritz_values = d_enriched_values;
-                d_ritz_vectors = d_enriched_vectors;
-                d_enriched_values = NULL;
-                d_enriched_vectors = NULL;
-                ++basis_cols;
-                result->davidson_accepted = 1;
-                result->rayleigh_ritz_used_qr = enriched_used_qr;
-                result->basis_orthogonality_frobenius_error =
-                    enriched_basis_frobenius;
-                result->basis_orthogonality_max_abs_error =
-                    enriched_basis_max;
-                result->basis_has_nan_or_inf = enriched_basis_invalid;
-                result->ritz_vectors_orthogonality_frobenius_error =
-                    enriched_ritz_frobenius;
-                result->ritz_vectors_orthogonality_max_abs_error =
-                    enriched_ritz_max;
-                result->ritz_vectors_has_nan_or_inf =
-                    enriched_ritz_invalid;
-            }
-            cudaFree(d_enriched_values);
-            cudaFree(d_enriched_vectors);
+            memcpy(result->davidson_history, history.data(),
+                   history.size() * sizeof(IPTDavidsonHistoryEntry));
+            result->davidson_history_count = (int)history.size();
         }
     }
     result->solve_time_sec =
@@ -2882,6 +3168,7 @@ cleanup:
     cudaFree(d_values);
     cudaFree(d_diagonal);
     cudaFree(d_combined_basis);
+    cudaFree(d_davidson_basis);
     cudaFree(d_ritz_values);
     cudaFree(d_ritz_vectors);
     if (sparse_matrix != NULL) {
