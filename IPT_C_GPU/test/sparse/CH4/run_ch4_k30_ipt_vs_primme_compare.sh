@@ -62,6 +62,7 @@ echo "IPT_DAVIDSON_FORCE_ACTIVE_PAIRS=28,29"
 echo "IPT_DAVIDSON_BLOCK_ACTIVE=1"
 echo "IPT_DAVIDSON_DENOM_CLIP=$IPT_COMPARE_DENOM_CLIP"
 echo "IPT_DAVIDSON_ORTHO_REPEATS=$IPT_COMPARE_ORTHO_REPEATS"
+echo "IPT_DAVIDSON_USE_BEST_SO_FAR=${IPT_DAVIDSON_USE_BEST_SO_FAR:-1}"
 
 set +e
 (
@@ -92,6 +93,7 @@ set +e
     export IPT_DAVIDSON_BLOCK_ACTIVE=1
     export IPT_DAVIDSON_DENOM_CLIP="$IPT_COMPARE_DENOM_CLIP"
     export IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES=1
+    export IPT_DAVIDSON_USE_BEST_SO_FAR="${IPT_DAVIDSON_USE_BEST_SO_FAR:-1}"
     export IPT_DAVIDSON_ORTHO_REPEATS="$IPT_COMPARE_ORTHO_REPEATS"
     export IPT_DAVIDSON_RESTART_EVERY=20
     export IPT_DAVIDSON_RESTART_KEEP_EXTRA=5
@@ -196,6 +198,15 @@ if ipt_trial:
             ipt_trial.get("max_relative_eigen_residual_index", ""),
         "relative_fixed_point_residual":
             ipt_trial.get("relative_fixed_point_residual", ""),
+        "best_so_far_updated": ipt_trial.get("best_so_far_updated", ""),
+        "best_so_far_step": ipt_trial.get("best_so_far_step", ""),
+        "best_so_far_source": ipt_trial.get("best_so_far_source", ""),
+        "best_so_far_max_residual":
+            ipt_trial.get("best_so_far_max_residual", ""),
+        "final_returned_from_best_so_far":
+            ipt_trial.get("final_returned_from_best_so_far", ""),
+        "pair28_best_residual": ipt_trial.get("pair28_best_residual", ""),
+        "pair29_best_residual": ipt_trial.get("pair29_best_residual", ""),
         "passed_relative_threshold":
             "1" if ipt_trial.get("status", "") == "success" else "0",
         "result_dir": str(ipt_result_dir),
@@ -216,6 +227,13 @@ else:
         "max_relative_eigen_residual": "",
         "max_relative_eigen_residual_index": "",
         "relative_fixed_point_residual": "",
+        "best_so_far_updated": "",
+        "best_so_far_step": "",
+        "best_so_far_source": "",
+        "best_so_far_max_residual": "",
+        "final_returned_from_best_so_far": "",
+        "pair28_best_residual": "",
+        "pair29_best_residual": "",
         "passed_relative_threshold": "0",
         "result_dir": str(ipt_result_dir),
         "log_dir": os.environ["IPT_LOG_DIR"],
@@ -239,6 +257,13 @@ if primme_timing:
         "max_relative_eigen_residual_index":
             primme_timing.get("max_relative_eigen_residual_index", ""),
         "relative_fixed_point_residual": "",
+        "best_so_far_updated": "",
+        "best_so_far_step": "",
+        "best_so_far_source": "",
+        "best_so_far_max_residual": "",
+        "final_returned_from_best_so_far": "",
+        "pair28_best_residual": "",
+        "pair29_best_residual": "",
         "passed_relative_threshold":
             primme_timing.get("passed_relative_threshold", ""),
         "result_dir": str(primme_result_dir),
@@ -259,6 +284,13 @@ else:
         "max_relative_eigen_residual": "",
         "max_relative_eigen_residual_index": "",
         "relative_fixed_point_residual": "",
+        "best_so_far_updated": "",
+        "best_so_far_step": "",
+        "best_so_far_source": "",
+        "best_so_far_max_residual": "",
+        "final_returned_from_best_so_far": "",
+        "pair28_best_residual": "",
+        "pair29_best_residual": "",
         "passed_relative_threshold": "0",
         "result_dir": str(primme_result_dir),
         "log_dir": os.environ["PRIMME_LOG_DIR"],
@@ -269,7 +301,11 @@ fieldnames = [
     "basis_cols", "iterations", "matvecs", "solve_time_sec",
     "solve_time_source", "max_relative_eigen_residual",
     "max_relative_eigen_residual_index",
-    "relative_fixed_point_residual", "passed_relative_threshold",
+    "relative_fixed_point_residual", "best_so_far_updated",
+    "best_so_far_step", "best_so_far_source",
+    "best_so_far_max_residual", "final_returned_from_best_so_far",
+    "pair28_best_residual", "pair29_best_residual",
+    "passed_relative_threshold",
     "result_dir", "log_dir",
 ]
 with compare_csv.open("w", newline="") as f:
@@ -311,6 +347,13 @@ with compare_summary.open("w") as f:
             f"solve_time_source={row['solve_time_source']} "
             f"max_relative_eigen_residual={row['max_relative_eigen_residual']} "
             f"max_relative_eigen_residual_index={row['max_relative_eigen_residual_index']} "
+            f"best_so_far_updated={row['best_so_far_updated']} "
+            f"best_so_far_step={row['best_so_far_step']} "
+            f"best_so_far_source={row['best_so_far_source']} "
+            f"best_so_far_max_residual={row['best_so_far_max_residual']} "
+            f"final_returned_from_best_so_far={row['final_returned_from_best_so_far']} "
+            f"pair28_best_residual={row['pair28_best_residual']} "
+            f"pair29_best_residual={row['pair29_best_residual']} "
             f"passed_relative_threshold={row['passed_relative_threshold']}\n")
     f.write(f"primme_speedup_vs_ipt={speedup:.17g}\n")
     f.write(f"ipt_solve_log={ipt_solve_log}\n")

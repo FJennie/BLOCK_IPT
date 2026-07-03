@@ -60,6 +60,16 @@ static int ipt_cuda_env_flag(const char *name)
     return 1;
 }
 
+static int ipt_cuda_env_flag_default(const char *name, int default_value)
+{
+    const char *raw = getenv(name);
+
+    if (raw == NULL || raw[0] == '\0') {
+        return default_value;
+    }
+    return ipt_cuda_env_flag(name);
+}
+
 #ifndef IPT_CUDA_DECLS
 #define IPT_CUDA_DECLS
 
@@ -90,6 +100,11 @@ typedef struct {
     double pair_29_residual;
     double orthogonality_max_abs_error;
     int restarted;
+    int best_so_far_updated;
+    int best_so_far_step;
+    double best_so_far_max_residual;
+    double pair28_best_residual;
+    double pair29_best_residual;
 } IPTDavidsonHistoryEntry;
 
 typedef struct {
@@ -125,6 +140,11 @@ typedef struct {
     int basis_cols_after;
     double orthogonality_error_before;
     double orthogonality_error_after;
+    int best_so_far_updated;
+    int best_so_far_step;
+    double best_so_far_max_residual;
+    double pair28_best_residual;
+    double pair29_best_residual;
 } IPTDavidsonBlockHistoryEntry;
 
 typedef struct {
@@ -139,6 +159,11 @@ typedef struct {
     double pair_28_residual;
     double pair_29_residual;
     double orthogonality_max_abs_error;
+    int best_so_far_updated;
+    int best_so_far_step;
+    double best_so_far_max_residual;
+    double pair28_best_residual;
+    double pair29_best_residual;
 } IPTJDLocalHistoryEntry;
 
 typedef struct {
@@ -186,6 +211,17 @@ typedef struct {
     int jd_local_accepted;
     int jd_local_history_count;
     IPTJDLocalHistoryEntry *jd_local_history;
+    int best_so_far_enabled;
+    int best_so_far_updated;
+    int best_so_far_update_count;
+    int best_so_far_step;
+    char best_so_far_source[32];
+    int best_so_far_basis_cols;
+    double best_so_far_max_residual;
+    int best_so_far_max_residual_index;
+    int final_returned_from_best_so_far;
+    double pair28_best_residual;
+    double pair29_best_residual;
 } IPTCudaResult;
 
 const char *ipt_cuda_status_string(int status);
@@ -381,6 +417,17 @@ extern "C" void ipt_cuda_free_result(IPTCudaResult *result)
     free(result->jd_local_history);
     result->jd_local_history_count = 0;
     result->jd_local_history = NULL;
+    result->best_so_far_enabled = 0;
+    result->best_so_far_updated = 0;
+    result->best_so_far_update_count = 0;
+    result->best_so_far_step = -1;
+    result->best_so_far_source[0] = '\0';
+    result->best_so_far_basis_cols = 0;
+    result->best_so_far_max_residual = NAN;
+    result->best_so_far_max_residual_index = -1;
+    result->final_returned_from_best_so_far = 0;
+    result->pair28_best_residual = NAN;
+    result->pair29_best_residual = NAN;
 }
 
 // 释放 device 侧 d_vectors/d_values
@@ -389,6 +436,172 @@ extern "C" void ipt_cuda_free_device_result(double *d_vectors,
 {
     cudaFree(d_vectors);
     cudaFree(d_values);
+}
+
+struct IPTBestSoFarState {
+    int enabled;
+    int has_state;
+    int updated;
+    int update_count;
+    int step;
+    char source[32];
+    int basis_cols;
+    double max_residual;
+    int max_residual_index;
+    int state_is_current;
+    int rayleigh_ritz_used_qr;
+    double basis_orthogonality_frobenius_error;
+    double basis_orthogonality_max_abs_error;
+    double ritz_vectors_orthogonality_frobenius_error;
+    double ritz_vectors_orthogonality_max_abs_error;
+    int basis_has_nan_or_inf;
+    int ritz_vectors_has_nan_or_inf;
+    double pair28_best_residual;
+    double pair29_best_residual;
+    std::vector<double> values;
+    std::vector<double> vectors;
+    std::vector<double> residuals;
+};
+
+static void ipt_best_so_far_init(IPTBestSoFarState *best, int enabled)
+{
+    if (best == NULL) {
+        return;
+    }
+    best->enabled = enabled;
+    best->has_state = 0;
+    best->updated = 0;
+    best->update_count = 0;
+    best->step = -1;
+    snprintf(best->source, sizeof(best->source), "none");
+    best->basis_cols = 0;
+    best->max_residual = NAN;
+    best->max_residual_index = -1;
+    best->state_is_current = 0;
+    best->rayleigh_ritz_used_qr = 0;
+    best->basis_orthogonality_frobenius_error = NAN;
+    best->basis_orthogonality_max_abs_error = NAN;
+    best->ritz_vectors_orthogonality_frobenius_error = NAN;
+    best->ritz_vectors_orthogonality_max_abs_error = NAN;
+    best->basis_has_nan_or_inf = 0;
+    best->ritz_vectors_has_nan_or_inf = 0;
+    best->pair28_best_residual = NAN;
+    best->pair29_best_residual = NAN;
+    best->values.clear();
+    best->vectors.clear();
+    best->residuals.clear();
+}
+
+static void ipt_best_so_far_note_pair_best(IPTBestSoFarState *best,
+                                           const std::vector<double> &residuals)
+{
+    if (best == NULL || !best->enabled) {
+        return;
+    }
+    if (residuals.size() > 28U && isfinite(residuals[28]) &&
+        (!isfinite(best->pair28_best_residual) ||
+         residuals[28] < best->pair28_best_residual)) {
+        best->pair28_best_residual = residuals[28];
+    }
+    if (residuals.size() > 29U && isfinite(residuals[29]) &&
+        (!isfinite(best->pair29_best_residual) ||
+         residuals[29] < best->pair29_best_residual)) {
+        best->pair29_best_residual = residuals[29];
+    }
+}
+
+static int ipt_best_so_far_note(
+    IPTBestSoFarState *best, const char *source, int step,
+    const std::vector<double> &values, const std::vector<double> &vectors,
+    const std::vector<double> &residuals, double max_residual,
+    int max_residual_index, int basis_cols, int rayleigh_ritz_used_qr,
+    double basis_orthogonality_frobenius_error,
+    double basis_orthogonality_max_abs_error, int basis_has_nan_or_inf,
+    double ritz_vectors_orthogonality_frobenius_error,
+    double ritz_vectors_orthogonality_max_abs_error,
+    int ritz_vectors_has_nan_or_inf, int state_is_current)
+{
+    int improves = 0;
+
+    if (best == NULL || !best->enabled) {
+        return 0;
+    }
+    ipt_best_so_far_note_pair_best(best, residuals);
+    if (!isfinite(max_residual) || values.empty() || vectors.empty()) {
+        return 0;
+    }
+    improves = !best->has_state || max_residual < best->max_residual;
+    if (!improves) {
+        return 0;
+    }
+    if (best->has_state) {
+        best->updated = 1;
+    }
+    best->has_state = 1;
+    ++best->update_count;
+    best->step = step;
+    snprintf(best->source, sizeof(best->source), "%s",
+             source == NULL ? "unknown" : source);
+    best->basis_cols = basis_cols;
+    best->max_residual = max_residual;
+    best->max_residual_index = max_residual_index;
+    best->state_is_current = state_is_current;
+    best->rayleigh_ritz_used_qr = rayleigh_ritz_used_qr;
+    best->basis_orthogonality_frobenius_error =
+        basis_orthogonality_frobenius_error;
+    best->basis_orthogonality_max_abs_error =
+        basis_orthogonality_max_abs_error;
+    best->basis_has_nan_or_inf = basis_has_nan_or_inf;
+    best->ritz_vectors_orthogonality_frobenius_error =
+        ritz_vectors_orthogonality_frobenius_error;
+    best->ritz_vectors_orthogonality_max_abs_error =
+        ritz_vectors_orthogonality_max_abs_error;
+    best->ritz_vectors_has_nan_or_inf = ritz_vectors_has_nan_or_inf;
+    best->values = values;
+    best->vectors = vectors;
+    best->residuals = residuals;
+    return 1;
+}
+
+static void ipt_best_so_far_refresh_current_metadata(
+    IPTBestSoFarState *best, int basis_cols,
+    double basis_orthogonality_frobenius_error,
+    double basis_orthogonality_max_abs_error, int basis_has_nan_or_inf)
+{
+    if (best == NULL || !best->enabled || !best->has_state ||
+        !best->state_is_current) {
+        return;
+    }
+    best->basis_cols = basis_cols;
+    best->basis_orthogonality_frobenius_error =
+        basis_orthogonality_frobenius_error;
+    best->basis_orthogonality_max_abs_error =
+        basis_orthogonality_max_abs_error;
+    best->basis_has_nan_or_inf = basis_has_nan_or_inf;
+}
+
+static void ipt_best_so_far_store_result_fields(
+    IPTCudaResult *result, const IPTBestSoFarState *best,
+    int final_returned_from_best_so_far)
+{
+    if (result == NULL || best == NULL) {
+        return;
+    }
+    result->best_so_far_enabled = best->enabled;
+    result->best_so_far_updated = best->updated;
+    result->best_so_far_update_count = best->update_count;
+    result->best_so_far_step = best->has_state ? best->step : -1;
+    snprintf(result->best_so_far_source, sizeof(result->best_so_far_source),
+             "%s", best->has_state ? best->source : "none");
+    result->best_so_far_basis_cols = best->has_state ? best->basis_cols : 0;
+    result->best_so_far_max_residual =
+        best->has_state ? best->max_residual : NAN;
+    result->best_so_far_max_residual_index =
+        best->has_state ? best->max_residual_index : -1;
+    result->final_returned_from_best_so_far =
+        final_returned_from_best_so_far;
+    result->pair28_best_residual = best->pair28_best_residual;
+    result->pair29_best_residual = best->pair29_best_residual;
 }
 
 // 生成初始 n x k 单位列向量
@@ -2967,6 +3180,7 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
     cublasHandle_t cublas_handle = NULL;
     cusparseHandle_t sparse_handle = NULL;
     cusparseSpMatDescr_t sparse_matrix = NULL;
+    IPTBestSoFarState best_so_far;
 
     if (result != NULL) {
         memset(result, 0, sizeof(*result));
@@ -2982,7 +3196,19 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         result->adaptive_coupling_tau = NAN;
         result->adaptive_target_block_start = -1;
         result->adaptive_target_block_end = -1;
+        result->best_so_far_enabled =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_USE_BEST_SO_FAR", 1);
+        result->best_so_far_step = -1;
+        snprintf(result->best_so_far_source,
+                 sizeof(result->best_so_far_source), "none");
+        result->best_so_far_max_residual = NAN;
+        result->best_so_far_max_residual_index = -1;
+        result->pair28_best_residual = NAN;
+        result->pair29_best_residual = NAN;
     }
+    ipt_best_so_far_init(
+        &best_so_far,
+        ipt_cuda_env_flag_default("IPT_DAVIDSON_USE_BEST_SO_FAR", 1));
 
     if (col_ptr == NULL || row_ind == NULL || matrix_values == NULL ||
         result == NULL || n <= 0 || k <= 0 || k > n || nnz < 0 ||
@@ -3279,6 +3505,16 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             col_ptr, row_ind, matrix_values, n, k, host_ritz_values,
             host_ritz_vectors, matrix_norm, &current_residuals,
             &current_maximum, &current_max_index);
+        ipt_best_so_far_note(
+            &best_so_far, "davidson_initial", 0, host_ritz_values,
+            host_ritz_vectors, current_residuals, current_maximum,
+            current_max_index, basis_cols, result->rayleigh_ritz_used_qr,
+            result->basis_orthogonality_frobenius_error,
+            result->basis_orthogonality_max_abs_error,
+            result->basis_has_nan_or_inf,
+            result->ritz_vectors_orthogonality_frobenius_error,
+            result->ritz_vectors_orthogonality_max_abs_error,
+            result->ritz_vectors_has_nan_or_inf, 1);
         result->davidson_residual_before = current_maximum;
         result->davidson_target_index = current_max_index;
         if (ipt_block_build_orthonormal_basis(
@@ -3319,6 +3555,7 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                 int trial_max_index = -1;
                 int locking_preserved = 1;
                 int accepted = 0;
+                int trial_best_updated = 0;
 
                 if (forced_mode) {
                     candidates = forced_pairs;
@@ -3473,6 +3710,14 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                                 ->ritz_vectors_orthogonality_max_abs_error;
                         entry.orthogonality_error_after =
                             entry.orthogonality_error_before;
+                        entry.best_so_far_updated = 0;
+                        entry.best_so_far_step = best_so_far.step;
+                        entry.best_so_far_max_residual =
+                            best_so_far.max_residual;
+                        entry.pair28_best_residual =
+                            best_so_far.pair28_best_residual;
+                        entry.pair29_best_residual =
+                            best_so_far.pair29_best_residual;
                         block_history.push_back(entry);
                         break;
                     }
@@ -3530,6 +3775,16 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         col_ptr, row_ind, matrix_values, n, k, trial_values,
                         trial_vectors, matrix_norm, &trial_residuals,
                         &trial_maximum, &trial_max_index);
+                    trial_best_updated = ipt_best_so_far_note(
+                        &best_so_far,
+                        continuation ? "davidson_continuation"
+                                     : "davidson",
+                        step, trial_values, trial_vectors, trial_residuals,
+                        trial_maximum, trial_max_index, trial_basis_cols,
+                        trial_used_qr, trial_basis_frobenius,
+                        trial_basis_max, trial_basis_invalid,
+                        trial_ritz_frobenius, trial_ritz_max,
+                        trial_ritz_invalid, 0);
                     for (int col = 0; col < k; ++col) {
                         if (current_residuals[(size_t)col] <
                                 protect_tolerance &&
@@ -3620,6 +3875,16 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                                 ->ritz_vectors_orthogonality_max_abs_error;
                         block_entry.orthogonality_error_after =
                             trial_ritz_max;
+                        block_entry.best_so_far_updated =
+                            trial_best_updated;
+                        block_entry.best_so_far_step =
+                            best_so_far.step;
+                        block_entry.best_so_far_max_residual =
+                            best_so_far.max_residual;
+                        block_entry.pair28_best_residual =
+                            best_so_far.pair28_best_residual;
+                        block_entry.pair29_best_residual =
+                            best_so_far.pair29_best_residual;
                         block_history.push_back(block_entry);
                     }
                     for (int index : active_indices) {
@@ -3655,10 +3920,22 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                                 ? trial_ritz_max
                                 : result
                                       ->ritz_vectors_orthogonality_max_abs_error;
+                        entry.best_so_far_updated =
+                            trial_best_updated;
+                        entry.best_so_far_step = best_so_far.step;
+                        entry.best_so_far_max_residual =
+                            best_so_far.max_residual;
+                        entry.pair28_best_residual =
+                            best_so_far.pair28_best_residual;
+                        entry.pair29_best_residual =
+                            best_so_far.pair29_best_residual;
                         history.push_back(entry);
                     }
                     result->davidson_residual_after = trial_maximum;
                     if (accepted) {
+                        if (trial_best_updated) {
+                            best_so_far.state_is_current = 1;
+                        }
                         cudaFree(d_davidson_basis);
                         d_davidson_basis = d_trial_basis;
                         d_trial_basis = NULL;
@@ -3792,6 +4069,13 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                                              ->basis_orthogonality_max_abs_error,
                                         &result
                                              ->basis_has_nan_or_inf);
+                                    ipt_best_so_far_refresh_current_metadata(
+                                        &best_so_far, basis_cols,
+                                        result
+                                            ->basis_orthogonality_frobenius_error,
+                                        result
+                                            ->basis_orthogonality_max_abs_error,
+                                        result->basis_has_nan_or_inf);
                                 }
                             }
                             if (restarted) {
@@ -3958,6 +4242,16 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             col_ptr, row_ind, matrix_values, n, k, host_ritz_values,
             host_ritz_vectors, matrix_norm, &current_residuals,
             &current_maximum, &current_max_index);
+        ipt_best_so_far_note(
+            &best_so_far, "jd_initial", 0, host_ritz_values,
+            host_ritz_vectors, current_residuals, current_maximum,
+            current_max_index, basis_cols, result->rayleigh_ritz_used_qr,
+            result->basis_orthogonality_frobenius_error,
+            result->basis_orthogonality_max_abs_error,
+            result->basis_has_nan_or_inf,
+            result->ritz_vectors_orthogonality_frobenius_error,
+            result->ritz_vectors_orthogonality_max_abs_error,
+            result->ritz_vectors_has_nan_or_inf, 1);
         if (ipt_block_build_orthonormal_basis(
                 raw_basis, n, basis_cols, ortho_repeats,
                 &orthonormal_basis)) {
@@ -3985,6 +4279,7 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                 int trial_max_index = -1;
                 int locking_preserved = 1;
                 int accepted = 0;
+                int trial_best_updated = 0;
 
                 for (int index : active_pairs) {
                     std::vector<double> correction;
@@ -4065,6 +4360,13 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         trial_values, trial_vectors, matrix_norm,
                         &trial_residuals, &trial_maximum,
                         &trial_max_index);
+                    trial_best_updated = ipt_best_so_far_note(
+                        &best_so_far, "jd_local", step, trial_values,
+                        trial_vectors, trial_residuals, trial_maximum,
+                        trial_max_index, trial_basis_cols, trial_used_qr,
+                        trial_basis_frobenius, trial_basis_max,
+                        trial_basis_invalid, trial_ritz_frobenius,
+                        trial_ritz_max, trial_ritz_invalid, 0);
                     for (int col = 0; col < k; ++col) {
                         if (current_residuals[(size_t)col] <
                                 protect_tolerance &&
@@ -4112,9 +4414,21 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                                 ? trial_ritz_max
                                 : result
                                       ->ritz_vectors_orthogonality_max_abs_error;
+                        entry.best_so_far_updated =
+                            trial_best_updated;
+                        entry.best_so_far_step = best_so_far.step;
+                        entry.best_so_far_max_residual =
+                            best_so_far.max_residual;
+                        entry.pair28_best_residual =
+                            best_so_far.pair28_best_residual;
+                        entry.pair29_best_residual =
+                            best_so_far.pair29_best_residual;
                         history.push_back(entry);
                     }
                     if (accepted) {
+                        if (trial_best_updated) {
+                            best_so_far.state_is_current = 1;
+                        }
                         cudaFree(d_davidson_basis);
                         d_davidson_basis = d_trial_basis;
                         d_trial_basis = NULL;
@@ -4186,12 +4500,49 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         goto cleanup;
     }
 
-    CUDA_CHECK(cudaMemcpy(result->vectors, d_ritz_vectors,
-                          (size_t)n * (size_t)k * sizeof(double),
-                          cudaMemcpyDeviceToHost));
-    CUDA_CHECK(cudaMemcpy(result->values, d_ritz_values,
-                          (size_t)k * sizeof(double),
-                          cudaMemcpyDeviceToHost));
+    {
+        int return_best =
+            best_so_far.enabled && best_so_far.has_state &&
+            best_so_far.values.size() >= (size_t)k &&
+            best_so_far.vectors.size() >=
+                (size_t)n * (size_t)k;
+
+        if (return_best) {
+            memcpy(result->vectors, best_so_far.vectors.data(),
+                   (size_t)n * (size_t)k * sizeof(double));
+            memcpy(result->values, best_so_far.values.data(),
+                   (size_t)k * sizeof(double));
+            basis_cols = best_so_far.basis_cols;
+            result->rayleigh_ritz_used_qr =
+                best_so_far.rayleigh_ritz_used_qr;
+            result->basis_orthogonality_frobenius_error =
+                best_so_far.basis_orthogonality_frobenius_error;
+            result->basis_orthogonality_max_abs_error =
+                best_so_far.basis_orthogonality_max_abs_error;
+            result->basis_has_nan_or_inf =
+                best_so_far.basis_has_nan_or_inf;
+            result->ritz_vectors_orthogonality_frobenius_error =
+                best_so_far.ritz_vectors_orthogonality_frobenius_error;
+            result->ritz_vectors_orthogonality_max_abs_error =
+                best_so_far.ritz_vectors_orthogonality_max_abs_error;
+            result->ritz_vectors_has_nan_or_inf =
+                best_so_far.ritz_vectors_has_nan_or_inf;
+            if (result->davidson_attempted) {
+                result->davidson_residual_after =
+                    best_so_far.max_residual;
+            }
+        } else {
+            CUDA_CHECK(cudaMemcpy(result->vectors, d_ritz_vectors,
+                                  (size_t)n * (size_t)k * sizeof(double),
+                                  cudaMemcpyDeviceToHost));
+            CUDA_CHECK(cudaMemcpy(result->values, d_ritz_values,
+                                  (size_t)k * sizeof(double),
+                                  cudaMemcpyDeviceToHost));
+        }
+        ipt_best_so_far_store_result_fields(
+            result, &best_so_far,
+            return_best && !best_so_far.state_is_current);
+    }
     result->n = n;
     result->k = k;
     result->iterations = iterations_done;

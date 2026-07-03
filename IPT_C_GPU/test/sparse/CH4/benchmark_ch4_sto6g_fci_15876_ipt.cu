@@ -152,6 +152,17 @@ typedef struct {
     int jd_local_attempted;
     int jd_local_accepted;
     std::vector<IPTJDLocalHistoryEntry> jd_local_history;
+    int best_so_far_enabled;
+    int best_so_far_updated;
+    int best_so_far_update_count;
+    int best_so_far_step;
+    std::string best_so_far_source;
+    int best_so_far_basis_cols;
+    double best_so_far_max_residual;
+    int best_so_far_max_residual_index;
+    int final_returned_from_best_so_far;
+    double pair28_best_residual;
+    double pair29_best_residual;
     std::vector<double> eigenvalues;
     std::vector<double> eigenvectors;
     std::vector<double> relative_eigen_residuals;
@@ -1260,6 +1271,13 @@ static TrialResult run_primme_once(const CscMatrixView *matrix, double tol,
     result.adaptive_target_block_start = -1;
     result.adaptive_target_block_end = -1;
     result.adaptive_added_indices = "none";
+    result.best_so_far_step = -1;
+    result.best_so_far_source = "none";
+    result.best_so_far_basis_cols = 0;
+    result.best_so_far_max_residual = NAN;
+    result.best_so_far_max_residual_index = -1;
+    result.pair28_best_residual = NAN;
+    result.pair29_best_residual = NAN;
 
     if (k <= 0 || k > matrix->n) {
         result.status = IPT_CUDA_INVALID_ARGUMENT;
@@ -1425,6 +1443,13 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
     result.adaptive_target_block_start = -1;
     result.adaptive_target_block_end = -1;
     result.adaptive_added_indices = "none";
+    result.best_so_far_step = -1;
+    result.best_so_far_source = "none";
+    result.best_so_far_basis_cols = 0;
+    result.best_so_far_max_residual = NAN;
+    result.best_so_far_max_residual_index = -1;
+    result.pair28_best_residual = NAN;
+    result.pair29_best_residual = NAN;
 
     if (k <= 0 || k > matrix->n) {
         result.status = IPT_CUDA_INVALID_ARGUMENT;
@@ -1514,6 +1539,20 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
                 ipt.jd_local_history,
                 ipt.jd_local_history + ipt.jd_local_history_count);
         }
+        result.best_so_far_enabled = ipt.best_so_far_enabled;
+        result.best_so_far_updated = ipt.best_so_far_updated;
+        result.best_so_far_update_count = ipt.best_so_far_update_count;
+        result.best_so_far_step = ipt.best_so_far_step;
+        result.best_so_far_source = ipt.best_so_far_source;
+        result.best_so_far_basis_cols = ipt.best_so_far_basis_cols;
+        result.best_so_far_max_residual =
+            ipt.best_so_far_max_residual;
+        result.best_so_far_max_residual_index =
+            ipt.best_so_far_max_residual_index;
+        result.final_returned_from_best_so_far =
+            ipt.final_returned_from_best_so_far;
+        result.pair28_best_residual = ipt.pair28_best_residual;
+        result.pair29_best_residual = ipt.pair29_best_residual;
         pairs_to_check = std::min(result.requested_k, result.returned_k);
         result.eigenvectors.assign(
             ipt.vectors,
@@ -1562,13 +1601,23 @@ static bool trial_succeeded(const TrialResult &result)
 
 static void write_trial_csv(FILE *csv, const TrialResult &result)
 {
-    fprintf(csv, "%s,%d,%d,%d,%d,%d,%s,%.17g,%.17g,%d,%.17g\n",
+    fprintf(csv,
+            "%s,%d,%d,%d,%d,%d,%s,%.17g,%.17g,%d,%.17g,"
+            "%d,%d,%d,%s,%d,%.17g,%d,%d,%.17g,%.17g\n",
             result.method, result.repeat, result.requested_k,
             result.basis_cols, result.returned_k, result.iterations,
             trial_status(result), result.api_total_time_sec,
             result.max_relative_eigen_residual,
             result.max_relative_eigen_residual_index,
-            result.relative_fixed_point_residual);
+            result.relative_fixed_point_residual,
+            result.best_so_far_enabled, result.best_so_far_updated,
+            result.best_so_far_step, result.best_so_far_source.c_str(),
+            result.best_so_far_basis_cols,
+            result.best_so_far_max_residual,
+            result.best_so_far_max_residual_index,
+            result.final_returned_from_best_so_far,
+            result.pair28_best_residual,
+            result.pair29_best_residual);
 }
 
 static void write_trial_summary(FILE *summary, const TrialResult &result)
@@ -1608,6 +1657,14 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             "davidson_block_history_count=%zu "
             "jd_local_attempted=%d jd_local_accepted=%d "
             "jd_local_history_count=%zu "
+            "best_so_far_enabled=%d best_so_far_updated=%d "
+            "best_so_far_update_count=%d best_so_far_step=%d "
+            "best_so_far_source=%s best_so_far_basis_cols=%d "
+            "best_so_far_max_residual=%.17g "
+            "best_so_far_max_residual_index=%d "
+            "final_returned_from_best_so_far=%d "
+            "pair28_best_residual=%.17g "
+            "pair29_best_residual=%.17g "
             "adaptive_block_enabled=%d adaptive_coupling_tau=%.17g "
             "adaptive_limit_hit=%d adaptive_added_indices=%s "
             "adaptive_final_target_block_start=%d "
@@ -1637,6 +1694,14 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             result.davidson_block_history.size(),
             result.jd_local_attempted, result.jd_local_accepted,
             result.jd_local_history.size(),
+            result.best_so_far_enabled, result.best_so_far_updated,
+            result.best_so_far_update_count, result.best_so_far_step,
+            result.best_so_far_source.c_str(),
+            result.best_so_far_basis_cols,
+            result.best_so_far_max_residual,
+            result.best_so_far_max_residual_index,
+            result.final_returned_from_best_so_far,
+            result.pair28_best_residual, result.pair29_best_residual,
             result.adaptive_block_enabled,
             result.adaptive_coupling_tau, result.adaptive_limit_hit,
             result.adaptive_added_indices.c_str(),
@@ -1665,14 +1730,19 @@ static void write_davidson_history(FILE *history_csv,
     for (const IPTDavidsonHistoryEntry &entry :
          result.davidson_history) {
         fprintf(history_csv,
-                "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g,%d\n",
+                "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g,%d,"
+                "%d,%d,%.17g,%.17g,%.17g\n",
                 entry.davidson_step, entry.active_pair_index,
                 entry.residual_before, entry.residual_after,
                 entry.accepted, entry.basis_cols,
                 entry.max_relative_eigen_residual,
                 entry.max_relative_eigen_residual_index,
                 entry.pair_28_residual, entry.pair_29_residual,
-                entry.orthogonality_max_abs_error, entry.restarted);
+                entry.orthogonality_max_abs_error, entry.restarted,
+                entry.best_so_far_updated, entry.best_so_far_step,
+                entry.best_so_far_max_residual,
+                entry.pair28_best_residual,
+                entry.pair29_best_residual);
     }
 }
 
@@ -1700,7 +1770,8 @@ static void write_davidson_block_history(
          result.davidson_block_history) {
         fprintf(history_csv,
                 "%d,%s,%d,%d,%s,%s,%.17g,%.17g,%.17g,%.17g,"
-                "%.17g,%.17g,%d,%s,%d,%d,%.17g,%.17g\n",
+                "%.17g,%.17g,%d,%s,%d,%d,%.17g,%.17g,"
+                "%d,%d,%.17g,%.17g,%.17g\n",
                 entry.davidson_step, entry.active_pairs,
                 entry.accepted_corrections,
                 entry.rejected_corrections,
@@ -1713,7 +1784,11 @@ static void write_davidson_block_history(
                 entry.accepted, entry.reject_reason,
                 entry.basis_cols_before, entry.basis_cols_after,
                 entry.orthogonality_error_before,
-                entry.orthogonality_error_after);
+                entry.orthogonality_error_after,
+                entry.best_so_far_updated, entry.best_so_far_step,
+                entry.best_so_far_max_residual,
+                entry.pair28_best_residual,
+                entry.pair29_best_residual);
     }
 }
 
@@ -1722,14 +1797,19 @@ static void write_jd_local_history(FILE *history_csv,
 {
     for (const IPTJDLocalHistoryEntry &entry : result.jd_local_history) {
         fprintf(history_csv,
-                "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g\n",
+                "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g,"
+                "%d,%d,%.17g,%.17g,%.17g\n",
                 entry.jd_step, entry.active_pair_index,
                 entry.residual_before, entry.residual_after,
                 entry.accepted, entry.basis_cols,
                 entry.max_relative_eigen_residual,
                 entry.max_relative_eigen_residual_index,
                 entry.pair_28_residual, entry.pair_29_residual,
-                entry.orthogonality_max_abs_error);
+                entry.orthogonality_max_abs_error,
+                entry.best_so_far_updated, entry.best_so_far_step,
+                entry.best_so_far_max_residual,
+                entry.pair28_best_residual,
+                entry.pair29_best_residual);
     }
 }
 
@@ -2240,7 +2320,12 @@ int main(void)
             "method,repeat,requested_k,basis_cols,returned_k,iterations,status,"
             "time_total_sec,max_relative_eigen_residual,"
             "max_relative_eigen_residual_index,"
-            "relative_fixed_point_residual\n");
+            "relative_fixed_point_residual,best_so_far_enabled,"
+            "best_so_far_updated,best_so_far_step,best_so_far_source,"
+            "best_so_far_basis_cols,best_so_far_max_residual,"
+            "best_so_far_max_residual_index,"
+            "final_returned_from_best_so_far,pair28_best_residual,"
+            "pair29_best_residual\n");
     fprintf(pair_csv,
             "method,repeat,requested_k,basis_cols,returned_k,pair_index,"
             "lambda,relative_eigen_residual\n");
@@ -2248,7 +2333,10 @@ int main(void)
             "davidson_step,active_pair_index,residual_before,residual_after,"
             "accepted,basis_cols,max_relative_eigen_residual,"
             "max_relative_eigen_residual_index,pair_28_residual,"
-            "pair_29_residual,orthogonality_error,restarted\n");
+            "pair_29_residual,orthogonality_error,restarted,"
+            "best_so_far_updated,best_so_far_step,"
+            "best_so_far_max_residual,pair28_best_residual,"
+            "pair29_best_residual\n");
     fprintf(davidson_selection_history_csv,
             "davidson_step,pair_index,residual,selected_by_residual,"
             "selected_forced,skipped_converged,skipped_active_tol,"
@@ -2264,12 +2352,17 @@ int main(void)
             "pair_29_before,pair_29_after,accepted,reject_reason,"
             "basis_cols_before,basis_cols_after,"
             "orthogonality_error_before,"
-            "orthogonality_error_after\n");
+            "orthogonality_error_after,best_so_far_updated,"
+            "best_so_far_step,best_so_far_max_residual,"
+            "pair28_best_residual,pair29_best_residual\n");
     fprintf(jd_local_history_csv,
             "jd_step,active_pair_index,residual_before,residual_after,"
             "accepted,basis_cols,max_relative_eigen_residual,"
             "max_relative_eigen_residual_index,pair_28_residual,"
-            "pair_29_residual,orthogonality_error\n");
+            "pair_29_residual,orthogonality_error,"
+            "best_so_far_updated,best_so_far_step,"
+            "best_so_far_max_residual,pair28_best_residual,"
+            "pair29_best_residual\n");
     if (residual_support_csv != NULL) {
         fprintf(residual_support_csv,
                 "pair_index,rank,original_index,sorted_index,"
@@ -2295,6 +2388,7 @@ int main(void)
             "davidson_steps=%d\ndavidson_active_max=%d\n"
             "davidson_select_tol=%.17g\ndavidson_denom_clip=%.17g\n"
             "davidson_accept_only_if_improves=%d\n"
+            "davidson_use_best_so_far=%d\n"
             "davidson_ortho_repeats=%d\n"
             "davidson_protect_tol=%.17g\n"
             "davidson_locked_tol=%.17g\n"
@@ -2311,6 +2405,9 @@ int main(void)
                 ? 1
                 : ipt_cuda_env_flag(
                       "IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES"),
+            getenv("IPT_DAVIDSON_USE_BEST_SO_FAR") == NULL
+                ? 1
+                : ipt_cuda_env_flag("IPT_DAVIDSON_USE_BEST_SO_FAR"),
             ipt_cuda_env_int("IPT_DAVIDSON_ORTHO_REPEATS", 2),
             ipt_cuda_env_double("IPT_DAVIDSON_PROTECT_TOL", 1.0e-10),
             ipt_cuda_env_double("IPT_DAVIDSON_LOCKED_TOL", 1.0e-12),
@@ -2400,7 +2497,12 @@ int main(void)
                "returned_k=%d solve=%.6e preparation=%.6e "
                "setup=%.6e iteration=%.6e rr=%.6e api_total=%.6e "
                "relative_fixed_point_residual=%.3e "
-               "max_relative_eigen_residual=%.3e status=%s\n",
+               "max_relative_eigen_residual=%.3e "
+               "best_so_far_updated=%d best_so_far_step=%d "
+               "best_so_far_max_residual=%.3e "
+               "final_returned_from_best_so_far=%d "
+               "pair28_best_residual=%.3e "
+               "pair29_best_residual=%.3e status=%s\n",
                warmup_ipt.requested_k, warmup_ipt.basis_cols,
                warmup_ipt.returned_k, warmup_ipt.time_sec,
                warmup_ipt.preparation_time_sec,
@@ -2410,6 +2512,12 @@ int main(void)
                warmup_ipt.api_total_time_sec,
                warmup_ipt.relative_fixed_point_residual,
                warmup_ipt.max_relative_eigen_residual,
+               warmup_ipt.best_so_far_updated,
+               warmup_ipt.best_so_far_step,
+               warmup_ipt.best_so_far_max_residual,
+               warmup_ipt.final_returned_from_best_so_far,
+               warmup_ipt.pair28_best_residual,
+               warmup_ipt.pair29_best_residual,
                trial_status(warmup_ipt));
         if (run_primme) {
             TrialResult warmup_primme = run_primme_once(
@@ -2436,7 +2544,12 @@ int main(void)
                "returned_k=%d solve=%.6e preparation=%.6e "
                "setup=%.6e iteration=%.6e rr=%.6e api_total=%.6e "
                "relative_fixed_point_residual=%.3e "
-               "max_relative_eigen_residual=%.3e status=%s\n",
+               "max_relative_eigen_residual=%.3e "
+               "best_so_far_updated=%d best_so_far_step=%d "
+               "best_so_far_max_residual=%.3e "
+               "final_returned_from_best_so_far=%d "
+               "pair28_best_residual=%.3e "
+               "pair29_best_residual=%.3e status=%s\n",
                repeat, ipt_result.requested_k, ipt_result.basis_cols,
                ipt_result.returned_k, ipt_result.time_sec,
                ipt_result.preparation_time_sec,
@@ -2446,6 +2559,12 @@ int main(void)
                ipt_result.api_total_time_sec,
                ipt_result.relative_fixed_point_residual,
                ipt_result.max_relative_eigen_residual,
+               ipt_result.best_so_far_updated,
+               ipt_result.best_so_far_step,
+               ipt_result.best_so_far_max_residual,
+               ipt_result.final_returned_from_best_so_far,
+               ipt_result.pair28_best_residual,
+               ipt_result.pair29_best_residual,
                trial_status(ipt_result));
         fflush(stdout);
 
