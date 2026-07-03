@@ -1,0 +1,2 @@
+repeat,status,returned_k,solve_time_sec,outer_iterations,matvecs,max_relative_eigen_residual,max_relative_eigen_residual_index,passed_relative_threshold
+1,0,30,10.017404837999493,60,3792,4.9609110424552801e-13,6,1
