@@ -1,0 +1,25 @@
+matrix_source=cache
+cache_path=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ch4_sto6g_fci_15876_csc.bin
+n=15876
+nnz=8905697
+matrix_inf_norm=45.655812124752458
+requested_k=30
+repeats=1
+convergence_metric=max_relative_eigen_residual
+convergence_threshold=9.9999999999999998e-13
+primme_relative_eigen_residual_tol=4.9999999999999999e-13
+primme_convergence_test=relative_eigen_residual
+relative_eigen_residual_definition=||A v - lambda v||_2/(||A||_inf*||v||_2)
+primme_method=PRIMME_JDQMR_ETol
+primme_max_matvecs=200000
+primme_max_outer_iterations=0
+primme_max_basis_size=160
+primme_min_restart_size=80
+primme_max_block_size=8
+primme_locking=1
+timing_metric=solve_time_sec
+timing_scope=cublas_dprimme_plus_final_cuda_synchronize
+timing_excludes=cache_read,matrix_h2d,gpu_setup,warmup_spmm,eigenvector_d2h,residual_recomputation
+repeat=1 status=0 returned_k=30 solve_time_sec=8.0385904599679634 outer_iterations=59 matvecs=3818 max_relative_eigen_residual=4.2587557688460745e-13 max_relative_eigen_residual_index=6 passed_relative_threshold=1
+mean_solve_time_sec=8.0385904599679634
+stddev_solve_time_sec=0

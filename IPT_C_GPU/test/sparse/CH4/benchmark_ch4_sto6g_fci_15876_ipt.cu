@@ -163,6 +163,11 @@ typedef struct {
     int final_returned_from_best_so_far;
     double pair28_best_residual;
     double pair29_best_residual;
+    int relaxed_accept_enabled;
+    int accepted_steps;
+    int rejected_steps;
+    int min_accepted_steps;
+    int early_jump_to_continuation;
     std::vector<double> eigenvalues;
     std::vector<double> eigenvectors;
     std::vector<double> relative_eigen_residuals;
@@ -1278,6 +1283,7 @@ static TrialResult run_primme_once(const CscMatrixView *matrix, double tol,
     result.best_so_far_max_residual_index = -1;
     result.pair28_best_residual = NAN;
     result.pair29_best_residual = NAN;
+    result.min_accepted_steps = 0;
 
     if (k <= 0 || k > matrix->n) {
         result.status = IPT_CUDA_INVALID_ARGUMENT;
@@ -1450,6 +1456,7 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
     result.best_so_far_max_residual_index = -1;
     result.pair28_best_residual = NAN;
     result.pair29_best_residual = NAN;
+    result.min_accepted_steps = 0;
 
     if (k <= 0 || k > matrix->n) {
         result.status = IPT_CUDA_INVALID_ARGUMENT;
@@ -1553,6 +1560,12 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
             ipt.final_returned_from_best_so_far;
         result.pair28_best_residual = ipt.pair28_best_residual;
         result.pair29_best_residual = ipt.pair29_best_residual;
+        result.relaxed_accept_enabled = ipt.relaxed_accept_enabled;
+        result.accepted_steps = ipt.accepted_steps;
+        result.rejected_steps = ipt.rejected_steps;
+        result.min_accepted_steps = ipt.min_accepted_steps;
+        result.early_jump_to_continuation =
+            ipt.early_jump_to_continuation;
         pairs_to_check = std::min(result.requested_k, result.returned_k);
         result.eigenvectors.assign(
             ipt.vectors,
@@ -1603,7 +1616,8 @@ static void write_trial_csv(FILE *csv, const TrialResult &result)
 {
     fprintf(csv,
             "%s,%d,%d,%d,%d,%d,%s,%.17g,%.17g,%d,%.17g,"
-            "%d,%d,%d,%s,%d,%.17g,%d,%d,%.17g,%.17g\n",
+            "%d,%d,%d,%s,%d,%.17g,%d,%d,%.17g,%.17g,"
+            "%d,%d,%d,%d,%d\n",
             result.method, result.repeat, result.requested_k,
             result.basis_cols, result.returned_k, result.iterations,
             trial_status(result), result.api_total_time_sec,
@@ -1617,7 +1631,10 @@ static void write_trial_csv(FILE *csv, const TrialResult &result)
             result.best_so_far_max_residual_index,
             result.final_returned_from_best_so_far,
             result.pair28_best_residual,
-            result.pair29_best_residual);
+            result.pair29_best_residual,
+            result.relaxed_accept_enabled, result.accepted_steps,
+            result.rejected_steps, result.min_accepted_steps,
+            result.early_jump_to_continuation);
 }
 
 static void write_trial_summary(FILE *summary, const TrialResult &result)
@@ -1665,6 +1682,9 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             "final_returned_from_best_so_far=%d "
             "pair28_best_residual=%.17g "
             "pair29_best_residual=%.17g "
+            "relaxed_accept_enabled=%d accepted_steps=%d "
+            "rejected_steps=%d min_accepted_steps=%d "
+            "early_jump_to_continuation=%d "
             "adaptive_block_enabled=%d adaptive_coupling_tau=%.17g "
             "adaptive_limit_hit=%d adaptive_added_indices=%s "
             "adaptive_final_target_block_start=%d "
@@ -1702,6 +1722,9 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             result.best_so_far_max_residual_index,
             result.final_returned_from_best_so_far,
             result.pair28_best_residual, result.pair29_best_residual,
+            result.relaxed_accept_enabled, result.accepted_steps,
+            result.rejected_steps, result.min_accepted_steps,
+            result.early_jump_to_continuation,
             result.adaptive_block_enabled,
             result.adaptive_coupling_tau, result.adaptive_limit_hit,
             result.adaptive_added_indices.c_str(),
@@ -1731,7 +1754,8 @@ static void write_davidson_history(FILE *history_csv,
          result.davidson_history) {
         fprintf(history_csv,
                 "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g,%d,"
-                "%d,%d,%.17g,%.17g,%.17g\n",
+                "%d,%d,%.17g,%.17g,%.17g,"
+                "%d,%d,%d,%d,%s,%d,%.17g,%.17g,%d,%d,%d,%d\n",
                 entry.davidson_step, entry.active_pair_index,
                 entry.residual_before, entry.residual_after,
                 entry.accepted, entry.basis_cols,
@@ -1742,7 +1766,14 @@ static void write_davidson_history(FILE *history_csv,
                 entry.best_so_far_updated, entry.best_so_far_step,
                 entry.best_so_far_max_residual,
                 entry.pair28_best_residual,
-                entry.pair29_best_residual);
+                entry.pair29_best_residual,
+                entry.relaxed_accept_enabled, entry.accept_global_ok,
+                entry.accept_active_ok, entry.accept_locked_safe,
+                entry.accept_reason, entry.reject_retry_count,
+                entry.retry_alpha, entry.retry_denom_clip,
+                entry.accepted_steps, entry.rejected_steps,
+                entry.min_accepted_steps,
+                entry.early_jump_to_continuation);
     }
 }
 
@@ -1771,7 +1802,8 @@ static void write_davidson_block_history(
         fprintf(history_csv,
                 "%d,%s,%d,%d,%s,%s,%.17g,%.17g,%.17g,%.17g,"
                 "%.17g,%.17g,%d,%s,%d,%d,%.17g,%.17g,"
-                "%d,%d,%.17g,%.17g,%.17g\n",
+                "%d,%d,%.17g,%.17g,%.17g,"
+                "%d,%d,%d,%d,%s,%d,%.17g,%.17g,%d,%d,%d,%d\n",
                 entry.davidson_step, entry.active_pairs,
                 entry.accepted_corrections,
                 entry.rejected_corrections,
@@ -1788,7 +1820,14 @@ static void write_davidson_block_history(
                 entry.best_so_far_updated, entry.best_so_far_step,
                 entry.best_so_far_max_residual,
                 entry.pair28_best_residual,
-                entry.pair29_best_residual);
+                entry.pair29_best_residual,
+                entry.relaxed_accept_enabled, entry.accept_global_ok,
+                entry.accept_active_ok, entry.accept_locked_safe,
+                entry.accept_reason, entry.reject_retry_count,
+                entry.retry_alpha, entry.retry_denom_clip,
+                entry.accepted_steps, entry.rejected_steps,
+                entry.min_accepted_steps,
+                entry.early_jump_to_continuation);
     }
 }
 
@@ -1798,7 +1837,8 @@ static void write_jd_local_history(FILE *history_csv,
     for (const IPTJDLocalHistoryEntry &entry : result.jd_local_history) {
         fprintf(history_csv,
                 "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g,"
-                "%d,%d,%.17g,%.17g,%.17g\n",
+                "%d,%d,%.17g,%.17g,%.17g,"
+                "%d,%d,%d,%d,%s,%d,%.17g,%.17g,%d,%d,%d,%d\n",
                 entry.jd_step, entry.active_pair_index,
                 entry.residual_before, entry.residual_after,
                 entry.accepted, entry.basis_cols,
@@ -1809,7 +1849,14 @@ static void write_jd_local_history(FILE *history_csv,
                 entry.best_so_far_updated, entry.best_so_far_step,
                 entry.best_so_far_max_residual,
                 entry.pair28_best_residual,
-                entry.pair29_best_residual);
+                entry.pair29_best_residual,
+                entry.relaxed_accept_enabled, entry.accept_global_ok,
+                entry.accept_active_ok, entry.accept_locked_safe,
+                entry.accept_reason, entry.reject_retry_count,
+                entry.retry_alpha, entry.retry_denom_clip,
+                entry.accepted_steps, entry.rejected_steps,
+                entry.min_accepted_steps,
+                entry.early_jump_to_continuation);
     }
 }
 
@@ -2325,7 +2372,9 @@ int main(void)
             "best_so_far_basis_cols,best_so_far_max_residual,"
             "best_so_far_max_residual_index,"
             "final_returned_from_best_so_far,pair28_best_residual,"
-            "pair29_best_residual\n");
+            "pair29_best_residual,relaxed_accept_enabled,"
+            "accepted_steps,rejected_steps,min_accepted_steps,"
+            "early_jump_to_continuation\n");
     fprintf(pair_csv,
             "method,repeat,requested_k,basis_cols,returned_k,pair_index,"
             "lambda,relative_eigen_residual\n");
@@ -2336,7 +2385,11 @@ int main(void)
             "pair_29_residual,orthogonality_error,restarted,"
             "best_so_far_updated,best_so_far_step,"
             "best_so_far_max_residual,pair28_best_residual,"
-            "pair29_best_residual\n");
+            "pair29_best_residual,relaxed_accept_enabled,"
+            "accept_global_ok,accept_active_ok,accept_locked_safe,"
+            "accept_reason,reject_retry_count,retry_alpha,"
+            "retry_denom_clip,accepted_steps,rejected_steps,"
+            "min_accepted_steps,early_jump_to_continuation\n");
     fprintf(davidson_selection_history_csv,
             "davidson_step,pair_index,residual,selected_by_residual,"
             "selected_forced,skipped_converged,skipped_active_tol,"
@@ -2354,7 +2407,12 @@ int main(void)
             "orthogonality_error_before,"
             "orthogonality_error_after,best_so_far_updated,"
             "best_so_far_step,best_so_far_max_residual,"
-            "pair28_best_residual,pair29_best_residual\n");
+            "pair28_best_residual,pair29_best_residual,"
+            "relaxed_accept_enabled,accept_global_ok,"
+            "accept_active_ok,accept_locked_safe,accept_reason,"
+            "reject_retry_count,retry_alpha,retry_denom_clip,"
+            "accepted_steps,rejected_steps,min_accepted_steps,"
+            "early_jump_to_continuation\n");
     fprintf(jd_local_history_csv,
             "jd_step,active_pair_index,residual_before,residual_after,"
             "accepted,basis_cols,max_relative_eigen_residual,"
@@ -2362,7 +2420,11 @@ int main(void)
             "pair_29_residual,orthogonality_error,"
             "best_so_far_updated,best_so_far_step,"
             "best_so_far_max_residual,pair28_best_residual,"
-            "pair29_best_residual\n");
+            "pair29_best_residual,relaxed_accept_enabled,"
+            "accept_global_ok,accept_active_ok,accept_locked_safe,"
+            "accept_reason,reject_retry_count,retry_alpha,"
+            "retry_denom_clip,accepted_steps,rejected_steps,"
+            "min_accepted_steps,early_jump_to_continuation\n");
     if (residual_support_csv != NULL) {
         fprintf(residual_support_csv,
                 "pair_index,rank,original_index,sorted_index,"
@@ -2389,6 +2451,15 @@ int main(void)
             "davidson_select_tol=%.17g\ndavidson_denom_clip=%.17g\n"
             "davidson_accept_only_if_improves=%d\n"
             "davidson_use_best_so_far=%d\n"
+            "davidson_relaxed_accept=%d\n"
+            "davidson_accept_rel_slack=%.17g\n"
+            "davidson_accept_abs_slack=%.17g\n"
+            "davidson_active_pair_accept=%d\n"
+            "davidson_locked_degrade_slack=%.17g\n"
+            "davidson_retry_on_reject=%d\n"
+            "davidson_retry_damping_list=%s\n"
+            "davidson_retry_denom_clip_mults=%s\n"
+            "davidson_min_accepted_steps=%d\n"
             "davidson_ortho_repeats=%d\n"
             "davidson_protect_tol=%.17g\n"
             "davidson_locked_tol=%.17g\n"
@@ -2408,6 +2479,28 @@ int main(void)
             getenv("IPT_DAVIDSON_USE_BEST_SO_FAR") == NULL
                 ? 1
                 : ipt_cuda_env_flag("IPT_DAVIDSON_USE_BEST_SO_FAR"),
+            getenv("IPT_DAVIDSON_RELAXED_ACCEPT") == NULL
+                ? 1
+                : ipt_cuda_env_flag("IPT_DAVIDSON_RELAXED_ACCEPT"),
+            ipt_cuda_env_double("IPT_DAVIDSON_ACCEPT_REL_SLACK",
+                                1.0e-12),
+            ipt_cuda_env_double("IPT_DAVIDSON_ACCEPT_ABS_SLACK",
+                                1.0e-15),
+            getenv("IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT") == NULL
+                ? 1
+                : ipt_cuda_env_flag("IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT"),
+            ipt_cuda_env_double("IPT_DAVIDSON_LOCKED_DEGRADE_SLACK",
+                                1.0e-8),
+            getenv("IPT_DAVIDSON_RETRY_ON_REJECT") == NULL
+                ? 1
+                : ipt_cuda_env_flag("IPT_DAVIDSON_RETRY_ON_REJECT"),
+            getenv("IPT_DAVIDSON_RETRY_DAMPING_LIST") == NULL
+                ? "0.5,0.25"
+                : getenv("IPT_DAVIDSON_RETRY_DAMPING_LIST"),
+            getenv("IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS") == NULL
+                ? "10,100"
+                : getenv("IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS"),
+            ipt_cuda_env_int("IPT_DAVIDSON_MIN_ACCEPTED_STEPS", 0),
             ipt_cuda_env_int("IPT_DAVIDSON_ORTHO_REPEATS", 2),
             ipt_cuda_env_double("IPT_DAVIDSON_PROTECT_TOL", 1.0e-10),
             ipt_cuda_env_double("IPT_DAVIDSON_LOCKED_TOL", 1.0e-12),
@@ -2502,7 +2595,10 @@ int main(void)
                "best_so_far_max_residual=%.3e "
                "final_returned_from_best_so_far=%d "
                "pair28_best_residual=%.3e "
-               "pair29_best_residual=%.3e status=%s\n",
+               "pair29_best_residual=%.3e "
+               "relaxed_accept_enabled=%d accepted_steps=%d "
+               "rejected_steps=%d min_accepted_steps=%d "
+               "early_jump_to_continuation=%d status=%s\n",
                warmup_ipt.requested_k, warmup_ipt.basis_cols,
                warmup_ipt.returned_k, warmup_ipt.time_sec,
                warmup_ipt.preparation_time_sec,
@@ -2518,6 +2614,11 @@ int main(void)
                warmup_ipt.final_returned_from_best_so_far,
                warmup_ipt.pair28_best_residual,
                warmup_ipt.pair29_best_residual,
+               warmup_ipt.relaxed_accept_enabled,
+               warmup_ipt.accepted_steps,
+               warmup_ipt.rejected_steps,
+               warmup_ipt.min_accepted_steps,
+               warmup_ipt.early_jump_to_continuation,
                trial_status(warmup_ipt));
         if (run_primme) {
             TrialResult warmup_primme = run_primme_once(
@@ -2549,7 +2650,10 @@ int main(void)
                "best_so_far_max_residual=%.3e "
                "final_returned_from_best_so_far=%d "
                "pair28_best_residual=%.3e "
-               "pair29_best_residual=%.3e status=%s\n",
+               "pair29_best_residual=%.3e "
+               "relaxed_accept_enabled=%d accepted_steps=%d "
+               "rejected_steps=%d min_accepted_steps=%d "
+               "early_jump_to_continuation=%d status=%s\n",
                repeat, ipt_result.requested_k, ipt_result.basis_cols,
                ipt_result.returned_k, ipt_result.time_sec,
                ipt_result.preparation_time_sec,
@@ -2565,6 +2669,11 @@ int main(void)
                ipt_result.final_returned_from_best_so_far,
                ipt_result.pair28_best_residual,
                ipt_result.pair29_best_residual,
+               ipt_result.relaxed_accept_enabled,
+               ipt_result.accepted_steps,
+               ipt_result.rejected_steps,
+               ipt_result.min_accepted_steps,
+               ipt_result.early_jump_to_continuation,
                trial_status(ipt_result));
         fflush(stdout);
 

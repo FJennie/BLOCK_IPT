@@ -8,6 +8,13 @@ LOG_DIR="${IPT_C_LOG_DIR:-$ROOT/logs/sparse}"
 RESULTS_DIR="${IPT_C_RESULTS_DIR:-$ROOT/results/sparse}"
 TEST_DIR="$ROOT/test/sparse/CH4"
 mkdir -p "$LOG_DIR" "$RESULTS_DIR" "$TEST_DIR"
+BUILD_DIR="${IPT_BENCH_BUILD_DIR:-$TEST_DIR/.codex_build}"
+if [ "${IPT_SKIP_BUILD:-0}" = "1" ]; then
+    BENCH_BIN="${IPT_BENCH_BIN:-$TEST_DIR/benchmark_ch4_sto6g_fci_15876_ipt_cuda}"
+else
+    mkdir -p "$BUILD_DIR"
+    BENCH_BIN="${IPT_BENCH_BIN:-$BUILD_DIR/benchmark_ch4_sto6g_fci_15876_ipt_cuda_${SLURM_JOB_ID:-manual}_$$}"
+fi
 RUN_LOG="$LOG_DIR/ch4_sto6g_fci_15876_ipt_${SLURM_JOB_ID:-manual}.log"
 ln -sfn "$RUN_LOG" "$LOG_DIR/latest_ch4_sto6g_fci_15876_ipt.log"
 exec > >(tee "$RUN_LOG") 2>&1
@@ -41,6 +48,15 @@ export IPT_DAVIDSON_BLOCK_ACTIVE="${IPT_DAVIDSON_BLOCK_ACTIVE:-0}"
 export IPT_DAVIDSON_DENOM_CLIP="${IPT_DAVIDSON_DENOM_CLIP:-1e-8}"
 export IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES="${IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES:-1}"
 export IPT_DAVIDSON_USE_BEST_SO_FAR="${IPT_DAVIDSON_USE_BEST_SO_FAR:-1}"
+export IPT_DAVIDSON_RELAXED_ACCEPT="${IPT_DAVIDSON_RELAXED_ACCEPT:-1}"
+export IPT_DAVIDSON_ACCEPT_REL_SLACK="${IPT_DAVIDSON_ACCEPT_REL_SLACK:-1e-12}"
+export IPT_DAVIDSON_ACCEPT_ABS_SLACK="${IPT_DAVIDSON_ACCEPT_ABS_SLACK:-1e-15}"
+export IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT="${IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT:-1}"
+export IPT_DAVIDSON_LOCKED_DEGRADE_SLACK="${IPT_DAVIDSON_LOCKED_DEGRADE_SLACK:-1e-8}"
+export IPT_DAVIDSON_RETRY_ON_REJECT="${IPT_DAVIDSON_RETRY_ON_REJECT:-1}"
+export IPT_DAVIDSON_RETRY_DAMPING_LIST="${IPT_DAVIDSON_RETRY_DAMPING_LIST:-0.5,0.25}"
+export IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS="${IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS:-10,100}"
+export IPT_DAVIDSON_MIN_ACCEPTED_STEPS="${IPT_DAVIDSON_MIN_ACCEPTED_STEPS:-0}"
 export IPT_DAVIDSON_ORTHO_REPEATS="${IPT_DAVIDSON_ORTHO_REPEATS:-2}"
 export IPT_DAVIDSON_PROTECT_TOL="${IPT_DAVIDSON_PROTECT_TOL:-1e-10}"
 export IPT_DAVIDSON_LOCKED_TOL="${IPT_DAVIDSON_LOCKED_TOL:-1e-12}"
@@ -77,6 +93,7 @@ echo "===== CH4/STO-6G full FCI IPT sparse benchmark ====="
 date; hostname
 echo "SLURM_JOB_ID=${SLURM_JOB_ID:-}"
 echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-}"
+echo "BENCH_BIN=$BENCH_BIN"
 echo "IPT_REPEATS=$IPT_REPEATS"
 echo "IPT_TOL=$IPT_TOL"
 echo "IPT_MAXITER=$IPT_MAXITER"
@@ -98,6 +115,15 @@ echo "IPT_DAVIDSON_BLOCK_ACTIVE=$IPT_DAVIDSON_BLOCK_ACTIVE"
 echo "IPT_DAVIDSON_DENOM_CLIP=$IPT_DAVIDSON_DENOM_CLIP"
 echo "IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES=$IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES"
 echo "IPT_DAVIDSON_USE_BEST_SO_FAR=$IPT_DAVIDSON_USE_BEST_SO_FAR"
+echo "IPT_DAVIDSON_RELAXED_ACCEPT=$IPT_DAVIDSON_RELAXED_ACCEPT"
+echo "IPT_DAVIDSON_ACCEPT_REL_SLACK=$IPT_DAVIDSON_ACCEPT_REL_SLACK"
+echo "IPT_DAVIDSON_ACCEPT_ABS_SLACK=$IPT_DAVIDSON_ACCEPT_ABS_SLACK"
+echo "IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT=$IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT"
+echo "IPT_DAVIDSON_LOCKED_DEGRADE_SLACK=$IPT_DAVIDSON_LOCKED_DEGRADE_SLACK"
+echo "IPT_DAVIDSON_RETRY_ON_REJECT=$IPT_DAVIDSON_RETRY_ON_REJECT"
+echo "IPT_DAVIDSON_RETRY_DAMPING_LIST=$IPT_DAVIDSON_RETRY_DAMPING_LIST"
+echo "IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS=$IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS"
+echo "IPT_DAVIDSON_MIN_ACCEPTED_STEPS=$IPT_DAVIDSON_MIN_ACCEPTED_STEPS"
 echo "IPT_DAVIDSON_ORTHO_REPEATS=$IPT_DAVIDSON_ORTHO_REPEATS"
 echo "IPT_DAVIDSON_PROTECT_TOL=$IPT_DAVIDSON_PROTECT_TOL"
 echo "IPT_DAVIDSON_LOCKED_TOL=$IPT_DAVIDSON_LOCKED_TOL"
@@ -141,11 +167,11 @@ if [ "${IPT_SKIP_BUILD:-0}" = "1" ]; then
     echo "IPT_SKIP_BUILD=1; using existing benchmark binary"
 else
     set -x
-    nvcc -O3 -std=c++14 -lineinfo -arch=sm_80     -I"$PRIMME_ROOT/include"     -I"$PYTHON_ROOT/include/python3.8"     "$TEST_DIR/benchmark_ch4_sto6g_fci_15876_ipt.cu"     "$PRIMME_ROOT/lib/libprimme.a"     -o "$TEST_DIR/benchmark_ch4_sto6g_fci_15876_ipt_cuda"     -lcublas -lcusparse -lcusolver -lcudart     -L"$PYTHON_ROOT/lib" -lpython3.8     -L"$TEST_DIR" -lopenblas     -lpthread -ldl -lutil -lrt     -Xlinker -rpath -Xlinker "$GCC_LIB_DIR"     -Xlinker -rpath -Xlinker "$PYTHON_ROOT/lib"     -Xlinker -rpath -Xlinker "$OPENBLAS_DIR"     -lgfortran "$GCC_LIB_DIR/libstdc++.so" -lm
+    nvcc -O3 -std=c++14 -lineinfo -arch=sm_80     -I"$PRIMME_ROOT/include"     -I"$PYTHON_ROOT/include/python3.8"     "$TEST_DIR/benchmark_ch4_sto6g_fci_15876_ipt.cu"     "$PRIMME_ROOT/lib/libprimme.a"     -o "$BENCH_BIN"     -lcublas -lcusparse -lcusolver -lcudart     -L"$PYTHON_ROOT/lib" -lpython3.8     -L"$TEST_DIR" -lopenblas     -lpthread -ldl -lutil -lrt     -Xlinker -rpath -Xlinker "$GCC_LIB_DIR"     -Xlinker -rpath -Xlinker "$PYTHON_ROOT/lib"     -Xlinker -rpath -Xlinker "$OPENBLAS_DIR"     -lgfortran "$GCC_LIB_DIR/libstdc++.so" -lm
     set +x
 fi
 echo "===== run ====="
-"$TEST_DIR/benchmark_ch4_sto6g_fci_15876_ipt_cuda"
+"$BENCH_BIN"
 status=$?
 echo "===== output files ====="
 ls -lh "$LOG_DIR" "$RESULTS_DIR" || true

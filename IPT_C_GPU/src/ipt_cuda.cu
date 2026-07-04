@@ -4,12 +4,14 @@
 #include <cusparse_v2.h>
 
 #include <chrono>
+#include <algorithm>
 #include <float.h>
 #include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 
 #include "ipt_preparation.cu"
 
@@ -70,6 +72,29 @@ static int ipt_cuda_env_flag_default(const char *name, int default_value)
     return ipt_cuda_env_flag(name);
 }
 
+static std::vector<double> ipt_cuda_env_double_list(
+    const char *name, const char *default_value)
+{
+    const char *raw = getenv(name);
+    const char *cursor = raw != NULL && raw[0] != '\0' ? raw
+                                                        : default_value;
+    std::vector<double> values;
+
+    while (cursor != NULL && *cursor != '\0') {
+        char *end = NULL;
+        double value = strtod(cursor, &end);
+
+        if (end != cursor && isfinite(value) && value > 0.0) {
+            values.push_back(value);
+        }
+        if (end == NULL || *end == '\0') {
+            break;
+        }
+        cursor = end + 1;
+    }
+    return values;
+}
+
 #ifndef IPT_CUDA_DECLS
 #define IPT_CUDA_DECLS
 
@@ -105,6 +130,18 @@ typedef struct {
     double best_so_far_max_residual;
     double pair28_best_residual;
     double pair29_best_residual;
+    int relaxed_accept_enabled;
+    int accept_global_ok;
+    int accept_active_ok;
+    int accept_locked_safe;
+    char accept_reason[64];
+    int reject_retry_count;
+    double retry_alpha;
+    double retry_denom_clip;
+    int accepted_steps;
+    int rejected_steps;
+    int min_accepted_steps;
+    int early_jump_to_continuation;
 } IPTDavidsonHistoryEntry;
 
 typedef struct {
@@ -145,6 +182,18 @@ typedef struct {
     double best_so_far_max_residual;
     double pair28_best_residual;
     double pair29_best_residual;
+    int relaxed_accept_enabled;
+    int accept_global_ok;
+    int accept_active_ok;
+    int accept_locked_safe;
+    char accept_reason[64];
+    int reject_retry_count;
+    double retry_alpha;
+    double retry_denom_clip;
+    int accepted_steps;
+    int rejected_steps;
+    int min_accepted_steps;
+    int early_jump_to_continuation;
 } IPTDavidsonBlockHistoryEntry;
 
 typedef struct {
@@ -164,6 +213,18 @@ typedef struct {
     double best_so_far_max_residual;
     double pair28_best_residual;
     double pair29_best_residual;
+    int relaxed_accept_enabled;
+    int accept_global_ok;
+    int accept_active_ok;
+    int accept_locked_safe;
+    char accept_reason[64];
+    int reject_retry_count;
+    double retry_alpha;
+    double retry_denom_clip;
+    int accepted_steps;
+    int rejected_steps;
+    int min_accepted_steps;
+    int early_jump_to_continuation;
 } IPTJDLocalHistoryEntry;
 
 typedef struct {
@@ -222,6 +283,11 @@ typedef struct {
     int final_returned_from_best_so_far;
     double pair28_best_residual;
     double pair29_best_residual;
+    int relaxed_accept_enabled;
+    int accepted_steps;
+    int rejected_steps;
+    int min_accepted_steps;
+    int early_jump_to_continuation;
 } IPTCudaResult;
 
 const char *ipt_cuda_status_string(int status);
@@ -428,6 +494,11 @@ extern "C" void ipt_cuda_free_result(IPTCudaResult *result)
     result->final_returned_from_best_so_far = 0;
     result->pair28_best_residual = NAN;
     result->pair29_best_residual = NAN;
+    result->relaxed_accept_enabled = 0;
+    result->accepted_steps = 0;
+    result->rejected_steps = 0;
+    result->min_accepted_steps = 0;
+    result->early_jump_to_continuation = 0;
 }
 
 // 释放 device 侧 d_vectors/d_values
@@ -602,6 +673,192 @@ static void ipt_best_so_far_store_result_fields(
         final_returned_from_best_so_far;
     result->pair28_best_residual = best->pair28_best_residual;
     result->pair29_best_residual = best->pair29_best_residual;
+}
+
+struct IPTTrialAcceptDecision {
+    int relaxed_accept_enabled;
+    int finite_ok;
+    int global_ok;
+    int active_ok;
+    int locked_safe;
+    int accepted;
+    char reason[64];
+};
+
+static int ipt_residual_improved(double before, double after,
+                                 double rel_slack, double abs_slack)
+{
+    double required = 0.0;
+
+    if (!isfinite(before) || !isfinite(after)) {
+        return 0;
+    }
+    required = std::max(abs_slack, fabs(before) * rel_slack);
+    return after + required < before;
+}
+
+static IPTTrialAcceptDecision ipt_block_trial_accept_decision(
+    const std::vector<double> &current_residuals,
+    const std::vector<double> &trial_residuals,
+    const std::vector<int> &active_indices,
+    const std::vector<int> &forced_pairs, double current_maximum,
+    double trial_maximum, int accept_only_if_improves,
+    int relaxed_accept_enabled, double rel_slack, double abs_slack,
+    int active_pair_accept, double converged_tolerance,
+    double protect_tolerance, double locked_degrade_slack,
+    int basis_invalid, int ritz_invalid)
+{
+    IPTTrialAcceptDecision decision = {};
+    const std::vector<int> &focus =
+        forced_pairs.empty() ? active_indices : forced_pairs;
+
+    decision.relaxed_accept_enabled = relaxed_accept_enabled;
+    decision.finite_ok =
+        isfinite(trial_maximum) && !basis_invalid && !ritz_invalid;
+    decision.global_ok =
+        decision.finite_ok &&
+        trial_maximum <=
+            current_maximum * (1.0 + rel_slack) + abs_slack;
+    decision.locked_safe = decision.finite_ok;
+    decision.active_ok = 0;
+    snprintf(decision.reason, sizeof(decision.reason), "not_evaluated");
+
+    if (decision.finite_ok) {
+        for (size_t col = 0; col < current_residuals.size() &&
+                             col < trial_residuals.size();
+             ++col) {
+            double before = current_residuals[col];
+            double after = trial_residuals[col];
+
+            if (!isfinite(before) || !isfinite(after)) {
+                decision.locked_safe = 0;
+                break;
+            }
+            if (before <= protect_tolerance &&
+                after >
+                    before * (1.0 + locked_degrade_slack) +
+                        locked_degrade_slack) {
+                decision.locked_safe = 0;
+                break;
+            }
+        }
+    }
+    if (decision.finite_ok && active_pair_accept) {
+        for (int pair : focus) {
+            if (pair < 0 || pair >= (int)current_residuals.size() ||
+                pair >= (int)trial_residuals.size()) {
+                continue;
+            }
+            if (current_residuals[(size_t)pair] <= converged_tolerance) {
+                continue;
+            }
+            if (ipt_residual_improved(current_residuals[(size_t)pair],
+                                      trial_residuals[(size_t)pair],
+                                      rel_slack, abs_slack)) {
+                decision.active_ok = 1;
+                break;
+            }
+        }
+    }
+
+    if (!decision.finite_ok) {
+        decision.accepted = 0;
+        snprintf(decision.reason, sizeof(decision.reason), "nonfinite");
+    } else if (!decision.locked_safe) {
+        decision.accepted = 0;
+        snprintf(decision.reason, sizeof(decision.reason), "locked_unsafe");
+    } else if (!accept_only_if_improves) {
+        decision.accepted = 1;
+        snprintf(decision.reason, sizeof(decision.reason), "accept_unchecked");
+    } else if (relaxed_accept_enabled) {
+        decision.accepted = decision.global_ok || decision.active_ok;
+        if (decision.accepted) {
+            if (decision.global_ok && decision.active_ok) {
+                snprintf(decision.reason, sizeof(decision.reason),
+                         "global_ok+active_ok");
+            } else if (decision.global_ok) {
+                snprintf(decision.reason, sizeof(decision.reason),
+                         "global_ok");
+            } else {
+                snprintf(decision.reason, sizeof(decision.reason),
+                         "active_ok");
+            }
+        } else {
+            snprintf(decision.reason, sizeof(decision.reason),
+                     "not_improved");
+        }
+    } else {
+        decision.global_ok =
+            decision.finite_ok && trial_maximum < current_maximum;
+        decision.accepted = decision.global_ok;
+        snprintf(decision.reason, sizeof(decision.reason), "%s",
+                 decision.accepted ? "strict_global" : "not_improved");
+    }
+    return decision;
+}
+
+static void ipt_block_fill_davidson_history_accept_fields(
+    IPTDavidsonHistoryEntry *entry, const IPTTrialAcceptDecision &decision,
+    int retry_count, double retry_alpha, double retry_denom_clip,
+    int accepted_steps, int rejected_steps, int min_accepted_steps,
+    int early_jump_to_continuation)
+{
+    entry->relaxed_accept_enabled = decision.relaxed_accept_enabled;
+    entry->accept_global_ok = decision.global_ok;
+    entry->accept_active_ok = decision.active_ok;
+    entry->accept_locked_safe = decision.locked_safe;
+    snprintf(entry->accept_reason, sizeof(entry->accept_reason), "%s",
+             decision.reason);
+    entry->reject_retry_count = retry_count;
+    entry->retry_alpha = retry_alpha;
+    entry->retry_denom_clip = retry_denom_clip;
+    entry->accepted_steps = accepted_steps;
+    entry->rejected_steps = rejected_steps;
+    entry->min_accepted_steps = min_accepted_steps;
+    entry->early_jump_to_continuation = early_jump_to_continuation;
+}
+
+static void ipt_block_fill_block_history_accept_fields(
+    IPTDavidsonBlockHistoryEntry *entry,
+    const IPTTrialAcceptDecision &decision, int retry_count,
+    double retry_alpha, double retry_denom_clip, int accepted_steps,
+    int rejected_steps, int min_accepted_steps,
+    int early_jump_to_continuation)
+{
+    entry->relaxed_accept_enabled = decision.relaxed_accept_enabled;
+    entry->accept_global_ok = decision.global_ok;
+    entry->accept_active_ok = decision.active_ok;
+    entry->accept_locked_safe = decision.locked_safe;
+    snprintf(entry->accept_reason, sizeof(entry->accept_reason), "%s",
+             decision.reason);
+    entry->reject_retry_count = retry_count;
+    entry->retry_alpha = retry_alpha;
+    entry->retry_denom_clip = retry_denom_clip;
+    entry->accepted_steps = accepted_steps;
+    entry->rejected_steps = rejected_steps;
+    entry->min_accepted_steps = min_accepted_steps;
+    entry->early_jump_to_continuation = early_jump_to_continuation;
+}
+
+static void ipt_block_fill_jd_history_accept_fields(
+    IPTJDLocalHistoryEntry *entry, const IPTTrialAcceptDecision &decision,
+    int retry_count, double retry_alpha, double retry_denom_clip,
+    int accepted_steps, int rejected_steps, int min_accepted_steps,
+    int early_jump_to_continuation)
+{
+    entry->relaxed_accept_enabled = decision.relaxed_accept_enabled;
+    entry->accept_global_ok = decision.global_ok;
+    entry->accept_active_ok = decision.active_ok;
+    entry->accept_locked_safe = decision.locked_safe;
+    snprintf(entry->accept_reason, sizeof(entry->accept_reason), "%s",
+             decision.reason);
+    entry->reject_retry_count = retry_count;
+    entry->retry_alpha = retry_alpha;
+    entry->retry_denom_clip = retry_denom_clip;
+    entry->accepted_steps = accepted_steps;
+    entry->rejected_steps = rejected_steps;
+    entry->min_accepted_steps = min_accepted_steps;
+    entry->early_jump_to_continuation = early_jump_to_continuation;
 }
 
 // 生成初始 n x k 单位列向量
@@ -3205,6 +3462,12 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         result->best_so_far_max_residual_index = -1;
         result->pair28_best_residual = NAN;
         result->pair29_best_residual = NAN;
+        result->relaxed_accept_enabled =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_RELAXED_ACCEPT", 1);
+        result->accepted_steps = 0;
+        result->rejected_steps = 0;
+        result->min_accepted_steps = 0;
+        result->early_jump_to_continuation = 0;
     }
     ipt_best_so_far_init(
         &best_so_far,
@@ -3446,11 +3709,25 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             ipt_cuda_env_int("IPT_DAVIDSON_RESTART_EVERY", 20);
         int restart_keep_extra =
             ipt_cuda_env_int("IPT_DAVIDSON_RESTART_KEEP_EXTRA", 5);
+        int relaxed_accept_enabled =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_RELAXED_ACCEPT", 1);
+        int active_pair_accept =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT", 1);
+        int retry_on_reject =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_RETRY_ON_REJECT", 1);
+        int min_accepted_steps =
+            ipt_cuda_env_int("IPT_DAVIDSON_MIN_ACCEPTED_STEPS", 0);
         int accept_only_if_improves =
             accept_raw == NULL
                 ? 1
                 : ipt_cuda_env_flag(
                       "IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES");
+        double accept_rel_slack = ipt_cuda_env_double(
+            "IPT_DAVIDSON_ACCEPT_REL_SLACK", 1.0e-12);
+        double accept_abs_slack = ipt_cuda_env_double(
+            "IPT_DAVIDSON_ACCEPT_ABS_SLACK", 1.0e-15);
+        double locked_degrade_slack = ipt_cuda_env_double(
+            "IPT_DAVIDSON_LOCKED_DEGRADE_SLACK", 1.0e-8);
         double converged_tolerance = ipt_cuda_env_double(
             "IPT_DAVIDSON_CONVERGED_TOL", 1.0e-13);
         double active_tolerance = ipt_cuda_env_double(
@@ -3471,9 +3748,18 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         std::vector<IPTDavidsonSelectionEntry> selection_history;
         std::vector<IPTDavidsonBlockHistoryEntry> block_history;
         std::vector<int> forced_pairs;
+        std::vector<double> retry_damping_list =
+            ipt_cuda_env_double_list("IPT_DAVIDSON_RETRY_DAMPING_LIST",
+                                     "0.5,0.25");
+        std::vector<double> retry_denom_clip_mults =
+            ipt_cuda_env_double_list("IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS",
+                                     "10,100");
         double current_maximum = NAN;
         int current_max_index = -1;
         int accepted_since_restart = 0;
+        int accepted_steps_count = 0;
+        int rejected_steps_count = 0;
+        int early_jump_to_continuation = 0;
 
         if (getenv("IPT_DAVIDSON_FORCE_ACTIVE_PAIRS") != NULL) {
             forced_pairs = ipt_jd_parse_active_pairs(
@@ -3486,7 +3772,10 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         ortho_repeats = std::max(1, ortho_repeats);
         restart_every = std::max(0, restart_every);
         restart_keep_extra = std::max(1, restart_keep_extra);
+        min_accepted_steps = std::max(0, min_accepted_steps);
         result->davidson_attempted = 1;
+        result->relaxed_accept_enabled = relaxed_accept_enabled;
+        result->min_accepted_steps = min_accepted_steps;
         result->davidson_denom_clip = ipt_cuda_env_double(
             "IPT_DAVIDSON_DENOM_CLIP", 1.0e-8);
         if (result->davidson_denom_clip <= 0.0) {
@@ -3553,9 +3842,13 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                 std::vector<double> trial_residuals;
                 double trial_maximum = NAN;
                 int trial_max_index = -1;
-                int locking_preserved = 1;
                 int accepted = 0;
                 int trial_best_updated = 0;
+                int any_trial_best_updated = 0;
+                int retry_count = 0;
+                double retry_alpha = 1.0;
+                double retry_denom_clip = result->davidson_denom_clip;
+                IPTTrialAcceptDecision accept_decision = {};
 
                 if (forced_mode) {
                     candidates = forced_pairs;
@@ -3718,11 +4011,34 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                             best_so_far.pair28_best_residual;
                         entry.pair29_best_residual =
                             best_so_far.pair29_best_residual;
+                        {
+                            IPTTrialAcceptDecision no_correction = {};
+
+                            no_correction.relaxed_accept_enabled =
+                                relaxed_accept_enabled;
+                            no_correction.finite_ok = 1;
+                            no_correction.locked_safe = 1;
+                            snprintf(no_correction.reason,
+                                     sizeof(no_correction.reason),
+                                     "no_valid_correction");
+                            ipt_block_fill_block_history_accept_fields(
+                                &entry, no_correction, 0, 1.0,
+                                result->davidson_denom_clip,
+                                accepted_steps_count,
+                                rejected_steps_count + 1,
+                                min_accepted_steps, 0);
+                        }
                         block_history.push_back(entry);
+                        ++rejected_steps_count;
                         break;
                     }
-                    if (extra_steps > 0) {
+                    if (extra_steps > 0 &&
+                        accepted_steps_count >= min_accepted_steps) {
+                        early_jump_to_continuation = 1;
                         step = baseline_steps;
+                        continue;
+                    }
+                    if (extra_steps > 0) {
                         continue;
                     }
                     break;
@@ -3785,20 +4101,318 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         trial_basis_max, trial_basis_invalid,
                         trial_ritz_frobenius, trial_ritz_max,
                         trial_ritz_invalid, 0);
-                    for (int col = 0; col < k; ++col) {
-                        if (current_residuals[(size_t)col] <
-                                protect_tolerance &&
-                            trial_residuals[(size_t)col] >=
-                                protect_tolerance) {
-                            locking_preserved = 0;
-                            break;
+                    any_trial_best_updated = trial_best_updated;
+                    accept_decision = ipt_block_trial_accept_decision(
+                        current_residuals, trial_residuals,
+                        active_indices, forced_pairs, current_maximum,
+                        trial_maximum, accept_only_if_improves,
+                        relaxed_accept_enabled, accept_rel_slack,
+                        accept_abs_slack, active_pair_accept,
+                        converged_tolerance, protect_tolerance,
+                        locked_degrade_slack, trial_basis_invalid,
+                        trial_ritz_invalid);
+                    accepted = accept_decision.accepted;
+                    if (!accepted && retry_on_reject) {
+                        std::vector<int> base_active_indices =
+                            active_indices;
+                        std::vector<double> base_corrections_sorted =
+                            corrections_sorted;
+                        std::vector<double> base_trial_orthonormal_basis =
+                            trial_orthonormal_basis;
+                        std::vector<double> base_norms_before =
+                            correction_norms_before;
+                        std::vector<double> base_norms_after =
+                            correction_norms_after;
+                        auto free_trial_buffers = [&]() {
+                            cudaFree(d_trial_basis);
+                            cudaFree(d_trial_values);
+                            cudaFree(d_trial_vectors);
+                            d_trial_basis = NULL;
+                            d_trial_values = NULL;
+                            d_trial_vectors = NULL;
+                        };
+                        auto evaluate_retry =
+                            [&](const std::vector<int> &retry_active,
+                                const std::vector<double> &retry_basis,
+                                const std::vector<double> &retry_corrections,
+                                const std::vector<double> &retry_norms_before,
+                                const std::vector<double> &retry_norms_after,
+                                double alpha, double denom_clip,
+                                int retry_index) -> int {
+                            cudaError_t cuda_status = cudaSuccess;
+                            int retry_basis_cols =
+                                basis_cols + (int)retry_active.size();
+                            const double *current_basis =
+                                d_davidson_basis != NULL
+                                    ? d_davidson_basis
+                                    : d_combined_basis;
+
+                            if (retry_active.empty()) {
+                                return IPT_CUDA_SUCCESS;
+                            }
+                            free_trial_buffers();
+                            active_indices = retry_active;
+                            trial_orthonormal_basis = retry_basis;
+                            corrections_sorted = retry_corrections;
+                            correction_norms_before = retry_norms_before;
+                            correction_norms_after = retry_norms_after;
+                            trial_basis_cols = retry_basis_cols;
+                            retry_alpha = alpha;
+                            retry_denom_clip = denom_clip;
+                            retry_count = retry_index;
+                            trial_rr_time = 0.0;
+                            trial_basis_frobenius = NAN;
+                            trial_basis_max = NAN;
+                            trial_ritz_frobenius = NAN;
+                            trial_ritz_max = NAN;
+                            trial_basis_invalid = 0;
+                            trial_ritz_invalid = 0;
+                            trial_used_qr = 0;
+                            cuda_status = cudaMalloc(
+                                (void **)&d_trial_basis,
+                                (size_t)n * (size_t)trial_basis_cols *
+                                    sizeof(double));
+                            if (cuda_status != cudaSuccess) {
+                                fprintf(stderr,
+                                        "CUDA error at %s:%d: %s\n",
+                                        __FILE__, __LINE__,
+                                        cudaGetErrorString(cuda_status));
+                                return IPT_CUDA_CUDA_ERROR;
+                            }
+                            cuda_status = cudaMemcpy(
+                                d_trial_basis, current_basis,
+                                (size_t)n * (size_t)basis_cols *
+                                    sizeof(double),
+                                cudaMemcpyDeviceToDevice);
+                            if (cuda_status != cudaSuccess) {
+                                fprintf(stderr,
+                                        "CUDA error at %s:%d: %s\n",
+                                        __FILE__, __LINE__,
+                                        cudaGetErrorString(cuda_status));
+                                return IPT_CUDA_CUDA_ERROR;
+                            }
+                            cuda_status = cudaMemcpy(
+                                d_trial_basis +
+                                    (size_t)n * (size_t)basis_cols,
+                                corrections_sorted.data(),
+                                corrections_sorted.size() * sizeof(double),
+                                cudaMemcpyHostToDevice);
+                            if (cuda_status != cudaSuccess) {
+                                fprintf(stderr,
+                                        "CUDA error at %s:%d: %s\n",
+                                        __FILE__, __LINE__,
+                                        cudaGetErrorString(cuda_status));
+                                return IPT_CUDA_CUDA_ERROR;
+                            }
+                            status = ipt_block_cluster_rayleigh_ritz_gpu(
+                                sparse_handle, sparse_matrix, cublas_handle,
+                                d_trial_basis, n, trial_basis_cols, k,
+                                d_perm, &d_trial_values, &d_trial_vectors,
+                                &trial_rr_time, &trial_used_qr,
+                                &trial_basis_frobenius, &trial_basis_max,
+                                &trial_basis_invalid, &trial_ritz_frobenius,
+                                &trial_ritz_max, &trial_ritz_invalid);
+                            if (status != IPT_CUDA_SUCCESS) {
+                                return status;
+                            }
+                            result->rayleigh_ritz_time_sec +=
+                                trial_rr_time;
+                            result->matvecs += trial_basis_cols;
+                            cuda_status = cudaMemcpy(
+                                trial_vectors.data(), d_trial_vectors,
+                                trial_vectors.size() * sizeof(double),
+                                cudaMemcpyDeviceToHost);
+                            if (cuda_status != cudaSuccess) {
+                                fprintf(stderr,
+                                        "CUDA error at %s:%d: %s\n",
+                                        __FILE__, __LINE__,
+                                        cudaGetErrorString(cuda_status));
+                                return IPT_CUDA_CUDA_ERROR;
+                            }
+                            cuda_status = cudaMemcpy(
+                                trial_values.data(), d_trial_values,
+                                trial_values.size() * sizeof(double),
+                                cudaMemcpyDeviceToHost);
+                            if (cuda_status != cudaSuccess) {
+                                fprintf(stderr,
+                                        "CUDA error at %s:%d: %s\n",
+                                        __FILE__, __LINE__,
+                                        cudaGetErrorString(cuda_status));
+                                return IPT_CUDA_CUDA_ERROR;
+                            }
+                            ipt_block_host_residuals(
+                                col_ptr, row_ind, matrix_values, n, k,
+                                trial_values, trial_vectors, matrix_norm,
+                                &trial_residuals, &trial_maximum,
+                                &trial_max_index);
+                            if (ipt_best_so_far_note(
+                                    &best_so_far,
+                                    continuation
+                                        ? "davidson_continuation_retry"
+                                        : "davidson_retry",
+                                    step, trial_values, trial_vectors,
+                                    trial_residuals, trial_maximum,
+                                    trial_max_index, trial_basis_cols,
+                                    trial_used_qr, trial_basis_frobenius,
+                                    trial_basis_max, trial_basis_invalid,
+                                    trial_ritz_frobenius, trial_ritz_max,
+                                    trial_ritz_invalid, 0)) {
+                                any_trial_best_updated = 1;
+                            }
+                            accept_decision =
+                                ipt_block_trial_accept_decision(
+                                    current_residuals, trial_residuals,
+                                    active_indices, forced_pairs,
+                                    current_maximum, trial_maximum,
+                                    accept_only_if_improves,
+                                    relaxed_accept_enabled,
+                                    accept_rel_slack, accept_abs_slack,
+                                    active_pair_accept,
+                                    converged_tolerance, protect_tolerance,
+                                    locked_degrade_slack,
+                                    trial_basis_invalid,
+                                    trial_ritz_invalid);
+                            accepted = accept_decision.accepted;
+                            return IPT_CUDA_SUCCESS;
+                        };
+                        auto build_retry_corrections =
+                            [&](double denom_clip,
+                                std::vector<int> *retry_active,
+                                std::vector<double> *retry_basis,
+                                std::vector<double> *retry_corrections,
+                                std::vector<double> *retry_norms_before,
+                                std::vector<double> *retry_norms_after) {
+                            retry_active->clear();
+                            retry_corrections->clear();
+                            retry_norms_before->clear();
+                            retry_norms_after->clear();
+                            *retry_basis = orthonormal_basis;
+                            for (int index : candidates) {
+                                double norm_before = NAN;
+                                double norm_after = NAN;
+                                std::vector<double> correction;
+                                std::vector<double> sorted_correction(
+                                    (size_t)n, 0.0);
+
+                                if ((int)retry_active->size() >=
+                                    round_limit) {
+                                    break;
+                                }
+                                if (current_residuals[(size_t)index] <=
+                                        converged_tolerance ||
+                                    current_residuals[(size_t)index] <=
+                                        active_tolerance) {
+                                    continue;
+                                }
+                                if (!ipt_block_build_davidson_correction(
+                                        col_ptr, row_ind, matrix_values, n,
+                                        original_diagonal, host_ritz_values,
+                                        host_ritz_vectors, index,
+                                        denom_clip, &correction)) {
+                                    continue;
+                                }
+                                norm_before =
+                                    ipt_block_vector_norm(correction);
+                                for (int sorted = 0; sorted < n;
+                                     ++sorted) {
+                                    sorted_correction[(size_t)sorted] =
+                                        correction[(size_t)perm
+                                                       [(size_t)sorted]];
+                                }
+                                if (!protected_ritz_basis.empty()) {
+                                    ipt_block_project_out(
+                                        &sorted_correction,
+                                        protected_ritz_basis, n,
+                                        (int)(protected_ritz_basis.size() /
+                                              (size_t)n),
+                                        ortho_repeats);
+                                }
+                                ipt_block_project_out(
+                                    &sorted_correction, *retry_basis, n,
+                                    (int)(retry_basis->size() /
+                                          (size_t)n),
+                                    ortho_repeats);
+                                if (!ipt_block_normalize_direction(
+                                        &sorted_correction, norm_before,
+                                        &norm_after)) {
+                                    continue;
+                                }
+                                retry_basis->insert(
+                                    retry_basis->end(),
+                                    sorted_correction.begin(),
+                                    sorted_correction.end());
+                                retry_corrections->insert(
+                                    retry_corrections->end(),
+                                    sorted_correction.begin(),
+                                    sorted_correction.end());
+                                retry_active->push_back(index);
+                                retry_norms_before->push_back(norm_before);
+                                retry_norms_after->push_back(norm_after);
+                            }
+                        };
+                        int next_retry = 1;
+                        int retry_status = IPT_CUDA_SUCCESS;
+
+                        for (double alpha : retry_damping_list) {
+                            std::vector<double> damped_corrections =
+                                base_corrections_sorted;
+
+                            for (double &value : damped_corrections) {
+                                value *= alpha;
+                            }
+                            retry_status = evaluate_retry(
+                                base_active_indices,
+                                base_trial_orthonormal_basis,
+                                damped_corrections, base_norms_before,
+                                base_norms_after, alpha,
+                                result->davidson_denom_clip, next_retry++);
+                            if (retry_status != IPT_CUDA_SUCCESS) {
+                                status = retry_status;
+                                goto cleanup;
+                            }
+                            if (accepted) {
+                                break;
+                            }
+                        }
+                        if (!accepted) {
+                            for (double mult : retry_denom_clip_mults) {
+                                std::vector<int> retry_active;
+                                std::vector<double> retry_basis;
+                                std::vector<double> retry_corrections;
+                                std::vector<double> retry_norms_before;
+                                std::vector<double> retry_norms_after;
+                                double denom_clip =
+                                    result->davidson_denom_clip * mult;
+
+                                build_retry_corrections(
+                                    denom_clip, &retry_active, &retry_basis,
+                                    &retry_corrections, &retry_norms_before,
+                                    &retry_norms_after);
+                                retry_status = evaluate_retry(
+                                    retry_active, retry_basis,
+                                    retry_corrections, retry_norms_before,
+                                    retry_norms_after, 1.0, denom_clip,
+                                    next_retry++);
+                                if (retry_status != IPT_CUDA_SUCCESS) {
+                                    status = retry_status;
+                                    goto cleanup;
+                                }
+                                if (accepted) {
+                                    break;
+                                }
+                            }
                         }
                     }
-                    accepted =
-                        locking_preserved &&
-                        (!accept_only_if_improves ||
-                         (isfinite(trial_maximum) &&
-                          trial_maximum < current_maximum));
+                    trial_best_updated = any_trial_best_updated;
+                    {
+                        int accepted_steps_after =
+                            accepted_steps_count + (accepted ? 1 : 0);
+                        int rejected_steps_after =
+                            rejected_steps_count + (accepted ? 0 : 1);
+                        int step_early_jump =
+                            !accepted && !continuation && extra_steps > 0 &&
+                            accepted_steps_count >= min_accepted_steps;
+
                     if (continuation) {
                         IPTDavidsonBlockHistoryEntry block_entry = {};
                         std::string active_text;
@@ -3862,11 +4476,8 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         snprintf(
                             block_entry.reject_reason,
                             sizeof(block_entry.reject_reason), "%s",
-                            accepted
-                                ? "none"
-                                : (!locking_preserved
-                                       ? "protect_violation"
-                                       : "global_not_improved"));
+                            accepted ? "none"
+                                     : accept_decision.reason);
                         block_entry.basis_cols_before = basis_cols;
                         block_entry.basis_cols_after =
                             accepted ? trial_basis_cols : basis_cols;
@@ -3885,6 +4496,11 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                             best_so_far.pair28_best_residual;
                         block_entry.pair29_best_residual =
                             best_so_far.pair29_best_residual;
+                        ipt_block_fill_block_history_accept_fields(
+                            &block_entry, accept_decision, retry_count,
+                            retry_alpha, retry_denom_clip,
+                            accepted_steps_after, rejected_steps_after,
+                            min_accepted_steps, step_early_jump);
                         block_history.push_back(block_entry);
                     }
                     for (int index : active_indices) {
@@ -3929,7 +4545,13 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                             best_so_far.pair28_best_residual;
                         entry.pair29_best_residual =
                             best_so_far.pair29_best_residual;
+                        ipt_block_fill_davidson_history_accept_fields(
+                            &entry, accept_decision, retry_count,
+                            retry_alpha, retry_denom_clip,
+                            accepted_steps_after, rejected_steps_after,
+                            min_accepted_steps, step_early_jump);
                         history.push_back(entry);
+                    }
                     }
                     result->davidson_residual_after = trial_maximum;
                     if (accepted) {
@@ -4096,13 +4718,20 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                                 }
                             }
                         }
+                        ++accepted_steps_count;
                     }
                     cudaFree(d_trial_basis);
                     cudaFree(d_trial_values);
                     cudaFree(d_trial_vectors);
                     if (!accepted) {
-                        if (!continuation && extra_steps > 0) {
+                        ++rejected_steps_count;
+                        if (!continuation && extra_steps > 0 &&
+                            accepted_steps_count >= min_accepted_steps) {
+                            early_jump_to_continuation = 1;
                             step = baseline_steps;
+                            continue;
+                        }
+                        if (!continuation) {
                             continue;
                         }
                         break;
@@ -4111,6 +4740,9 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             }
         }
         result->davidson_residual_after = current_maximum;
+        result->accepted_steps = accepted_steps_count;
+        result->rejected_steps = rejected_steps_count;
+        result->early_jump_to_continuation = early_jump_to_continuation;
         if (!history.empty()) {
             result->davidson_history = (IPTDavidsonHistoryEntry *)calloc(
                 history.size(), sizeof(IPTDavidsonHistoryEntry));
@@ -4173,11 +4805,21 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             ipt_cuda_env_int("IPT_JD_LOCAL_SUPPORT_TOP", 80);
         int ortho_repeats =
             ipt_cuda_env_int("IPT_DAVIDSON_ORTHO_REPEATS", 2);
+        int relaxed_accept_enabled =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_RELAXED_ACCEPT", 1);
+        int active_pair_accept =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT", 1);
         int accept_only_if_improves =
             accept_raw == NULL
                 ? 1
                 : ipt_cuda_env_flag(
                       "IPT_JD_ACCEPT_ONLY_IF_IMPROVES");
+        double accept_rel_slack = ipt_cuda_env_double(
+            "IPT_DAVIDSON_ACCEPT_REL_SLACK", 1.0e-12);
+        double accept_abs_slack = ipt_cuda_env_double(
+            "IPT_DAVIDSON_ACCEPT_ABS_SLACK", 1.0e-15);
+        double locked_degrade_slack = ipt_cuda_env_double(
+            "IPT_DAVIDSON_LOCKED_DEGRADE_SLACK", 1.0e-8);
         int outside_diagonal =
             outside_raw != NULL &&
             (strcmp(outside_raw, "diagonal") == 0 ||
@@ -4207,6 +4849,9 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         std::vector<IPTJDLocalHistoryEntry> history;
         double current_maximum = NAN;
         int current_max_index = -1;
+        int accepted_steps_count = result->accepted_steps;
+        int rejected_steps_count = result->rejected_steps;
+        int min_accepted_steps = result->min_accepted_steps;
 
         steps = std::max(1, steps);
         ortho_repeats = std::max(2, ortho_repeats);
@@ -4277,9 +4922,9 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                 std::vector<double> trial_residuals;
                 double trial_maximum = NAN;
                 int trial_max_index = -1;
-                int locking_preserved = 1;
                 int accepted = 0;
                 int trial_best_updated = 0;
+                IPTTrialAcceptDecision accept_decision = {};
 
                 for (int index : active_pairs) {
                     std::vector<double> correction;
@@ -4367,22 +5012,22 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         trial_basis_frobenius, trial_basis_max,
                         trial_basis_invalid, trial_ritz_frobenius,
                         trial_ritz_max, trial_ritz_invalid, 0);
-                    for (int col = 0; col < k; ++col) {
-                        if (current_residuals[(size_t)col] <
-                                protect_tolerance &&
-                            trial_residuals[(size_t)col] >=
-                                protect_tolerance) {
-                            locking_preserved = 0;
-                            break;
-                        }
-                    }
-                    accepted =
-                        locking_preserved &&
-                        (!accept_only_if_improves ||
-                         (isfinite(trial_maximum) &&
-                          trial_maximum < current_maximum));
+                    accept_decision = ipt_block_trial_accept_decision(
+                        current_residuals, trial_residuals,
+                        step_active_pairs, std::vector<int>(),
+                        current_maximum, trial_maximum,
+                        accept_only_if_improves, relaxed_accept_enabled,
+                        accept_rel_slack, accept_abs_slack,
+                        active_pair_accept, locked_tolerance,
+                        protect_tolerance, locked_degrade_slack,
+                        trial_basis_invalid, trial_ritz_invalid);
+                    accepted = accept_decision.accepted;
                     for (int index : step_active_pairs) {
                         IPTJDLocalHistoryEntry entry = {};
+                        int accepted_steps_after =
+                            accepted_steps_count + (accepted ? 1 : 0);
+                        int rejected_steps_after =
+                            rejected_steps_count + (accepted ? 0 : 1);
 
                         entry.jd_step = step;
                         entry.active_pair_index = index;
@@ -4423,6 +5068,10 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                             best_so_far.pair28_best_residual;
                         entry.pair29_best_residual =
                             best_so_far.pair29_best_residual;
+                        ipt_block_fill_jd_history_accept_fields(
+                            &entry, accept_decision, 0, 1.0, damping,
+                            accepted_steps_after, rejected_steps_after,
+                            min_accepted_steps, 0);
                         history.push_back(entry);
                     }
                     if (accepted) {
@@ -4462,11 +5111,13 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                             trial_ritz_max;
                         result->ritz_vectors_has_nan_or_inf =
                             trial_ritz_invalid;
+                        ++accepted_steps_count;
                     }
                     cudaFree(d_trial_basis);
                     cudaFree(d_trial_values);
                     cudaFree(d_trial_vectors);
                     if (!accepted) {
+                        ++rejected_steps_count;
                         break;
                     }
                 }
@@ -4488,6 +5139,8 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                    history.size() * sizeof(IPTJDLocalHistoryEntry));
             result->jd_local_history_count = (int)history.size();
         }
+        result->accepted_steps = accepted_steps_count;
+        result->rejected_steps = rejected_steps_count;
     }
     result->solve_time_sec =
         result->iteration_time_sec + result->rayleigh_ritz_time_sec;
