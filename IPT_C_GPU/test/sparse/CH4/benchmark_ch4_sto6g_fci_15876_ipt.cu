@@ -168,6 +168,16 @@ typedef struct {
     int rejected_steps;
     int min_accepted_steps;
     int early_jump_to_continuation;
+    int cluster_aware_accept_enabled;
+    int soft_cluster_locking_enabled;
+    double gap28_29;
+    double relative_gap28_29;
+    double cluster_residual_fro;
+    double cluster_residual_max;
+    std::string pair28_lock_state;
+    std::string pair29_lock_state;
+    int cluster_hard_locked;
+    int cluster_soft_locked_count;
     std::vector<double> eigenvalues;
     std::vector<double> eigenvectors;
     std::vector<double> relative_eigen_residuals;
@@ -1284,6 +1294,12 @@ static TrialResult run_primme_once(const CscMatrixView *matrix, double tol,
     result.pair28_best_residual = NAN;
     result.pair29_best_residual = NAN;
     result.min_accepted_steps = 0;
+    result.gap28_29 = NAN;
+    result.relative_gap28_29 = NAN;
+    result.cluster_residual_fro = NAN;
+    result.cluster_residual_max = NAN;
+    result.pair28_lock_state = "unknown";
+    result.pair29_lock_state = "unknown";
 
     if (k <= 0 || k > matrix->n) {
         result.status = IPT_CUDA_INVALID_ARGUMENT;
@@ -1457,6 +1473,12 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
     result.pair28_best_residual = NAN;
     result.pair29_best_residual = NAN;
     result.min_accepted_steps = 0;
+    result.gap28_29 = NAN;
+    result.relative_gap28_29 = NAN;
+    result.cluster_residual_fro = NAN;
+    result.cluster_residual_max = NAN;
+    result.pair28_lock_state = "unknown";
+    result.pair29_lock_state = "unknown";
 
     if (k <= 0 || k > matrix->n) {
         result.status = IPT_CUDA_INVALID_ARGUMENT;
@@ -1566,6 +1588,19 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
         result.min_accepted_steps = ipt.min_accepted_steps;
         result.early_jump_to_continuation =
             ipt.early_jump_to_continuation;
+        result.cluster_aware_accept_enabled =
+            ipt.cluster_aware_accept_enabled;
+        result.soft_cluster_locking_enabled =
+            ipt.soft_cluster_locking_enabled;
+        result.gap28_29 = ipt.gap28_29;
+        result.relative_gap28_29 = ipt.relative_gap28_29;
+        result.cluster_residual_fro = ipt.cluster_residual_fro;
+        result.cluster_residual_max = ipt.cluster_residual_max;
+        result.pair28_lock_state = ipt.pair28_lock_state;
+        result.pair29_lock_state = ipt.pair29_lock_state;
+        result.cluster_hard_locked = ipt.cluster_hard_locked;
+        result.cluster_soft_locked_count =
+            ipt.cluster_soft_locked_count;
         pairs_to_check = std::min(result.requested_k, result.returned_k);
         result.eigenvectors.assign(
             ipt.vectors,
@@ -1617,7 +1652,8 @@ static void write_trial_csv(FILE *csv, const TrialResult &result)
     fprintf(csv,
             "%s,%d,%d,%d,%d,%d,%s,%.17g,%.17g,%d,%.17g,"
             "%d,%d,%d,%s,%d,%.17g,%d,%d,%.17g,%.17g,"
-            "%d,%d,%d,%d,%d\n",
+            "%d,%d,%d,%d,%d,%d,%d,%.17g,%.17g,%.17g,%.17g,"
+            "%s,%s,%d,%d\n",
             result.method, result.repeat, result.requested_k,
             result.basis_cols, result.returned_k, result.iterations,
             trial_status(result), result.api_total_time_sec,
@@ -1634,7 +1670,15 @@ static void write_trial_csv(FILE *csv, const TrialResult &result)
             result.pair29_best_residual,
             result.relaxed_accept_enabled, result.accepted_steps,
             result.rejected_steps, result.min_accepted_steps,
-            result.early_jump_to_continuation);
+            result.early_jump_to_continuation,
+            result.cluster_aware_accept_enabled,
+            result.soft_cluster_locking_enabled, result.gap28_29,
+            result.relative_gap28_29, result.cluster_residual_fro,
+            result.cluster_residual_max,
+            result.pair28_lock_state.c_str(),
+            result.pair29_lock_state.c_str(),
+            result.cluster_hard_locked,
+            result.cluster_soft_locked_count);
 }
 
 static void write_trial_summary(FILE *summary, const TrialResult &result)
@@ -1685,6 +1729,14 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             "relaxed_accept_enabled=%d accepted_steps=%d "
             "rejected_steps=%d min_accepted_steps=%d "
             "early_jump_to_continuation=%d "
+            "cluster_aware_accept_enabled=%d "
+            "soft_cluster_locking_enabled=%d "
+            "gap28_29=%.17g relative_gap28_29=%.17g "
+            "cluster_residual_fro=%.17g "
+            "cluster_residual_max=%.17g "
+            "pair28_lock_state=%s pair29_lock_state=%s "
+            "cluster_hard_locked=%d "
+            "cluster_soft_locked_count=%d "
             "adaptive_block_enabled=%d adaptive_coupling_tau=%.17g "
             "adaptive_limit_hit=%d adaptive_added_indices=%s "
             "adaptive_final_target_block_start=%d "
@@ -1725,6 +1777,14 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             result.relaxed_accept_enabled, result.accepted_steps,
             result.rejected_steps, result.min_accepted_steps,
             result.early_jump_to_continuation,
+            result.cluster_aware_accept_enabled,
+            result.soft_cluster_locking_enabled, result.gap28_29,
+            result.relative_gap28_29, result.cluster_residual_fro,
+            result.cluster_residual_max,
+            result.pair28_lock_state.c_str(),
+            result.pair29_lock_state.c_str(),
+            result.cluster_hard_locked,
+            result.cluster_soft_locked_count,
             result.adaptive_block_enabled,
             result.adaptive_coupling_tau, result.adaptive_limit_hit,
             result.adaptive_added_indices.c_str(),
@@ -1755,7 +1815,9 @@ static void write_davidson_history(FILE *history_csv,
         fprintf(history_csv,
                 "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g,%d,"
                 "%d,%d,%.17g,%.17g,%.17g,"
-                "%d,%d,%d,%d,%s,%d,%.17g,%.17g,%d,%d,%d,%d\n",
+                "%d,%d,%d,%d,%s,%d,%.17g,%.17g,%d,%d,%d,%d,"
+                "%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,"
+                "%.17g,%.17g,%.17g,%.17g,%d,%s,%s,%d,%d\n",
                 entry.davidson_step, entry.active_pair_index,
                 entry.residual_before, entry.residual_after,
                 entry.accepted, entry.basis_cols,
@@ -1773,7 +1835,20 @@ static void write_davidson_history(FILE *history_csv,
                 entry.retry_alpha, entry.retry_denom_clip,
                 entry.accepted_steps, entry.rejected_steps,
                 entry.min_accepted_steps,
-                entry.early_jump_to_continuation);
+                entry.early_jump_to_continuation, entry.gap28_29,
+                entry.relative_gap28_29,
+                entry.cluster_residual_fro_before,
+                entry.cluster_residual_fro_after,
+                entry.cluster_residual_max_before,
+                entry.cluster_residual_max_after,
+                entry.ritz_overlap_28_28,
+                entry.ritz_overlap_28_29,
+                entry.ritz_overlap_29_28,
+                entry.ritz_overlap_29_29,
+                entry.ritz_overlap_swap_detected,
+                entry.pair28_lock_state, entry.pair29_lock_state,
+                entry.cluster_hard_locked,
+                entry.cluster_soft_locked_count);
     }
 }
 
@@ -1803,7 +1878,9 @@ static void write_davidson_block_history(
                 "%d,%s,%d,%d,%s,%s,%.17g,%.17g,%.17g,%.17g,"
                 "%.17g,%.17g,%d,%s,%d,%d,%.17g,%.17g,"
                 "%d,%d,%.17g,%.17g,%.17g,"
-                "%d,%d,%d,%d,%s,%d,%.17g,%.17g,%d,%d,%d,%d\n",
+                "%d,%d,%d,%d,%s,%d,%.17g,%.17g,%d,%d,%d,%d,"
+                "%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,"
+                "%.17g,%.17g,%.17g,%.17g,%d,%s,%s,%d,%d\n",
                 entry.davidson_step, entry.active_pairs,
                 entry.accepted_corrections,
                 entry.rejected_corrections,
@@ -1827,7 +1904,20 @@ static void write_davidson_block_history(
                 entry.retry_alpha, entry.retry_denom_clip,
                 entry.accepted_steps, entry.rejected_steps,
                 entry.min_accepted_steps,
-                entry.early_jump_to_continuation);
+                entry.early_jump_to_continuation, entry.gap28_29,
+                entry.relative_gap28_29,
+                entry.cluster_residual_fro_before,
+                entry.cluster_residual_fro_after,
+                entry.cluster_residual_max_before,
+                entry.cluster_residual_max_after,
+                entry.ritz_overlap_28_28,
+                entry.ritz_overlap_28_29,
+                entry.ritz_overlap_29_28,
+                entry.ritz_overlap_29_29,
+                entry.ritz_overlap_swap_detected,
+                entry.pair28_lock_state, entry.pair29_lock_state,
+                entry.cluster_hard_locked,
+                entry.cluster_soft_locked_count);
     }
 }
 
@@ -1838,7 +1928,9 @@ static void write_jd_local_history(FILE *history_csv,
         fprintf(history_csv,
                 "%d,%d,%.17g,%.17g,%d,%d,%.17g,%d,%.17g,%.17g,%.17g,"
                 "%d,%d,%.17g,%.17g,%.17g,"
-                "%d,%d,%d,%d,%s,%d,%.17g,%.17g,%d,%d,%d,%d\n",
+                "%d,%d,%d,%d,%s,%d,%.17g,%.17g,%d,%d,%d,%d,"
+                "%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,"
+                "%.17g,%.17g,%.17g,%.17g,%d,%s,%s,%d,%d\n",
                 entry.jd_step, entry.active_pair_index,
                 entry.residual_before, entry.residual_after,
                 entry.accepted, entry.basis_cols,
@@ -1856,7 +1948,20 @@ static void write_jd_local_history(FILE *history_csv,
                 entry.retry_alpha, entry.retry_denom_clip,
                 entry.accepted_steps, entry.rejected_steps,
                 entry.min_accepted_steps,
-                entry.early_jump_to_continuation);
+                entry.early_jump_to_continuation, entry.gap28_29,
+                entry.relative_gap28_29,
+                entry.cluster_residual_fro_before,
+                entry.cluster_residual_fro_after,
+                entry.cluster_residual_max_before,
+                entry.cluster_residual_max_after,
+                entry.ritz_overlap_28_28,
+                entry.ritz_overlap_28_29,
+                entry.ritz_overlap_29_28,
+                entry.ritz_overlap_29_29,
+                entry.ritz_overlap_swap_detected,
+                entry.pair28_lock_state, entry.pair29_lock_state,
+                entry.cluster_hard_locked,
+                entry.cluster_soft_locked_count);
     }
 }
 
@@ -2374,7 +2479,12 @@ int main(void)
             "final_returned_from_best_so_far,pair28_best_residual,"
             "pair29_best_residual,relaxed_accept_enabled,"
             "accepted_steps,rejected_steps,min_accepted_steps,"
-            "early_jump_to_continuation\n");
+            "early_jump_to_continuation,cluster_aware_accept_enabled,"
+            "soft_cluster_locking_enabled,gap28_29,"
+            "relative_gap28_29,cluster_residual_fro,"
+            "cluster_residual_max,pair28_lock_state,"
+            "pair29_lock_state,cluster_hard_locked,"
+            "cluster_soft_locked_count\n");
     fprintf(pair_csv,
             "method,repeat,requested_k,basis_cols,returned_k,pair_index,"
             "lambda,relative_eigen_residual\n");
@@ -2389,7 +2499,17 @@ int main(void)
             "accept_global_ok,accept_active_ok,accept_locked_safe,"
             "accept_reason,reject_retry_count,retry_alpha,"
             "retry_denom_clip,accepted_steps,rejected_steps,"
-            "min_accepted_steps,early_jump_to_continuation\n");
+            "min_accepted_steps,early_jump_to_continuation,"
+            "gap28_29,relative_gap28_29,"
+            "cluster_residual_fro_before,"
+            "cluster_residual_fro_after,"
+            "cluster_residual_max_before,"
+            "cluster_residual_max_after,"
+            "ritz_overlap_28_28,ritz_overlap_28_29,"
+            "ritz_overlap_29_28,ritz_overlap_29_29,"
+            "ritz_overlap_swap_detected,pair28_lock_state,"
+            "pair29_lock_state,cluster_hard_locked,"
+            "cluster_soft_locked_count\n");
     fprintf(davidson_selection_history_csv,
             "davidson_step,pair_index,residual,selected_by_residual,"
             "selected_forced,skipped_converged,skipped_active_tol,"
@@ -2412,7 +2532,16 @@ int main(void)
             "accept_active_ok,accept_locked_safe,accept_reason,"
             "reject_retry_count,retry_alpha,retry_denom_clip,"
             "accepted_steps,rejected_steps,min_accepted_steps,"
-            "early_jump_to_continuation\n");
+            "early_jump_to_continuation,gap28_29,"
+            "relative_gap28_29,cluster_residual_fro_before,"
+            "cluster_residual_fro_after,"
+            "cluster_residual_max_before,"
+            "cluster_residual_max_after,"
+            "ritz_overlap_28_28,ritz_overlap_28_29,"
+            "ritz_overlap_29_28,ritz_overlap_29_29,"
+            "ritz_overlap_swap_detected,pair28_lock_state,"
+            "pair29_lock_state,cluster_hard_locked,"
+            "cluster_soft_locked_count\n");
     fprintf(jd_local_history_csv,
             "jd_step,active_pair_index,residual_before,residual_after,"
             "accepted,basis_cols,max_relative_eigen_residual,"
@@ -2424,7 +2553,17 @@ int main(void)
             "accept_global_ok,accept_active_ok,accept_locked_safe,"
             "accept_reason,reject_retry_count,retry_alpha,"
             "retry_denom_clip,accepted_steps,rejected_steps,"
-            "min_accepted_steps,early_jump_to_continuation\n");
+            "min_accepted_steps,early_jump_to_continuation,"
+            "gap28_29,relative_gap28_29,"
+            "cluster_residual_fro_before,"
+            "cluster_residual_fro_after,"
+            "cluster_residual_max_before,"
+            "cluster_residual_max_after,"
+            "ritz_overlap_28_28,ritz_overlap_28_29,"
+            "ritz_overlap_29_28,ritz_overlap_29_29,"
+            "ritz_overlap_swap_detected,pair28_lock_state,"
+            "pair29_lock_state,cluster_hard_locked,"
+            "cluster_soft_locked_count\n");
     if (residual_support_csv != NULL) {
         fprintf(residual_support_csv,
                 "pair_index,rank,original_index,sorted_index,"

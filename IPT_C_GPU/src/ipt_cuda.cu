@@ -142,6 +142,21 @@ typedef struct {
     int rejected_steps;
     int min_accepted_steps;
     int early_jump_to_continuation;
+    double gap28_29;
+    double relative_gap28_29;
+    double cluster_residual_fro_before;
+    double cluster_residual_fro_after;
+    double cluster_residual_max_before;
+    double cluster_residual_max_after;
+    double ritz_overlap_28_28;
+    double ritz_overlap_28_29;
+    double ritz_overlap_29_28;
+    double ritz_overlap_29_29;
+    int ritz_overlap_swap_detected;
+    char pair28_lock_state[16];
+    char pair29_lock_state[16];
+    int cluster_hard_locked;
+    int cluster_soft_locked_count;
 } IPTDavidsonHistoryEntry;
 
 typedef struct {
@@ -194,6 +209,21 @@ typedef struct {
     int rejected_steps;
     int min_accepted_steps;
     int early_jump_to_continuation;
+    double gap28_29;
+    double relative_gap28_29;
+    double cluster_residual_fro_before;
+    double cluster_residual_fro_after;
+    double cluster_residual_max_before;
+    double cluster_residual_max_after;
+    double ritz_overlap_28_28;
+    double ritz_overlap_28_29;
+    double ritz_overlap_29_28;
+    double ritz_overlap_29_29;
+    int ritz_overlap_swap_detected;
+    char pair28_lock_state[16];
+    char pair29_lock_state[16];
+    int cluster_hard_locked;
+    int cluster_soft_locked_count;
 } IPTDavidsonBlockHistoryEntry;
 
 typedef struct {
@@ -225,6 +255,21 @@ typedef struct {
     int rejected_steps;
     int min_accepted_steps;
     int early_jump_to_continuation;
+    double gap28_29;
+    double relative_gap28_29;
+    double cluster_residual_fro_before;
+    double cluster_residual_fro_after;
+    double cluster_residual_max_before;
+    double cluster_residual_max_after;
+    double ritz_overlap_28_28;
+    double ritz_overlap_28_29;
+    double ritz_overlap_29_28;
+    double ritz_overlap_29_29;
+    int ritz_overlap_swap_detected;
+    char pair28_lock_state[16];
+    char pair29_lock_state[16];
+    int cluster_hard_locked;
+    int cluster_soft_locked_count;
 } IPTJDLocalHistoryEntry;
 
 typedef struct {
@@ -288,6 +333,16 @@ typedef struct {
     int rejected_steps;
     int min_accepted_steps;
     int early_jump_to_continuation;
+    int cluster_aware_accept_enabled;
+    int soft_cluster_locking_enabled;
+    double gap28_29;
+    double relative_gap28_29;
+    double cluster_residual_fro;
+    double cluster_residual_max;
+    char pair28_lock_state[16];
+    char pair29_lock_state[16];
+    int cluster_hard_locked;
+    int cluster_soft_locked_count;
 } IPTCudaResult;
 
 const char *ipt_cuda_status_string(int status);
@@ -499,6 +554,18 @@ extern "C" void ipt_cuda_free_result(IPTCudaResult *result)
     result->rejected_steps = 0;
     result->min_accepted_steps = 0;
     result->early_jump_to_continuation = 0;
+    result->cluster_aware_accept_enabled = 0;
+    result->soft_cluster_locking_enabled = 0;
+    result->gap28_29 = NAN;
+    result->relative_gap28_29 = NAN;
+    result->cluster_residual_fro = NAN;
+    result->cluster_residual_max = NAN;
+    snprintf(result->pair28_lock_state, sizeof(result->pair28_lock_state),
+             "unknown");
+    snprintf(result->pair29_lock_state, sizeof(result->pair29_lock_state),
+             "unknown");
+    result->cluster_hard_locked = 0;
+    result->cluster_soft_locked_count = 0;
 }
 
 // 释放 device 侧 d_vectors/d_values
@@ -685,6 +752,27 @@ struct IPTTrialAcceptDecision {
     char reason[64];
 };
 
+struct IPTClusterTrialMetrics {
+    int enabled;
+    int active_ok;
+    double gap28_29;
+    double relative_gap28_29;
+    double cluster_residual_fro_before;
+    double cluster_residual_fro_after;
+    double cluster_residual_max_before;
+    double cluster_residual_max_after;
+    double overlap_28_28;
+    double overlap_28_29;
+    double overlap_29_28;
+    double overlap_29_29;
+    int overlap_swap_detected;
+};
+
+static int ipt_vector_contains_int(const std::vector<int> &values, int needle)
+{
+    return std::find(values.begin(), values.end(), needle) != values.end();
+}
+
 static int ipt_residual_improved(double before, double after,
                                  double rel_slack, double abs_slack)
 {
@@ -697,6 +785,221 @@ static int ipt_residual_improved(double before, double after,
     return after + required < before;
 }
 
+static void ipt_cluster_set_default_metrics(IPTClusterTrialMetrics *metrics)
+{
+    if (metrics == NULL) {
+        return;
+    }
+    metrics->enabled = 0;
+    metrics->active_ok = 0;
+    metrics->gap28_29 = NAN;
+    metrics->relative_gap28_29 = NAN;
+    metrics->cluster_residual_fro_before = NAN;
+    metrics->cluster_residual_fro_after = NAN;
+    metrics->cluster_residual_max_before = NAN;
+    metrics->cluster_residual_max_after = NAN;
+    metrics->overlap_28_28 = NAN;
+    metrics->overlap_28_29 = NAN;
+    metrics->overlap_29_28 = NAN;
+    metrics->overlap_29_29 = NAN;
+    metrics->overlap_swap_detected = 0;
+}
+
+static void ipt_cluster_copy_28_29_reference(
+    int n, int k, const std::vector<double> &ritz_vectors,
+    std::vector<double> *reference_vectors)
+{
+    reference_vectors->clear();
+    if (k <= 29 ||
+        ritz_vectors.size() < (size_t)n * (size_t)(k > 0 ? k : 1)) {
+        return;
+    }
+    reference_vectors->assign((size_t)n * 2U, 0.0);
+    for (int row = 0; row < n; ++row) {
+        (*reference_vectors)[(size_t)row] =
+            ritz_vectors[(size_t)row + (size_t)28 * (size_t)n];
+        (*reference_vectors)[(size_t)n + (size_t)row] =
+            ritz_vectors[(size_t)row + (size_t)29 * (size_t)n];
+    }
+}
+
+static void ipt_cluster_28_29_gap(
+    int k, const std::vector<double> &ritz_values, double *gap,
+    double *relative_gap)
+{
+    *gap = NAN;
+    *relative_gap = NAN;
+    if (k <= 29 || ritz_values.size() <= 29U) {
+        return;
+    }
+    *gap = fabs(ritz_values[29] - ritz_values[28]);
+    *relative_gap =
+        *gap / std::max(1.0, std::max(fabs(ritz_values[28]),
+                                      fabs(ritz_values[29])));
+}
+
+static int ipt_cluster_28_29_active(
+    int k, const std::vector<double> &ritz_values,
+    const std::vector<int> &forced_pairs,
+    const std::vector<int> &forced_cluster_pairs, double gap_abs_tol,
+    double gap_rel_tol, double *gap, double *relative_gap)
+{
+    int forced_pair_cluster =
+        ipt_vector_contains_int(forced_pairs, 28) &&
+        ipt_vector_contains_int(forced_pairs, 29);
+    int forced_active_cluster =
+        ipt_vector_contains_int(forced_cluster_pairs, 28) &&
+        ipt_vector_contains_int(forced_cluster_pairs, 29);
+
+    ipt_cluster_28_29_gap(k, ritz_values, gap, relative_gap);
+    if (k <= 29) {
+        return 0;
+    }
+    if (forced_pair_cluster || forced_active_cluster) {
+        return 1;
+    }
+    return isfinite(*gap) && isfinite(*relative_gap) &&
+           (*gap <= gap_abs_tol || *relative_gap <= gap_rel_tol);
+}
+
+static void ipt_cluster_28_29_lock_states(
+    const std::vector<double> &residuals, double converged_tolerance,
+    int cluster_active, int soft_cluster_locking_enabled,
+    int cluster_hard_locked, char *pair28_state, size_t pair28_state_size,
+    char *pair29_state, size_t pair29_state_size, int *soft_locked_count)
+{
+    const char *state28 = "inactive";
+    const char *state29 = "inactive";
+    int soft_count = 0;
+
+    if (soft_locked_count != NULL) {
+        *soft_locked_count = 0;
+    }
+    if (!cluster_active || residuals.size() <= 29U) {
+        snprintf(pair28_state, pair28_state_size, "%s", state28);
+        snprintf(pair29_state, pair29_state_size, "%s", state29);
+        return;
+    }
+    if (cluster_hard_locked) {
+        state28 = "hard";
+        state29 = "hard";
+    } else {
+        int pair28_converged =
+            isfinite(residuals[28]) &&
+            residuals[28] <= converged_tolerance;
+        int pair29_converged =
+            isfinite(residuals[29]) &&
+            residuals[29] <= converged_tolerance;
+
+        state28 = pair28_converged ? "converged" : "active";
+        state29 = pair29_converged ? "converged" : "active";
+        if (soft_cluster_locking_enabled && pair28_converged &&
+            !pair29_converged) {
+            state28 = "soft";
+            ++soft_count;
+        }
+        if (soft_cluster_locking_enabled && pair29_converged &&
+            !pair28_converged) {
+            state29 = "soft";
+            ++soft_count;
+        }
+    }
+    snprintf(pair28_state, pair28_state_size, "%s", state28);
+    snprintf(pair29_state, pair29_state_size, "%s", state29);
+    if (soft_locked_count != NULL) {
+        *soft_locked_count = soft_count;
+    }
+}
+
+static void ipt_cluster_compute_28_29_metrics(
+    int n, int k, const std::vector<double> &current_values,
+    const std::vector<double> &current_residuals,
+    const std::vector<double> &trial_vectors,
+    const std::vector<double> &trial_residuals,
+    const std::vector<double> &reference_vectors, int cluster_active,
+    double converged_tolerance, double rel_slack, double abs_slack,
+    IPTClusterTrialMetrics *metrics)
+{
+    double diag_score = 0.0;
+    double swap_score = 0.0;
+    double after28 = NAN;
+    double after29 = NAN;
+
+    ipt_cluster_set_default_metrics(metrics);
+    if (metrics == NULL || !cluster_active || k <= 29 ||
+        current_residuals.size() <= 29U || trial_residuals.size() <= 29U) {
+        return;
+    }
+    metrics->enabled = 1;
+    ipt_cluster_28_29_gap(k, current_values, &metrics->gap28_29,
+                          &metrics->relative_gap28_29);
+    metrics->cluster_residual_fro_before =
+        sqrt(current_residuals[28] * current_residuals[28] +
+             current_residuals[29] * current_residuals[29]);
+    metrics->cluster_residual_max_before =
+        std::max(current_residuals[28], current_residuals[29]);
+
+    if (reference_vectors.size() >= (size_t)n * 2U &&
+        trial_vectors.size() >= (size_t)n * (size_t)k) {
+        metrics->overlap_28_28 = 0.0;
+        metrics->overlap_28_29 = 0.0;
+        metrics->overlap_29_28 = 0.0;
+        metrics->overlap_29_29 = 0.0;
+        for (int row = 0; row < n; ++row) {
+            double old28 = reference_vectors[(size_t)row];
+            double old29 = reference_vectors[(size_t)n + (size_t)row];
+            double new28 =
+                trial_vectors[(size_t)row + (size_t)28 * (size_t)n];
+            double new29 =
+                trial_vectors[(size_t)row + (size_t)29 * (size_t)n];
+
+            metrics->overlap_28_28 += old28 * new28;
+            metrics->overlap_28_29 += old28 * new29;
+            metrics->overlap_29_28 += old29 * new28;
+            metrics->overlap_29_29 += old29 * new29;
+        }
+        metrics->overlap_28_28 = fabs(metrics->overlap_28_28);
+        metrics->overlap_28_29 = fabs(metrics->overlap_28_29);
+        metrics->overlap_29_28 = fabs(metrics->overlap_29_28);
+        metrics->overlap_29_29 = fabs(metrics->overlap_29_29);
+    }
+
+    diag_score = metrics->overlap_28_28 + metrics->overlap_29_29;
+    swap_score = metrics->overlap_28_29 + metrics->overlap_29_28;
+    metrics->overlap_swap_detected =
+        isfinite(diag_score) && isfinite(swap_score) &&
+        swap_score > diag_score;
+    if (metrics->overlap_swap_detected) {
+        after28 = trial_residuals[29];
+        after29 = trial_residuals[28];
+    } else {
+        after28 = trial_residuals[28];
+        after29 = trial_residuals[29];
+    }
+    metrics->cluster_residual_fro_after =
+        sqrt(after28 * after28 + after29 * after29);
+    metrics->cluster_residual_max_after = std::max(after28, after29);
+
+    if (ipt_residual_improved(metrics->cluster_residual_fro_before,
+                              metrics->cluster_residual_fro_after,
+                              rel_slack, abs_slack) ||
+        ipt_residual_improved(metrics->cluster_residual_max_before,
+                              metrics->cluster_residual_max_after,
+                              rel_slack, abs_slack)) {
+        metrics->active_ok = 1;
+    }
+    if (current_residuals[28] > converged_tolerance &&
+        ipt_residual_improved(current_residuals[28], after28, rel_slack,
+                              abs_slack)) {
+        metrics->active_ok = 1;
+    }
+    if (current_residuals[29] > converged_tolerance &&
+        ipt_residual_improved(current_residuals[29], after29, rel_slack,
+                              abs_slack)) {
+        metrics->active_ok = 1;
+    }
+}
+
 static IPTTrialAcceptDecision ipt_block_trial_accept_decision(
     const std::vector<double> &current_residuals,
     const std::vector<double> &trial_residuals,
@@ -705,12 +1008,15 @@ static IPTTrialAcceptDecision ipt_block_trial_accept_decision(
     double trial_maximum, int accept_only_if_improves,
     int relaxed_accept_enabled, double rel_slack, double abs_slack,
     int active_pair_accept, double converged_tolerance,
-    double protect_tolerance, double locked_degrade_slack,
-    int basis_invalid, int ritz_invalid)
+    double protect_tolerance, double locked_degrade_rel_slack,
+    double locked_degrade_abs_slack, int basis_invalid, int ritz_invalid,
+    const IPTClusterTrialMetrics *cluster_metrics,
+    int cluster_aware_accept_enabled)
 {
     IPTTrialAcceptDecision decision = {};
     const std::vector<int> &focus =
         forced_pairs.empty() ? active_indices : forced_pairs;
+    int locked_unsafe_pair = -1;
 
     decision.relaxed_accept_enabled = relaxed_accept_enabled;
     decision.finite_ok =
@@ -730,20 +1036,35 @@ static IPTTrialAcceptDecision ipt_block_trial_accept_decision(
             double before = current_residuals[col];
             double after = trial_residuals[col];
 
+            if (cluster_aware_accept_enabled && cluster_metrics != NULL &&
+                cluster_metrics->enabled && (col == 28U || col == 29U)) {
+                if (before > converged_tolerance) {
+                    continue;
+                }
+                if (cluster_metrics->overlap_swap_detected) {
+                    after = trial_residuals[col == 28U ? 29U : 28U];
+                }
+            }
             if (!isfinite(before) || !isfinite(after)) {
                 decision.locked_safe = 0;
+                locked_unsafe_pair = (int)col;
                 break;
             }
             if (before <= protect_tolerance &&
                 after >
-                    before * (1.0 + locked_degrade_slack) +
-                        locked_degrade_slack) {
+                    std::max(before * (1.0 + locked_degrade_rel_slack),
+                             locked_degrade_abs_slack)) {
                 decision.locked_safe = 0;
+                locked_unsafe_pair = (int)col;
                 break;
             }
         }
     }
-    if (decision.finite_ok && active_pair_accept) {
+    if (decision.finite_ok && active_pair_accept &&
+        cluster_aware_accept_enabled && cluster_metrics != NULL &&
+        cluster_metrics->enabled) {
+        decision.active_ok = cluster_metrics->active_ok;
+    } else if (decision.finite_ok && active_pair_accept) {
         for (int pair : focus) {
             if (pair < 0 || pair >= (int)current_residuals.size() ||
                 pair >= (int)trial_residuals.size()) {
@@ -766,7 +1087,13 @@ static IPTTrialAcceptDecision ipt_block_trial_accept_decision(
         snprintf(decision.reason, sizeof(decision.reason), "nonfinite");
     } else if (!decision.locked_safe) {
         decision.accepted = 0;
-        snprintf(decision.reason, sizeof(decision.reason), "locked_unsafe");
+        if (locked_unsafe_pair >= 0) {
+            snprintf(decision.reason, sizeof(decision.reason),
+                     "locked_unsafe_pair_%d", locked_unsafe_pair);
+        } else {
+            snprintf(decision.reason, sizeof(decision.reason),
+                     "locked_unsafe");
+        }
     } else if (!accept_only_if_improves) {
         decision.accepted = 1;
         snprintf(decision.reason, sizeof(decision.reason), "accept_unchecked");
@@ -859,6 +1186,123 @@ static void ipt_block_fill_jd_history_accept_fields(
     entry->rejected_steps = rejected_steps;
     entry->min_accepted_steps = min_accepted_steps;
     entry->early_jump_to_continuation = early_jump_to_continuation;
+}
+
+static void ipt_block_fill_davidson_history_cluster_fields(
+    IPTDavidsonHistoryEntry *entry, const IPTClusterTrialMetrics &metrics,
+    const char *pair28_lock_state, const char *pair29_lock_state,
+    int cluster_hard_locked, int cluster_soft_locked_count)
+{
+    entry->gap28_29 = metrics.gap28_29;
+    entry->relative_gap28_29 = metrics.relative_gap28_29;
+    entry->cluster_residual_fro_before =
+        metrics.cluster_residual_fro_before;
+    entry->cluster_residual_fro_after =
+        metrics.cluster_residual_fro_after;
+    entry->cluster_residual_max_before =
+        metrics.cluster_residual_max_before;
+    entry->cluster_residual_max_after =
+        metrics.cluster_residual_max_after;
+    entry->ritz_overlap_28_28 = metrics.overlap_28_28;
+    entry->ritz_overlap_28_29 = metrics.overlap_28_29;
+    entry->ritz_overlap_29_28 = metrics.overlap_29_28;
+    entry->ritz_overlap_29_29 = metrics.overlap_29_29;
+    entry->ritz_overlap_swap_detected = metrics.overlap_swap_detected;
+    snprintf(entry->pair28_lock_state, sizeof(entry->pair28_lock_state),
+             "%s", pair28_lock_state);
+    snprintf(entry->pair29_lock_state, sizeof(entry->pair29_lock_state),
+             "%s", pair29_lock_state);
+    entry->cluster_hard_locked = cluster_hard_locked;
+    entry->cluster_soft_locked_count = cluster_soft_locked_count;
+}
+
+static void ipt_block_fill_block_history_cluster_fields(
+    IPTDavidsonBlockHistoryEntry *entry,
+    const IPTClusterTrialMetrics &metrics, const char *pair28_lock_state,
+    const char *pair29_lock_state, int cluster_hard_locked,
+    int cluster_soft_locked_count)
+{
+    entry->gap28_29 = metrics.gap28_29;
+    entry->relative_gap28_29 = metrics.relative_gap28_29;
+    entry->cluster_residual_fro_before =
+        metrics.cluster_residual_fro_before;
+    entry->cluster_residual_fro_after =
+        metrics.cluster_residual_fro_after;
+    entry->cluster_residual_max_before =
+        metrics.cluster_residual_max_before;
+    entry->cluster_residual_max_after =
+        metrics.cluster_residual_max_after;
+    entry->ritz_overlap_28_28 = metrics.overlap_28_28;
+    entry->ritz_overlap_28_29 = metrics.overlap_28_29;
+    entry->ritz_overlap_29_28 = metrics.overlap_29_28;
+    entry->ritz_overlap_29_29 = metrics.overlap_29_29;
+    entry->ritz_overlap_swap_detected = metrics.overlap_swap_detected;
+    snprintf(entry->pair28_lock_state, sizeof(entry->pair28_lock_state),
+             "%s", pair28_lock_state);
+    snprintf(entry->pair29_lock_state, sizeof(entry->pair29_lock_state),
+             "%s", pair29_lock_state);
+    entry->cluster_hard_locked = cluster_hard_locked;
+    entry->cluster_soft_locked_count = cluster_soft_locked_count;
+}
+
+static void ipt_block_fill_jd_history_cluster_fields(
+    IPTJDLocalHistoryEntry *entry, const IPTClusterTrialMetrics &metrics,
+    const char *pair28_lock_state, const char *pair29_lock_state,
+    int cluster_hard_locked, int cluster_soft_locked_count)
+{
+    entry->gap28_29 = metrics.gap28_29;
+    entry->relative_gap28_29 = metrics.relative_gap28_29;
+    entry->cluster_residual_fro_before =
+        metrics.cluster_residual_fro_before;
+    entry->cluster_residual_fro_after =
+        metrics.cluster_residual_fro_after;
+    entry->cluster_residual_max_before =
+        metrics.cluster_residual_max_before;
+    entry->cluster_residual_max_after =
+        metrics.cluster_residual_max_after;
+    entry->ritz_overlap_28_28 = metrics.overlap_28_28;
+    entry->ritz_overlap_28_29 = metrics.overlap_28_29;
+    entry->ritz_overlap_29_28 = metrics.overlap_29_28;
+    entry->ritz_overlap_29_29 = metrics.overlap_29_29;
+    entry->ritz_overlap_swap_detected = metrics.overlap_swap_detected;
+    snprintf(entry->pair28_lock_state, sizeof(entry->pair28_lock_state),
+             "%s", pair28_lock_state);
+    snprintf(entry->pair29_lock_state, sizeof(entry->pair29_lock_state),
+             "%s", pair29_lock_state);
+    entry->cluster_hard_locked = cluster_hard_locked;
+    entry->cluster_soft_locked_count = cluster_soft_locked_count;
+}
+
+static void ipt_block_store_result_cluster_fields(
+    IPTCudaResult *result, const std::vector<double> &ritz_values,
+    const std::vector<double> &residuals, int k, int cluster_active,
+    int cluster_aware_accept_enabled, int soft_cluster_locking_enabled,
+    double converged_tolerance, int cluster_hard_locked)
+{
+    int soft_count = 0;
+
+    result->cluster_aware_accept_enabled = cluster_aware_accept_enabled;
+    result->soft_cluster_locking_enabled = soft_cluster_locking_enabled;
+    ipt_cluster_28_29_gap(k, ritz_values, &result->gap28_29,
+                          &result->relative_gap28_29);
+    if (cluster_active && residuals.size() > 29U) {
+        result->cluster_residual_fro =
+            sqrt(residuals[28] * residuals[28] +
+                 residuals[29] * residuals[29]);
+        result->cluster_residual_max =
+            std::max(residuals[28], residuals[29]);
+    } else {
+        result->cluster_residual_fro = NAN;
+        result->cluster_residual_max = NAN;
+    }
+    ipt_cluster_28_29_lock_states(
+        residuals, converged_tolerance, cluster_active,
+        soft_cluster_locking_enabled, cluster_hard_locked,
+        result->pair28_lock_state, sizeof(result->pair28_lock_state),
+        result->pair29_lock_state, sizeof(result->pair29_lock_state),
+        &soft_count);
+    result->cluster_hard_locked = cluster_hard_locked;
+    result->cluster_soft_locked_count = soft_count;
 }
 
 // 生成初始 n x k 单位列向量
@@ -2055,6 +2499,123 @@ static void ipt_block_host_residuals(
         if (!isfinite(*maximum) || residual > *maximum) {
             *maximum = residual;
             *max_index = col;
+        }
+    }
+}
+
+static void ipt_block_cluster_28_29_full_residual(
+    const int *col_ptr, const int *row_ind, const double *values, int n,
+    int k, const std::vector<double> &ritz_vectors, double matrix_norm,
+    double *cluster_fro, double *cluster_max)
+{
+    std::vector<double> ax28((size_t)n, 0.0);
+    std::vector<double> ax29((size_t)n, 0.0);
+    double theta28_28 = 0.0;
+    double theta28_29 = 0.0;
+    double theta29_28 = 0.0;
+    double theta29_29 = 0.0;
+    double residual28_sq = 0.0;
+    double residual29_sq = 0.0;
+    double norm28_sq = 0.0;
+    double norm29_sq = 0.0;
+    double scale28 = 1.0;
+    double scale29 = 1.0;
+    double cluster_scale = 1.0;
+
+    *cluster_fro = NAN;
+    *cluster_max = NAN;
+    if (k <= 29 ||
+        ritz_vectors.size() < (size_t)n * (size_t)(k > 0 ? k : 1)) {
+        return;
+    }
+    for (int col = 0; col < n; ++col) {
+        double x28 =
+            ritz_vectors[(size_t)col + (size_t)28 * (size_t)n];
+        double x29 =
+            ritz_vectors[(size_t)col + (size_t)29 * (size_t)n];
+
+        for (int p = col_ptr[col]; p < col_ptr[col + 1]; ++p) {
+            int row = row_ind[p];
+            double a = values[p];
+
+            ax28[(size_t)row] += a * x28;
+            ax29[(size_t)row] += a * x29;
+        }
+    }
+    for (int row = 0; row < n; ++row) {
+        double x28 =
+            ritz_vectors[(size_t)row + (size_t)28 * (size_t)n];
+        double x29 =
+            ritz_vectors[(size_t)row + (size_t)29 * (size_t)n];
+
+        theta28_28 += x28 * ax28[(size_t)row];
+        theta28_29 += x28 * ax29[(size_t)row];
+        theta29_28 += x29 * ax28[(size_t)row];
+        theta29_29 += x29 * ax29[(size_t)row];
+        norm28_sq += x28 * x28;
+        norm29_sq += x29 * x29;
+    }
+    for (int row = 0; row < n; ++row) {
+        double x28 =
+            ritz_vectors[(size_t)row + (size_t)28 * (size_t)n];
+        double x29 =
+            ritz_vectors[(size_t)row + (size_t)29 * (size_t)n];
+        double residual28 =
+            ax28[(size_t)row] - x28 * theta28_28 -
+            x29 * theta29_28;
+        double residual29 =
+            ax29[(size_t)row] - x28 * theta28_29 -
+            x29 * theta29_29;
+
+        residual28_sq += residual28 * residual28;
+        residual29_sq += residual29 * residual29;
+    }
+    scale28 = std::max(1.0, matrix_norm) *
+              std::max(1.0, sqrt(norm28_sq));
+    scale29 = std::max(1.0, matrix_norm) *
+              std::max(1.0, sqrt(norm29_sq));
+    cluster_scale = std::max(1.0, matrix_norm) *
+                    std::max(1.0, sqrt(norm28_sq + norm29_sq));
+    *cluster_fro = sqrt(residual28_sq + residual29_sq) / cluster_scale;
+    *cluster_max =
+        std::max(sqrt(residual28_sq) / scale28,
+                 sqrt(residual29_sq) / scale29);
+}
+
+static void ipt_cluster_refresh_full_residual_metrics(
+    const int *col_ptr, const int *row_ind, const double *values, int n,
+    int k, const std::vector<double> &current_vectors,
+    const std::vector<double> &trial_vectors, double matrix_norm,
+    double rel_slack, double abs_slack, IPTClusterTrialMetrics *metrics)
+{
+    double fro_before = NAN;
+    double fro_after = NAN;
+    double max_before = NAN;
+    double max_after = NAN;
+
+    if (metrics == NULL || !metrics->enabled) {
+        return;
+    }
+    ipt_block_cluster_28_29_full_residual(
+        col_ptr, row_ind, values, n, k, current_vectors, matrix_norm,
+        &fro_before, &max_before);
+    ipt_block_cluster_28_29_full_residual(
+        col_ptr, row_ind, values, n, k, trial_vectors, matrix_norm,
+        &fro_after, &max_after);
+    if (isfinite(fro_before) && isfinite(fro_after)) {
+        metrics->cluster_residual_fro_before = fro_before;
+        metrics->cluster_residual_fro_after = fro_after;
+        if (ipt_residual_improved(fro_before, fro_after, rel_slack,
+                                  abs_slack)) {
+            metrics->active_ok = 1;
+        }
+    }
+    if (isfinite(max_before) && isfinite(max_after)) {
+        metrics->cluster_residual_max_before = max_before;
+        metrics->cluster_residual_max_after = max_after;
+        if (ipt_residual_improved(max_before, max_after, rel_slack,
+                                  abs_slack)) {
+            metrics->active_ok = 1;
         }
     }
 }
@@ -3468,6 +4029,10 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         result->rejected_steps = 0;
         result->min_accepted_steps = 0;
         result->early_jump_to_continuation = 0;
+        result->cluster_aware_accept_enabled =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_CLUSTER_AWARE_ACCEPT", 0);
+        result->soft_cluster_locking_enabled =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_SOFT_CLUSTER_LOCKING", 0);
     }
     ipt_best_so_far_init(
         &best_so_far,
@@ -3713,6 +4278,10 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             ipt_cuda_env_flag_default("IPT_DAVIDSON_RELAXED_ACCEPT", 1);
         int active_pair_accept =
             ipt_cuda_env_flag_default("IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT", 1);
+        int cluster_aware_accept_enabled =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_CLUSTER_AWARE_ACCEPT", 0);
+        int soft_cluster_locking_enabled =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_SOFT_CLUSTER_LOCKING", 0);
         int retry_on_reject =
             ipt_cuda_env_flag_default("IPT_DAVIDSON_RETRY_ON_REJECT", 1);
         int min_accepted_steps =
@@ -3726,8 +4295,17 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             "IPT_DAVIDSON_ACCEPT_REL_SLACK", 1.0e-12);
         double accept_abs_slack = ipt_cuda_env_double(
             "IPT_DAVIDSON_ACCEPT_ABS_SLACK", 1.0e-15);
-        double locked_degrade_slack = ipt_cuda_env_double(
+        double legacy_locked_degrade_slack = ipt_cuda_env_double(
             "IPT_DAVIDSON_LOCKED_DEGRADE_SLACK", 1.0e-8);
+        double locked_degrade_rel_slack = ipt_cuda_env_double(
+            "IPT_DAVIDSON_LOCKED_DEGRADE_REL_SLACK",
+            legacy_locked_degrade_slack);
+        double locked_degrade_abs_slack = ipt_cuda_env_double(
+            "IPT_DAVIDSON_LOCKED_DEGRADE_ABS_SLACK", 1.0e-12);
+        double cluster_gap_abs_tol = ipt_cuda_env_double(
+            "IPT_DAVIDSON_CLUSTER_GAP_ABS_TOL", 1.0e-12);
+        double cluster_gap_rel_tol = ipt_cuda_env_double(
+            "IPT_DAVIDSON_CLUSTER_GAP_REL_TOL", 1.0e-10);
         double converged_tolerance = ipt_cuda_env_double(
             "IPT_DAVIDSON_CONVERGED_TOL", 1.0e-13);
         double active_tolerance = ipt_cuda_env_double(
@@ -3748,6 +4326,8 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         std::vector<IPTDavidsonSelectionEntry> selection_history;
         std::vector<IPTDavidsonBlockHistoryEntry> block_history;
         std::vector<int> forced_pairs;
+        std::vector<int> forced_cluster_pairs;
+        std::vector<double> cluster_reference_vectors;
         std::vector<double> retry_damping_list =
             ipt_cuda_env_double_list("IPT_DAVIDSON_RETRY_DAMPING_LIST",
                                      "0.5,0.25");
@@ -3760,10 +4340,20 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         int accepted_steps_count = 0;
         int rejected_steps_count = 0;
         int early_jump_to_continuation = 0;
+        int cluster_active = 0;
+        int cluster_hard_locked = 0;
+        int cluster_stable_count = 0;
+        int cluster_soft_locked_count = 0;
+        char pair28_lock_state[16] = "inactive";
+        char pair29_lock_state[16] = "inactive";
 
         if (getenv("IPT_DAVIDSON_FORCE_ACTIVE_PAIRS") != NULL) {
             forced_pairs = ipt_jd_parse_active_pairs(
                 getenv("IPT_DAVIDSON_FORCE_ACTIVE_PAIRS"), k);
+        }
+        if (getenv("IPT_DAVIDSON_ACTIVE_CLUSTERS") != NULL) {
+            forced_cluster_pairs = ipt_jd_parse_active_pairs(
+                getenv("IPT_DAVIDSON_ACTIVE_CLUSTERS"), k);
         }
         baseline_steps = std::max(0, baseline_steps);
         extra_steps = std::max(0, extra_steps);
@@ -3776,6 +4366,10 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         result->davidson_attempted = 1;
         result->relaxed_accept_enabled = relaxed_accept_enabled;
         result->min_accepted_steps = min_accepted_steps;
+        result->cluster_aware_accept_enabled =
+            cluster_aware_accept_enabled;
+        result->soft_cluster_locking_enabled =
+            soft_cluster_locking_enabled;
         result->davidson_denom_clip = ipt_cuda_env_double(
             "IPT_DAVIDSON_DENOM_CLIP", 1.0e-8);
         if (result->davidson_denom_clip <= 0.0) {
@@ -3794,6 +4388,28 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             col_ptr, row_ind, matrix_values, n, k, host_ritz_values,
             host_ritz_vectors, matrix_norm, &current_residuals,
             &current_maximum, &current_max_index);
+        {
+            double gap = NAN;
+            double relative_gap = NAN;
+
+            cluster_active = ipt_cluster_28_29_active(
+                k, host_ritz_values, forced_pairs, forced_cluster_pairs,
+                cluster_gap_abs_tol, cluster_gap_rel_tol, &gap,
+                &relative_gap);
+            ipt_cluster_copy_28_29_reference(n, k, host_ritz_vectors,
+                                             &cluster_reference_vectors);
+            ipt_cluster_28_29_lock_states(
+                current_residuals, converged_tolerance, cluster_active,
+                soft_cluster_locking_enabled, cluster_hard_locked,
+                pair28_lock_state, sizeof(pair28_lock_state),
+                pair29_lock_state, sizeof(pair29_lock_state),
+                &cluster_soft_locked_count);
+            ipt_block_store_result_cluster_fields(
+                result, host_ritz_values, current_residuals, k,
+                cluster_active, cluster_aware_accept_enabled,
+                soft_cluster_locking_enabled, converged_tolerance,
+                cluster_hard_locked);
+        }
         ipt_best_so_far_note(
             &best_so_far, "davidson_initial", 0, host_ritz_values,
             host_ritz_vectors, current_residuals, current_maximum,
@@ -3849,7 +4465,29 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                 double retry_alpha = 1.0;
                 double retry_denom_clip = result->davidson_denom_clip;
                 IPTTrialAcceptDecision accept_decision = {};
+                IPTClusterTrialMetrics cluster_metrics = {};
+                int log_cluster_hard_locked = 0;
+                int log_cluster_soft_locked_count = 0;
+                char log_pair28_lock_state[16] = "inactive";
+                char log_pair29_lock_state[16] = "inactive";
 
+                ipt_cluster_set_default_metrics(&cluster_metrics);
+                {
+                    double gap = NAN;
+                    double relative_gap = NAN;
+
+                    cluster_active = ipt_cluster_28_29_active(
+                        k, host_ritz_values, forced_pairs,
+                        forced_cluster_pairs, cluster_gap_abs_tol,
+                        cluster_gap_rel_tol, &gap, &relative_gap);
+                    ipt_cluster_28_29_lock_states(
+                        current_residuals, converged_tolerance,
+                        cluster_active, soft_cluster_locking_enabled,
+                        cluster_hard_locked, pair28_lock_state,
+                        sizeof(pair28_lock_state), pair29_lock_state,
+                        sizeof(pair29_lock_state),
+                        &cluster_soft_locked_count);
+                }
                 if (forced_mode) {
                     candidates = forced_pairs;
                 } else {
@@ -4028,6 +4666,21 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                                 rejected_steps_count + 1,
                                 min_accepted_steps, 0);
                         }
+                        ipt_cluster_compute_28_29_metrics(
+                            n, k, host_ritz_values, current_residuals,
+                            host_ritz_vectors, current_residuals,
+                            cluster_reference_vectors, cluster_active,
+                            converged_tolerance, accept_rel_slack,
+                            accept_abs_slack, &cluster_metrics);
+                        ipt_cluster_refresh_full_residual_metrics(
+                            col_ptr, row_ind, matrix_values, n, k,
+                            host_ritz_vectors, host_ritz_vectors,
+                            matrix_norm, accept_rel_slack,
+                            accept_abs_slack, &cluster_metrics);
+                        ipt_block_fill_block_history_cluster_fields(
+                            &entry, cluster_metrics, pair28_lock_state,
+                            pair29_lock_state, cluster_hard_locked,
+                            cluster_soft_locked_count);
                         block_history.push_back(entry);
                         ++rejected_steps_count;
                         break;
@@ -4102,6 +4755,17 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         trial_ritz_frobenius, trial_ritz_max,
                         trial_ritz_invalid, 0);
                     any_trial_best_updated = trial_best_updated;
+                    ipt_cluster_compute_28_29_metrics(
+                        n, k, host_ritz_values, current_residuals,
+                        trial_vectors, trial_residuals,
+                        cluster_reference_vectors, cluster_active,
+                        converged_tolerance, accept_rel_slack,
+                        accept_abs_slack, &cluster_metrics);
+                    ipt_cluster_refresh_full_residual_metrics(
+                        col_ptr, row_ind, matrix_values, n, k,
+                        host_ritz_vectors, trial_vectors, matrix_norm,
+                        accept_rel_slack, accept_abs_slack,
+                        &cluster_metrics);
                     accept_decision = ipt_block_trial_accept_decision(
                         current_residuals, trial_residuals,
                         active_indices, forced_pairs, current_maximum,
@@ -4109,8 +4773,10 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         relaxed_accept_enabled, accept_rel_slack,
                         accept_abs_slack, active_pair_accept,
                         converged_tolerance, protect_tolerance,
-                        locked_degrade_slack, trial_basis_invalid,
-                        trial_ritz_invalid);
+                        locked_degrade_rel_slack,
+                        locked_degrade_abs_slack, trial_basis_invalid,
+                        trial_ritz_invalid, &cluster_metrics,
+                        cluster_aware_accept_enabled);
                     accepted = accept_decision.accepted;
                     if (!accepted && retry_on_reject) {
                         std::vector<int> base_active_indices =
@@ -4259,6 +4925,18 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                                     trial_ritz_invalid, 0)) {
                                 any_trial_best_updated = 1;
                             }
+                            ipt_cluster_compute_28_29_metrics(
+                                n, k, host_ritz_values,
+                                current_residuals, trial_vectors,
+                                trial_residuals, cluster_reference_vectors,
+                                cluster_active, converged_tolerance,
+                                accept_rel_slack, accept_abs_slack,
+                                &cluster_metrics);
+                            ipt_cluster_refresh_full_residual_metrics(
+                                col_ptr, row_ind, matrix_values, n, k,
+                                host_ritz_vectors, trial_vectors,
+                                matrix_norm, accept_rel_slack,
+                                accept_abs_slack, &cluster_metrics);
                             accept_decision =
                                 ipt_block_trial_accept_decision(
                                     current_residuals, trial_residuals,
@@ -4269,9 +4947,11 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                                     accept_rel_slack, accept_abs_slack,
                                     active_pair_accept,
                                     converged_tolerance, protect_tolerance,
-                                    locked_degrade_slack,
+                                    locked_degrade_rel_slack,
+                                    locked_degrade_abs_slack,
                                     trial_basis_invalid,
-                                    trial_ritz_invalid);
+                                    trial_ritz_invalid, &cluster_metrics,
+                                    cluster_aware_accept_enabled);
                             accepted = accept_decision.accepted;
                             return IPT_CUDA_SUCCESS;
                         };
@@ -4412,6 +5092,47 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         int step_early_jump =
                             !accepted && !continuation && extra_steps > 0 &&
                             accepted_steps_count >= min_accepted_steps;
+                        log_cluster_hard_locked = cluster_hard_locked;
+                        log_cluster_soft_locked_count =
+                            cluster_soft_locked_count;
+                        snprintf(log_pair28_lock_state,
+                                 sizeof(log_pair28_lock_state), "%s",
+                                 pair28_lock_state);
+                        snprintf(log_pair29_lock_state,
+                                 sizeof(log_pair29_lock_state), "%s",
+                                 pair29_lock_state);
+                        if (accepted && cluster_active) {
+                            int cluster_stable =
+                                trial_residuals.size() > 29U &&
+                                trial_residuals[28] <=
+                                    converged_tolerance &&
+                                trial_residuals[29] <=
+                                    converged_tolerance &&
+                                cluster_metrics
+                                        .cluster_residual_fro_after <=
+                                    converged_tolerance;
+
+                            if (cluster_stable) {
+                                ++cluster_stable_count;
+                            } else {
+                                cluster_stable_count = 0;
+                            }
+                            if (soft_cluster_locking_enabled &&
+                                cluster_stable_count >= 2) {
+                                cluster_hard_locked = 1;
+                            }
+                            ipt_cluster_28_29_lock_states(
+                                trial_residuals, converged_tolerance,
+                                cluster_active,
+                                soft_cluster_locking_enabled,
+                                cluster_hard_locked,
+                                log_pair28_lock_state,
+                                sizeof(log_pair28_lock_state),
+                                log_pair29_lock_state,
+                                sizeof(log_pair29_lock_state),
+                                &log_cluster_soft_locked_count);
+                            log_cluster_hard_locked = cluster_hard_locked;
+                        }
 
                     if (continuation) {
                         IPTDavidsonBlockHistoryEntry block_entry = {};
@@ -4501,6 +5222,12 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                             retry_alpha, retry_denom_clip,
                             accepted_steps_after, rejected_steps_after,
                             min_accepted_steps, step_early_jump);
+                        ipt_block_fill_block_history_cluster_fields(
+                            &block_entry, cluster_metrics,
+                            log_pair28_lock_state,
+                            log_pair29_lock_state,
+                            log_cluster_hard_locked,
+                            log_cluster_soft_locked_count);
                         block_history.push_back(block_entry);
                     }
                     for (int index : active_indices) {
@@ -4550,6 +5277,12 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                             retry_alpha, retry_denom_clip,
                             accepted_steps_after, rejected_steps_after,
                             min_accepted_steps, step_early_jump);
+                        ipt_block_fill_davidson_history_cluster_fields(
+                            &entry, cluster_metrics,
+                            log_pair28_lock_state,
+                            log_pair29_lock_state,
+                            log_cluster_hard_locked,
+                            log_cluster_soft_locked_count);
                         history.push_back(entry);
                     }
                     }
@@ -4575,6 +5308,23 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         current_residuals.swap(trial_residuals);
                         current_maximum = trial_maximum;
                         current_max_index = trial_max_index;
+                        snprintf(pair28_lock_state,
+                                 sizeof(pair28_lock_state), "%s",
+                                 log_pair28_lock_state);
+                        snprintf(pair29_lock_state,
+                                 sizeof(pair29_lock_state), "%s",
+                                 log_pair29_lock_state);
+                        cluster_soft_locked_count =
+                            log_cluster_soft_locked_count;
+                        ipt_cluster_copy_28_29_reference(
+                            n, k, host_ritz_vectors,
+                            &cluster_reference_vectors);
+                        ipt_block_store_result_cluster_fields(
+                            result, host_ritz_values, current_residuals, k,
+                            cluster_active,
+                            cluster_aware_accept_enabled,
+                            soft_cluster_locking_enabled,
+                            converged_tolerance, cluster_hard_locked);
                         result->davidson_accepted = 1;
                         result->rayleigh_ritz_used_qr = trial_used_qr;
                         result->basis_orthogonality_frobenius_error =
@@ -4743,6 +5493,11 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         result->accepted_steps = accepted_steps_count;
         result->rejected_steps = rejected_steps_count;
         result->early_jump_to_continuation = early_jump_to_continuation;
+        ipt_block_store_result_cluster_fields(
+            result, host_ritz_values, current_residuals, k,
+            cluster_active, cluster_aware_accept_enabled,
+            soft_cluster_locking_enabled, converged_tolerance,
+            cluster_hard_locked);
         if (!history.empty()) {
             result->davidson_history = (IPTDavidsonHistoryEntry *)calloc(
                 history.size(), sizeof(IPTDavidsonHistoryEntry));
@@ -4809,6 +5564,10 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             ipt_cuda_env_flag_default("IPT_DAVIDSON_RELAXED_ACCEPT", 1);
         int active_pair_accept =
             ipt_cuda_env_flag_default("IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT", 1);
+        int cluster_aware_accept_enabled =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_CLUSTER_AWARE_ACCEPT", 0);
+        int soft_cluster_locking_enabled =
+            ipt_cuda_env_flag_default("IPT_DAVIDSON_SOFT_CLUSTER_LOCKING", 0);
         int accept_only_if_improves =
             accept_raw == NULL
                 ? 1
@@ -4818,8 +5577,17 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             "IPT_DAVIDSON_ACCEPT_REL_SLACK", 1.0e-12);
         double accept_abs_slack = ipt_cuda_env_double(
             "IPT_DAVIDSON_ACCEPT_ABS_SLACK", 1.0e-15);
-        double locked_degrade_slack = ipt_cuda_env_double(
+        double legacy_locked_degrade_slack = ipt_cuda_env_double(
             "IPT_DAVIDSON_LOCKED_DEGRADE_SLACK", 1.0e-8);
+        double locked_degrade_rel_slack = ipt_cuda_env_double(
+            "IPT_DAVIDSON_LOCKED_DEGRADE_REL_SLACK",
+            legacy_locked_degrade_slack);
+        double locked_degrade_abs_slack = ipt_cuda_env_double(
+            "IPT_DAVIDSON_LOCKED_DEGRADE_ABS_SLACK", 1.0e-12);
+        double cluster_gap_abs_tol = ipt_cuda_env_double(
+            "IPT_DAVIDSON_CLUSTER_GAP_ABS_TOL", 1.0e-12);
+        double cluster_gap_rel_tol = ipt_cuda_env_double(
+            "IPT_DAVIDSON_CLUSTER_GAP_REL_TOL", 1.0e-10);
         int outside_diagonal =
             outside_raw != NULL &&
             (strcmp(outside_raw, "diagonal") == 0 ||
@@ -4840,6 +5608,9 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             col_ptr, row_ind, matrix_values, n);
         std::vector<int> active_pairs = ipt_jd_parse_active_pairs(
             getenv("IPT_JD_LOCAL_ACTIVE_PAIRS"), k);
+        std::vector<int> forced_cluster_pairs =
+            ipt_jd_parse_active_pairs(getenv("IPT_DAVIDSON_ACTIVE_CLUSTERS"),
+                                      k);
         std::vector<double> host_ritz_values((size_t)k, 0.0);
         std::vector<double> host_ritz_vectors(
             (size_t)n * (size_t)k, 0.0);
@@ -4852,6 +5623,13 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         int accepted_steps_count = result->accepted_steps;
         int rejected_steps_count = result->rejected_steps;
         int min_accepted_steps = result->min_accepted_steps;
+        std::vector<double> cluster_reference_vectors;
+        int cluster_active = 0;
+        int cluster_hard_locked = result->cluster_hard_locked;
+        int cluster_stable_count = cluster_hard_locked ? 2 : 0;
+        int cluster_soft_locked_count = 0;
+        char pair28_lock_state[16] = "inactive";
+        char pair29_lock_state[16] = "inactive";
 
         steps = std::max(1, steps);
         ortho_repeats = std::max(2, ortho_repeats);
@@ -4887,6 +5665,28 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             col_ptr, row_ind, matrix_values, n, k, host_ritz_values,
             host_ritz_vectors, matrix_norm, &current_residuals,
             &current_maximum, &current_max_index);
+        {
+            double gap = NAN;
+            double relative_gap = NAN;
+
+            cluster_active = ipt_cluster_28_29_active(
+                k, host_ritz_values, active_pairs, forced_cluster_pairs,
+                cluster_gap_abs_tol, cluster_gap_rel_tol, &gap,
+                &relative_gap);
+            ipt_cluster_copy_28_29_reference(n, k, host_ritz_vectors,
+                                             &cluster_reference_vectors);
+            ipt_cluster_28_29_lock_states(
+                current_residuals, locked_tolerance, cluster_active,
+                soft_cluster_locking_enabled, cluster_hard_locked,
+                pair28_lock_state, sizeof(pair28_lock_state),
+                pair29_lock_state, sizeof(pair29_lock_state),
+                &cluster_soft_locked_count);
+            ipt_block_store_result_cluster_fields(
+                result, host_ritz_values, current_residuals, k,
+                cluster_active, cluster_aware_accept_enabled,
+                soft_cluster_locking_enabled, locked_tolerance,
+                cluster_hard_locked);
+        }
         ipt_best_so_far_note(
             &best_so_far, "jd_initial", 0, host_ritz_values,
             host_ritz_vectors, current_residuals, current_maximum,
@@ -4925,6 +5725,25 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                 int accepted = 0;
                 int trial_best_updated = 0;
                 IPTTrialAcceptDecision accept_decision = {};
+                IPTClusterTrialMetrics cluster_metrics = {};
+
+                ipt_cluster_set_default_metrics(&cluster_metrics);
+                {
+                    double gap = NAN;
+                    double relative_gap = NAN;
+
+                    cluster_active = ipt_cluster_28_29_active(
+                        k, host_ritz_values, active_pairs,
+                        forced_cluster_pairs, cluster_gap_abs_tol,
+                        cluster_gap_rel_tol, &gap, &relative_gap);
+                    ipt_cluster_28_29_lock_states(
+                        current_residuals, locked_tolerance,
+                        cluster_active, soft_cluster_locking_enabled,
+                        cluster_hard_locked, pair28_lock_state,
+                        sizeof(pair28_lock_state), pair29_lock_state,
+                        sizeof(pair29_lock_state),
+                        &cluster_soft_locked_count);
+                }
 
                 for (int index : active_pairs) {
                     std::vector<double> correction;
@@ -5012,6 +5831,17 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         trial_basis_frobenius, trial_basis_max,
                         trial_basis_invalid, trial_ritz_frobenius,
                         trial_ritz_max, trial_ritz_invalid, 0);
+                    ipt_cluster_compute_28_29_metrics(
+                        n, k, host_ritz_values, current_residuals,
+                        trial_vectors, trial_residuals,
+                        cluster_reference_vectors, cluster_active,
+                        locked_tolerance, accept_rel_slack,
+                        accept_abs_slack, &cluster_metrics);
+                    ipt_cluster_refresh_full_residual_metrics(
+                        col_ptr, row_ind, matrix_values, n, k,
+                        host_ritz_vectors, trial_vectors, matrix_norm,
+                        accept_rel_slack, accept_abs_slack,
+                        &cluster_metrics);
                     accept_decision = ipt_block_trial_accept_decision(
                         current_residuals, trial_residuals,
                         step_active_pairs, std::vector<int>(),
@@ -5019,9 +5849,55 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         accept_only_if_improves, relaxed_accept_enabled,
                         accept_rel_slack, accept_abs_slack,
                         active_pair_accept, locked_tolerance,
-                        protect_tolerance, locked_degrade_slack,
-                        trial_basis_invalid, trial_ritz_invalid);
+                        protect_tolerance, locked_degrade_rel_slack,
+                        locked_degrade_abs_slack, trial_basis_invalid,
+                        trial_ritz_invalid, &cluster_metrics,
+                        cluster_aware_accept_enabled);
                     accepted = accept_decision.accepted;
+                    {
+                        int log_cluster_hard_locked =
+                            cluster_hard_locked;
+                        int log_cluster_soft_locked_count =
+                            cluster_soft_locked_count;
+                        char log_pair28_lock_state[16];
+                        char log_pair29_lock_state[16];
+
+                        snprintf(log_pair28_lock_state,
+                                 sizeof(log_pair28_lock_state), "%s",
+                                 pair28_lock_state);
+                        snprintf(log_pair29_lock_state,
+                                 sizeof(log_pair29_lock_state), "%s",
+                                 pair29_lock_state);
+                        if (accepted && cluster_active) {
+                            int cluster_stable =
+                                trial_residuals.size() > 29U &&
+                                trial_residuals[28] <= locked_tolerance &&
+                                trial_residuals[29] <= locked_tolerance &&
+                                cluster_metrics
+                                        .cluster_residual_fro_after <=
+                                    locked_tolerance;
+
+                            if (cluster_stable) {
+                                ++cluster_stable_count;
+                            } else {
+                                cluster_stable_count = 0;
+                            }
+                            if (soft_cluster_locking_enabled &&
+                                cluster_stable_count >= 2) {
+                                cluster_hard_locked = 1;
+                            }
+                            ipt_cluster_28_29_lock_states(
+                                trial_residuals, locked_tolerance,
+                                cluster_active,
+                                soft_cluster_locking_enabled,
+                                cluster_hard_locked,
+                                log_pair28_lock_state,
+                                sizeof(log_pair28_lock_state),
+                                log_pair29_lock_state,
+                                sizeof(log_pair29_lock_state),
+                                &log_cluster_soft_locked_count);
+                            log_cluster_hard_locked = cluster_hard_locked;
+                        }
                     for (int index : step_active_pairs) {
                         IPTJDLocalHistoryEntry entry = {};
                         int accepted_steps_after =
@@ -5072,7 +5948,14 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                             &entry, accept_decision, 0, 1.0, damping,
                             accepted_steps_after, rejected_steps_after,
                             min_accepted_steps, 0);
+                        ipt_block_fill_jd_history_cluster_fields(
+                            &entry, cluster_metrics,
+                            log_pair28_lock_state,
+                            log_pair29_lock_state,
+                            log_cluster_hard_locked,
+                            log_cluster_soft_locked_count);
                         history.push_back(entry);
+                    }
                     }
                     if (accepted) {
                         if (trial_best_updated) {
@@ -5095,6 +5978,23 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                         current_residuals.swap(trial_residuals);
                         current_maximum = trial_maximum;
                         current_max_index = trial_max_index;
+                        ipt_cluster_28_29_lock_states(
+                            current_residuals, locked_tolerance,
+                            cluster_active, soft_cluster_locking_enabled,
+                            cluster_hard_locked, pair28_lock_state,
+                            sizeof(pair28_lock_state),
+                            pair29_lock_state,
+                            sizeof(pair29_lock_state),
+                            &cluster_soft_locked_count);
+                        ipt_cluster_copy_28_29_reference(
+                            n, k, host_ritz_vectors,
+                            &cluster_reference_vectors);
+                        ipt_block_store_result_cluster_fields(
+                            result, host_ritz_values, current_residuals, k,
+                            cluster_active,
+                            cluster_aware_accept_enabled,
+                            soft_cluster_locking_enabled, locked_tolerance,
+                            cluster_hard_locked);
                         result->jd_local_accepted = 1;
                         result->rayleigh_ritz_used_qr = trial_used_qr;
                         result->basis_orthogonality_frobenius_error =
@@ -5141,6 +6041,11 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         }
         result->accepted_steps = accepted_steps_count;
         result->rejected_steps = rejected_steps_count;
+        ipt_block_store_result_cluster_fields(
+            result, host_ritz_values, current_residuals, k,
+            cluster_active, cluster_aware_accept_enabled,
+            soft_cluster_locking_enabled, locked_tolerance,
+            cluster_hard_locked);
     }
     result->solve_time_sec =
         result->iteration_time_sec + result->rayleigh_ritz_time_sec;
@@ -5195,6 +6100,61 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
         ipt_best_so_far_store_result_fields(
             result, &best_so_far,
             return_best && !best_so_far.state_is_current);
+    }
+    if (k > 29 && result->vectors != NULL && result->values != NULL) {
+        std::vector<double> final_values(result->values,
+                                         result->values + (size_t)k);
+        std::vector<double> final_vectors(
+            result->vectors, result->vectors + (size_t)n * (size_t)k);
+        std::vector<double> final_residuals;
+        std::vector<int> final_forced_pairs;
+        std::vector<int> final_cluster_pairs;
+        double final_maximum = NAN;
+        int final_max_index = -1;
+        double final_gap = NAN;
+        double final_relative_gap = NAN;
+        double final_matrix_norm = ipt_block_host_matrix_inf_norm(
+            col_ptr, row_ind, matrix_values, n);
+        int final_cluster_active = 0;
+        double final_converged_tolerance = ipt_cuda_env_double(
+            "IPT_DAVIDSON_CONVERGED_TOL", 1.0e-13);
+        double final_cluster_gap_abs_tol = ipt_cuda_env_double(
+            "IPT_DAVIDSON_CLUSTER_GAP_ABS_TOL", 1.0e-12);
+        double final_cluster_gap_rel_tol = ipt_cuda_env_double(
+            "IPT_DAVIDSON_CLUSTER_GAP_REL_TOL", 1.0e-10);
+
+        if (getenv("IPT_DAVIDSON_FORCE_ACTIVE_PAIRS") != NULL) {
+            final_forced_pairs = ipt_jd_parse_active_pairs(
+                getenv("IPT_DAVIDSON_FORCE_ACTIVE_PAIRS"), k);
+        }
+        if (getenv("IPT_DAVIDSON_ACTIVE_CLUSTERS") != NULL) {
+            final_cluster_pairs = ipt_jd_parse_active_pairs(
+                getenv("IPT_DAVIDSON_ACTIVE_CLUSTERS"), k);
+        }
+        ipt_block_host_residuals(
+            col_ptr, row_ind, matrix_values, n, k, final_values,
+            final_vectors, final_matrix_norm, &final_residuals,
+            &final_maximum, &final_max_index);
+        final_cluster_active = ipt_cluster_28_29_active(
+            k, final_values, final_forced_pairs, final_cluster_pairs,
+            final_cluster_gap_abs_tol, final_cluster_gap_rel_tol,
+            &final_gap, &final_relative_gap);
+        ipt_block_store_result_cluster_fields(
+            result, final_values, final_residuals, k, final_cluster_active,
+            result->cluster_aware_accept_enabled,
+            result->soft_cluster_locking_enabled,
+            final_converged_tolerance, result->cluster_hard_locked);
+        if (final_cluster_active) {
+            double final_cluster_fro = NAN;
+            double final_cluster_max = NAN;
+
+            ipt_block_cluster_28_29_full_residual(
+                col_ptr, row_ind, matrix_values, n, k, final_vectors,
+                final_matrix_norm, &final_cluster_fro,
+                &final_cluster_max);
+            result->cluster_residual_fro = final_cluster_fro;
+            result->cluster_residual_max = final_cluster_max;
+        }
     }
     result->n = n;
     result->k = k;

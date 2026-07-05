@@ -63,6 +63,14 @@ echo "IPT_DAVIDSON_BLOCK_ACTIVE=1"
 echo "IPT_DAVIDSON_DENOM_CLIP=$IPT_COMPARE_DENOM_CLIP"
 echo "IPT_DAVIDSON_ORTHO_REPEATS=$IPT_COMPARE_ORTHO_REPEATS"
 echo "IPT_DAVIDSON_USE_BEST_SO_FAR=${IPT_DAVIDSON_USE_BEST_SO_FAR:-1}"
+echo "IPT_DAVIDSON_RELAXED_ACCEPT=${IPT_DAVIDSON_RELAXED_ACCEPT:-1}"
+echo "IPT_DAVIDSON_RETRY_ON_REJECT=${IPT_DAVIDSON_RETRY_ON_REJECT:-1}"
+echo "IPT_DAVIDSON_MIN_ACCEPTED_STEPS=${IPT_DAVIDSON_MIN_ACCEPTED_STEPS:-0}"
+echo "IPT_DAVIDSON_ACTIVE_CLUSTERS=${IPT_DAVIDSON_ACTIVE_CLUSTERS:-}"
+echo "IPT_DAVIDSON_CLUSTER_AWARE_ACCEPT=${IPT_DAVIDSON_CLUSTER_AWARE_ACCEPT:-0}"
+echo "IPT_DAVIDSON_SOFT_CLUSTER_LOCKING=${IPT_DAVIDSON_SOFT_CLUSTER_LOCKING:-0}"
+echo "IPT_DAVIDSON_LOCKED_DEGRADE_REL_SLACK=${IPT_DAVIDSON_LOCKED_DEGRADE_REL_SLACK:-}"
+echo "IPT_DAVIDSON_LOCKED_DEGRADE_ABS_SLACK=${IPT_DAVIDSON_LOCKED_DEGRADE_ABS_SLACK:-1e-12}"
 
 set +e
 (
@@ -94,6 +102,20 @@ set +e
     export IPT_DAVIDSON_DENOM_CLIP="$IPT_COMPARE_DENOM_CLIP"
     export IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES=1
     export IPT_DAVIDSON_USE_BEST_SO_FAR="${IPT_DAVIDSON_USE_BEST_SO_FAR:-1}"
+    export IPT_DAVIDSON_RELAXED_ACCEPT="${IPT_DAVIDSON_RELAXED_ACCEPT:-1}"
+    export IPT_DAVIDSON_ACCEPT_REL_SLACK="${IPT_DAVIDSON_ACCEPT_REL_SLACK:-1e-12}"
+    export IPT_DAVIDSON_ACCEPT_ABS_SLACK="${IPT_DAVIDSON_ACCEPT_ABS_SLACK:-1e-15}"
+    export IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT="${IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT:-1}"
+    export IPT_DAVIDSON_LOCKED_DEGRADE_SLACK="${IPT_DAVIDSON_LOCKED_DEGRADE_SLACK:-1e-8}"
+    export IPT_DAVIDSON_LOCKED_DEGRADE_REL_SLACK="${IPT_DAVIDSON_LOCKED_DEGRADE_REL_SLACK:-1e-8}"
+    export IPT_DAVIDSON_LOCKED_DEGRADE_ABS_SLACK="${IPT_DAVIDSON_LOCKED_DEGRADE_ABS_SLACK:-1e-12}"
+    export IPT_DAVIDSON_ACTIVE_CLUSTERS="${IPT_DAVIDSON_ACTIVE_CLUSTERS:-}"
+    export IPT_DAVIDSON_CLUSTER_AWARE_ACCEPT="${IPT_DAVIDSON_CLUSTER_AWARE_ACCEPT:-0}"
+    export IPT_DAVIDSON_SOFT_CLUSTER_LOCKING="${IPT_DAVIDSON_SOFT_CLUSTER_LOCKING:-0}"
+    export IPT_DAVIDSON_RETRY_ON_REJECT="${IPT_DAVIDSON_RETRY_ON_REJECT:-1}"
+    export IPT_DAVIDSON_RETRY_DAMPING_LIST="${IPT_DAVIDSON_RETRY_DAMPING_LIST:-0.5,0.25}"
+    export IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS="${IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS:-10,100}"
+    export IPT_DAVIDSON_MIN_ACCEPTED_STEPS="${IPT_DAVIDSON_MIN_ACCEPTED_STEPS:-0}"
     export IPT_DAVIDSON_ORTHO_REPEATS="$IPT_COMPARE_ORTHO_REPEATS"
     export IPT_DAVIDSON_RESTART_EVERY=20
     export IPT_DAVIDSON_RESTART_KEEP_EXTRA=5
@@ -207,6 +229,28 @@ if ipt_trial:
             ipt_trial.get("final_returned_from_best_so_far", ""),
         "pair28_best_residual": ipt_trial.get("pair28_best_residual", ""),
         "pair29_best_residual": ipt_trial.get("pair29_best_residual", ""),
+        "relaxed_accept_enabled":
+            ipt_trial.get("relaxed_accept_enabled", ""),
+        "accepted_steps": ipt_trial.get("accepted_steps", ""),
+        "rejected_steps": ipt_trial.get("rejected_steps", ""),
+        "min_accepted_steps": ipt_trial.get("min_accepted_steps", ""),
+        "early_jump_to_continuation":
+            ipt_trial.get("early_jump_to_continuation", ""),
+        "cluster_aware_accept_enabled":
+            ipt_trial.get("cluster_aware_accept_enabled", ""),
+        "soft_cluster_locking_enabled":
+            ipt_trial.get("soft_cluster_locking_enabled", ""),
+        "gap28_29": ipt_trial.get("gap28_29", ""),
+        "relative_gap28_29": ipt_trial.get("relative_gap28_29", ""),
+        "cluster_residual_fro":
+            ipt_trial.get("cluster_residual_fro", ""),
+        "cluster_residual_max":
+            ipt_trial.get("cluster_residual_max", ""),
+        "pair28_lock_state": ipt_trial.get("pair28_lock_state", ""),
+        "pair29_lock_state": ipt_trial.get("pair29_lock_state", ""),
+        "cluster_hard_locked": ipt_trial.get("cluster_hard_locked", ""),
+        "cluster_soft_locked_count":
+            ipt_trial.get("cluster_soft_locked_count", ""),
         "passed_relative_threshold":
             "1" if ipt_trial.get("status", "") == "success" else "0",
         "result_dir": str(ipt_result_dir),
@@ -234,6 +278,21 @@ else:
         "final_returned_from_best_so_far": "",
         "pair28_best_residual": "",
         "pair29_best_residual": "",
+        "relaxed_accept_enabled": "",
+        "accepted_steps": "",
+        "rejected_steps": "",
+        "min_accepted_steps": "",
+        "early_jump_to_continuation": "",
+        "cluster_aware_accept_enabled": "",
+        "soft_cluster_locking_enabled": "",
+        "gap28_29": "",
+        "relative_gap28_29": "",
+        "cluster_residual_fro": "",
+        "cluster_residual_max": "",
+        "pair28_lock_state": "",
+        "pair29_lock_state": "",
+        "cluster_hard_locked": "",
+        "cluster_soft_locked_count": "",
         "passed_relative_threshold": "0",
         "result_dir": str(ipt_result_dir),
         "log_dir": os.environ["IPT_LOG_DIR"],
@@ -264,6 +323,21 @@ if primme_timing:
         "final_returned_from_best_so_far": "",
         "pair28_best_residual": "",
         "pair29_best_residual": "",
+        "relaxed_accept_enabled": "",
+        "accepted_steps": "",
+        "rejected_steps": "",
+        "min_accepted_steps": "",
+        "early_jump_to_continuation": "",
+        "cluster_aware_accept_enabled": "",
+        "soft_cluster_locking_enabled": "",
+        "gap28_29": "",
+        "relative_gap28_29": "",
+        "cluster_residual_fro": "",
+        "cluster_residual_max": "",
+        "pair28_lock_state": "",
+        "pair29_lock_state": "",
+        "cluster_hard_locked": "",
+        "cluster_soft_locked_count": "",
         "passed_relative_threshold":
             primme_timing.get("passed_relative_threshold", ""),
         "result_dir": str(primme_result_dir),
@@ -291,6 +365,21 @@ else:
         "final_returned_from_best_so_far": "",
         "pair28_best_residual": "",
         "pair29_best_residual": "",
+        "relaxed_accept_enabled": "",
+        "accepted_steps": "",
+        "rejected_steps": "",
+        "min_accepted_steps": "",
+        "early_jump_to_continuation": "",
+        "cluster_aware_accept_enabled": "",
+        "soft_cluster_locking_enabled": "",
+        "gap28_29": "",
+        "relative_gap28_29": "",
+        "cluster_residual_fro": "",
+        "cluster_residual_max": "",
+        "pair28_lock_state": "",
+        "pair29_lock_state": "",
+        "cluster_hard_locked": "",
+        "cluster_soft_locked_count": "",
         "passed_relative_threshold": "0",
         "result_dir": str(primme_result_dir),
         "log_dir": os.environ["PRIMME_LOG_DIR"],
@@ -305,6 +394,12 @@ fieldnames = [
     "best_so_far_step", "best_so_far_source",
     "best_so_far_max_residual", "final_returned_from_best_so_far",
     "pair28_best_residual", "pair29_best_residual",
+    "relaxed_accept_enabled", "accepted_steps", "rejected_steps",
+    "min_accepted_steps", "early_jump_to_continuation",
+    "cluster_aware_accept_enabled", "soft_cluster_locking_enabled",
+    "gap28_29", "relative_gap28_29", "cluster_residual_fro",
+    "cluster_residual_max", "pair28_lock_state", "pair29_lock_state",
+    "cluster_hard_locked", "cluster_soft_locked_count",
     "passed_relative_threshold",
     "result_dir", "log_dir",
 ]
@@ -354,6 +449,21 @@ with compare_summary.open("w") as f:
             f"final_returned_from_best_so_far={row['final_returned_from_best_so_far']} "
             f"pair28_best_residual={row['pair28_best_residual']} "
             f"pair29_best_residual={row['pair29_best_residual']} "
+            f"relaxed_accept_enabled={row['relaxed_accept_enabled']} "
+            f"accepted_steps={row['accepted_steps']} "
+            f"rejected_steps={row['rejected_steps']} "
+            f"min_accepted_steps={row['min_accepted_steps']} "
+            f"early_jump_to_continuation={row['early_jump_to_continuation']} "
+            f"cluster_aware_accept_enabled={row['cluster_aware_accept_enabled']} "
+            f"soft_cluster_locking_enabled={row['soft_cluster_locking_enabled']} "
+            f"gap28_29={row['gap28_29']} "
+            f"relative_gap28_29={row['relative_gap28_29']} "
+            f"cluster_residual_fro={row['cluster_residual_fro']} "
+            f"cluster_residual_max={row['cluster_residual_max']} "
+            f"pair28_lock_state={row['pair28_lock_state']} "
+            f"pair29_lock_state={row['pair29_lock_state']} "
+            f"cluster_hard_locked={row['cluster_hard_locked']} "
+            f"cluster_soft_locked_count={row['cluster_soft_locked_count']} "
             f"passed_relative_threshold={row['passed_relative_threshold']}\n")
     f.write(f"primme_speedup_vs_ipt={speedup:.17g}\n")
     f.write(f"ipt_solve_log={ipt_solve_log}\n")
