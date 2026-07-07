@@ -52,6 +52,20 @@ typedef struct {
 } H2OGenerationInfo;
 
 typedef struct {
+    char magic[8];
+    int version;
+    int n;
+    int nnz;
+    int norb;
+    int nelec;
+    int na;
+    int nb;
+    double matrix_inf_norm;
+    double nuclear_repulsion;
+    double hartree_fock_energy;
+} H2OMatrixCacheHeader;
+
+typedef struct {
     const char *method;
     int repeat;
     double time_sec;
@@ -174,6 +188,17 @@ static double env_double(const char *name, double default_value)
 
     double value = atof(raw);
     return value > 0.0 ? value : default_value;
+}
+
+static int env_bool(const char *name, int default_value)
+{
+    const char *raw = getenv(name);
+
+    if (raw == NULL || raw[0] == '\0') {
+        return default_value;
+    }
+
+    return atoi(raw) != 0;
 }
 
 static long long env_ll(const char *name, long long default_value)
@@ -460,6 +485,109 @@ static double inf_norm(const CscMatrixView *matrix)
     return norm;
 }
 
+static bool write_h2o_matrix_cache(const char *path, const CscMatrix &matrix,
+                                   double matrix_norm,
+                                   const H2OGenerationInfo &generation)
+{
+    const char magic[8] = {'I', 'P', 'T', 'H', '2', 'O', 'C', '1'};
+    H2OMatrixCacheHeader header = {};
+    char temporary_path[4096];
+    FILE *file = NULL;
+    bool ok = false;
+
+    if (path == NULL || path[0] == '\0') {
+        return false;
+    }
+    memcpy(header.magic, magic, sizeof(magic));
+    header.version = 1;
+    header.n = matrix.n;
+    header.nnz = matrix.nnz;
+    header.norb = generation.norb;
+    header.nelec = generation.nelec;
+    header.na = generation.na;
+    header.nb = generation.nb;
+    header.matrix_inf_norm = matrix_norm;
+    header.nuclear_repulsion = generation.nuclear_repulsion;
+    header.hartree_fock_energy = generation.hartree_fock_energy;
+
+    snprintf(temporary_path, sizeof(temporary_path), "%s.tmp", path);
+    file = fopen(temporary_path, "wb");
+    if (file == NULL) {
+        return false;
+    }
+    ok = fwrite(&header, sizeof(header), 1, file) == 1 &&
+         fwrite(matrix.col_ptr.data(), sizeof(int), matrix.col_ptr.size(),
+                file) == matrix.col_ptr.size() &&
+         fwrite(matrix.row_ind.data(), sizeof(int), matrix.row_ind.size(),
+                file) == matrix.row_ind.size() &&
+         fwrite(matrix.values.data(), sizeof(double), matrix.values.size(),
+                file) == matrix.values.size() &&
+         fflush(file) == 0;
+    if (fclose(file) != 0) {
+        ok = false;
+    }
+    if (!ok || rename(temporary_path, path) != 0) {
+        remove(temporary_path);
+        return false;
+    }
+    return true;
+}
+
+static bool read_h2o_matrix_cache(const char *path, CscMatrix *matrix,
+                                  double *matrix_norm,
+                                  H2OGenerationInfo *generation)
+{
+    const char magic[8] = {'I', 'P', 'T', 'H', '2', 'O', 'C', '1'};
+    H2OMatrixCacheHeader header = {};
+    FILE *file = NULL;
+    bool ok = false;
+
+    if (path == NULL || path[0] == '\0') {
+        return false;
+    }
+    file = fopen(path, "rb");
+    if (file == NULL) {
+        return false;
+    }
+    if (fread(&header, sizeof(header), 1, file) != 1 ||
+        memcmp(header.magic, magic, sizeof(magic)) != 0 ||
+        header.version != 1 || header.n <= 0 || header.nnz < 0) {
+        fclose(file);
+        return false;
+    }
+
+    matrix->n = header.n;
+    matrix->nnz = header.nnz;
+    matrix->col_ptr.assign((size_t)header.n + 1U, 0);
+    matrix->row_ind.assign((size_t)header.nnz, 0);
+    matrix->values.assign((size_t)header.nnz, 0.0);
+    ok = fread(matrix->col_ptr.data(), sizeof(int), matrix->col_ptr.size(),
+               file) == matrix->col_ptr.size() &&
+         fread(matrix->row_ind.data(), sizeof(int), matrix->row_ind.size(),
+               file) == matrix->row_ind.size() &&
+         fread(matrix->values.data(), sizeof(double), matrix->values.size(),
+               file) == matrix->values.size();
+    fclose(file);
+
+    if (!ok ||
+        !ipt_validate_csc(matrix->col_ptr.data(), matrix->row_ind.data(),
+                          matrix->n, matrix->nnz) ||
+        !isfinite(header.matrix_inf_norm) || header.matrix_inf_norm < 0.0) {
+        *matrix = CscMatrix();
+        return false;
+    }
+
+    generation->norb = header.norb;
+    generation->nelec = header.nelec;
+    generation->na = header.na;
+    generation->nb = header.nb;
+    generation->nuclear_repulsion = header.nuclear_repulsion;
+    generation->hartree_fock_energy = header.hartree_fock_energy;
+    generation->generation_time_sec = 0.0;
+    *matrix_norm = header.matrix_inf_norm;
+    return true;
+}
+
 static double relative_residual(const CscMatrixView *matrix,
                                 const double *vector, double eigenvalue,
                                 double matrix_norm)
@@ -671,6 +799,11 @@ int main(void)
     long long primme_max_matvecs =
         env_ll("PRIMME_MAX_MATVECS", DEFAULT_PRIMME_MAX_MATVECS);
     const char *dir = results_dir();
+    const char *cache_path = getenv("IPT_H2O_MATRIX_CACHE");
+    int load_matrix = env_bool("IPT_LOAD_MATRIX", 0);
+    int save_matrix = env_bool("IPT_SAVE_MATRIX", 0);
+    const char *matrix_source = "generated";
+    double matrix_norm = NAN;
     char csv_path[4096];
     char summary_path[4096];
     FILE *csv = NULL;
@@ -682,13 +815,47 @@ int main(void)
         repeats = DEFAULT_REPEATS;
     }
 
-    if (!generate_h2o_fci_csc(&owned_matrix, &generation)) {
-        fprintf(stderr, "failed to generate H2O/sto-6g FCI CSC matrix\n");
-        return 1;
+    if (cache_path == NULL || cache_path[0] == '\0') {
+        cache_path =
+            "/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/H2O/"
+            "h2o_sto6g_fci_441_csc.bin";
+    }
+    if (load_matrix &&
+        read_h2o_matrix_cache(cache_path, &owned_matrix, &matrix_norm,
+                              &generation)) {
+        matrix_source = "cache";
+        printf("Loaded H2O CSC matrix cache from %s\n", cache_path);
+    } else {
+        if (load_matrix) {
+            fprintf(stderr,
+                    "H2O matrix cache unavailable or invalid; generating "
+                    "matrix: %s\n",
+                    cache_path);
+        }
+        if (!generate_h2o_fci_csc(&owned_matrix, &generation)) {
+            fprintf(stderr, "failed to generate H2O/sto-6g FCI CSC matrix\n");
+            return 1;
+        }
+        {
+            CscMatrixView generated_matrix = matrix_view(owned_matrix);
+
+            matrix_norm = inf_norm(&generated_matrix);
+        }
+        if (save_matrix) {
+            if (!write_h2o_matrix_cache(cache_path, owned_matrix, matrix_norm,
+                                        generation)) {
+                fprintf(stderr, "failed to save H2O matrix cache to %s\n",
+                        cache_path);
+                return 1;
+            }
+            printf("Saved H2O CSC matrix cache to %s\n", cache_path);
+        }
     }
 
     CscMatrixView matrix = matrix_view(owned_matrix);
-    double matrix_norm = inf_norm(&matrix);
+    if (!isfinite(matrix_norm)) {
+        matrix_norm = inf_norm(&matrix);
+    }
 
     ensure_directory(dir);
     snprintf(csv_path, sizeof(csv_path),
@@ -769,10 +936,13 @@ int main(void)
             "primme_max_matvecs=%lld\nmatrix_inf_norm=%.17g\n"
             "matrix_generation_time_sec=%.17g\n"
             "matrix_generation_excluded_from_timings=true\n"
+            "matrix_source=%s\nmatrix_cache_path=%s\n"
+            "matrix_load_requested=%d\nmatrix_save_requested=%d\n"
             "pyscf_site_packages=%s\nnorb=%d\nnelec=%d\nna=%d\nnb=%d\n"
             "nuclear_repulsion=%.17g\nhartree_fock_energy=%.17g\n\n",
             matrix.n, matrix.nnz, ipt_k, repeats, tol, ipt_maxiter,
             primme_max_matvecs, matrix_norm, generation.generation_time_sec,
+            matrix_source, cache_path, load_matrix, save_matrix,
             pyscf_site_packages(), generation.norb, generation.nelec,
             generation.na, generation.nb, generation.nuclear_repulsion,
             generation.hartree_fock_energy);

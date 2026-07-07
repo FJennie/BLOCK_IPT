@@ -107,6 +107,23 @@ typedef struct {
 } TwoLink;
 
 typedef struct {
+    char magic[8];
+    int version;
+    int n;
+    int nnz;
+    int norb;
+    int active_electrons;
+    int neleca;
+    int nelecb;
+    int na;
+    int nb;
+    double matrix_inf_norm;
+    double ecore;
+    double nuclear_repulsion;
+    double hartree_fock_energy;
+} Nh3MatrixCacheHeader;
+
+typedef struct {
     const char *method;
     int repeat;
     double time_sec;
@@ -985,6 +1002,117 @@ static double inf_norm(const CscMatrixView *matrix)
     return norm;
 }
 
+static bool write_nh3_matrix_cache(const char *path, const CscMatrix &matrix,
+                                   double matrix_norm,
+                                   const ActiveSpaceData &active)
+{
+    const char magic[8] = {'I', 'P', 'T', 'N', 'H', '3', 'C', '1'};
+    Nh3MatrixCacheHeader header = {};
+    char temporary_path[4096];
+    FILE *file = NULL;
+    bool ok = false;
+
+    if (path == NULL || path[0] == '\0') {
+        return false;
+    }
+    memcpy(header.magic, magic, sizeof(magic));
+    header.version = 1;
+    header.n = matrix.n;
+    header.nnz = matrix.nnz;
+    header.norb = active.norb;
+    header.active_electrons = active.active_electrons;
+    header.neleca = active.neleca;
+    header.nelecb = active.nelecb;
+    header.na = active.na;
+    header.nb = active.nb;
+    header.matrix_inf_norm = matrix_norm;
+    header.ecore = active.ecore;
+    header.nuclear_repulsion = active.nuclear_repulsion;
+    header.hartree_fock_energy = active.hartree_fock_energy;
+
+    snprintf(temporary_path, sizeof(temporary_path), "%s.tmp", path);
+    file = fopen(temporary_path, "wb");
+    if (file == NULL) {
+        return false;
+    }
+    ok = fwrite(&header, sizeof(header), 1, file) == 1 &&
+         fwrite(matrix.col_ptr.data(), sizeof(int), matrix.col_ptr.size(),
+                file) == matrix.col_ptr.size() &&
+         fwrite(matrix.row_ind.data(), sizeof(int), matrix.row_ind.size(),
+                file) == matrix.row_ind.size() &&
+         fwrite(matrix.values.data(), sizeof(double), matrix.values.size(),
+                file) == matrix.values.size() &&
+         fflush(file) == 0;
+    if (fclose(file) != 0) {
+        ok = false;
+    }
+    if (!ok || rename(temporary_path, path) != 0) {
+        remove(temporary_path);
+        return false;
+    }
+    return true;
+}
+
+static bool read_nh3_matrix_cache(const char *path, CscMatrix *matrix,
+                                  double *matrix_norm,
+                                  ActiveSpaceData *active)
+{
+    const char magic[8] = {'I', 'P', 'T', 'N', 'H', '3', 'C', '1'};
+    Nh3MatrixCacheHeader header = {};
+    FILE *file = NULL;
+    bool ok = false;
+
+    if (path == NULL || path[0] == '\0') {
+        return false;
+    }
+    file = fopen(path, "rb");
+    if (file == NULL) {
+        return false;
+    }
+    if (fread(&header, sizeof(header), 1, file) != 1 ||
+        memcmp(header.magic, magic, sizeof(magic)) != 0 ||
+        header.version != 1 || header.n <= 0 || header.nnz < 0) {
+        fclose(file);
+        return false;
+    }
+
+    matrix->n = header.n;
+    matrix->nnz = header.nnz;
+    matrix->col_ptr.assign((size_t)header.n + 1U, 0);
+    matrix->row_ind.assign((size_t)header.nnz, 0);
+    matrix->values.assign((size_t)header.nnz, 0.0);
+    ok = fread(matrix->col_ptr.data(), sizeof(int), matrix->col_ptr.size(),
+               file) == matrix->col_ptr.size() &&
+         fread(matrix->row_ind.data(), sizeof(int), matrix->row_ind.size(),
+               file) == matrix->row_ind.size() &&
+         fread(matrix->values.data(), sizeof(double), matrix->values.size(),
+               file) == matrix->values.size();
+    fclose(file);
+
+    if (!ok ||
+        !ipt_validate_csc(matrix->col_ptr.data(), matrix->row_ind.data(),
+                          matrix->n, matrix->nnz) ||
+        !isfinite(header.matrix_inf_norm) || header.matrix_inf_norm < 0.0) {
+        *matrix = CscMatrix();
+        return false;
+    }
+
+    active->norb = header.norb;
+    active->active_electrons = header.active_electrons;
+    active->neleca = header.neleca;
+    active->nelecb = header.nelecb;
+    active->na = header.na;
+    active->nb = header.nb;
+    active->ecore = header.ecore;
+    active->nuclear_repulsion = header.nuclear_repulsion;
+    active->hartree_fock_energy = header.hartree_fock_energy;
+    active->generation_time_sec = 0.0;
+    active->h1.clear();
+    active->eri.clear();
+    *matrix_norm = header.matrix_inf_norm;
+    return true;
+}
+
 static double relative_residual(const CscMatrixView *matrix,
                                 const double *vector, double eigenvalue,
                                 double matrix_norm)
@@ -1360,6 +1488,11 @@ int main(void)
     long long primme_max_matvecs =
         env_ll("PRIMME_MAX_MATVECS", DEFAULT_PRIMME_MAX_MATVECS);
     const char *dir = results_dir();
+    const char *cache_path = getenv("IPT_NH3_MATRIX_CACHE");
+    int load_matrix = env_bool("IPT_LOAD_MATRIX", 0);
+    int save_matrix = env_bool("IPT_SAVE_MATRIX", 0);
+    const char *matrix_source = "generated";
+    double matrix_norm = NAN;
     char csv_path[4096];
     char summary_path[4096];
     FILE *csv = NULL;
@@ -1369,20 +1502,55 @@ int main(void)
     double reference_eigenvalue = NAN;
     double ipt_eigenvalue_abs_residual = NAN;
 
-    if (!generate_active_space_integrals(&active)) {
-        fprintf(stderr,
-                "failed to generate NH3/STO-6G full FCI active integrals\n");
-        return 1;
+    if (cache_path == NULL || cache_path[0] == '\0') {
+        cache_path =
+            "/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/"
+            "nh3_sto6g_fci_3136_csc.bin";
     }
+    if (load_matrix &&
+        read_nh3_matrix_cache(cache_path, &owned_matrix, &matrix_norm,
+                              &active)) {
+        matrix_source = "cache";
+        printf("Loaded NH3 CSC matrix cache from %s\n", cache_path);
+    } else {
+        if (load_matrix) {
+            fprintf(stderr,
+                    "NH3 matrix cache unavailable or invalid; generating "
+                    "matrix: %s\n",
+                    cache_path);
+        }
+        if (!generate_active_space_integrals(&active)) {
+            fprintf(stderr,
+                    "failed to generate NH3/STO-6G full FCI active "
+                    "integrals\n");
+            return 1;
+        }
 
-    if (!generate_hamiltonian_csc(active, &owned_matrix)) {
-        fprintf(stderr,
-                "failed to generate NH3/STO-6G full FCI CSC matrix\n");
-        return 1;
+        if (!generate_hamiltonian_csc(active, &owned_matrix)) {
+            fprintf(stderr,
+                    "failed to generate NH3/STO-6G full FCI CSC matrix\n");
+            return 1;
+        }
+        {
+            CscMatrixView generated_matrix = matrix_view(owned_matrix);
+
+            matrix_norm = inf_norm(&generated_matrix);
+        }
+        if (save_matrix) {
+            if (!write_nh3_matrix_cache(cache_path, owned_matrix, matrix_norm,
+                                        active)) {
+                fprintf(stderr, "failed to save NH3 matrix cache to %s\n",
+                        cache_path);
+                return 1;
+            }
+            printf("Saved NH3 CSC matrix cache to %s\n", cache_path);
+        }
     }
 
     CscMatrixView matrix = matrix_view(owned_matrix);
-    double matrix_norm = inf_norm(&matrix);
+    if (!isfinite(matrix_norm)) {
+        matrix_norm = inf_norm(&matrix);
+    }
 
     ensure_directory(dir);
     snprintf(csv_path, sizeof(csv_path),
@@ -1514,12 +1682,15 @@ int main(void)
             "run_primme=%d\nprimme_max_matvecs=%lld\n"
             "matrix_inf_norm=%.17g\n"
             "integral_generation_time_sec=%.17g\n"
+            "matrix_source=%s\nmatrix_cache_path=%s\n"
+            "matrix_load_requested=%d\nmatrix_save_requested=%d\n"
             "pyscf_site_packages=%s\nbasis=sto-6g\nfrozen_core_orbitals=0\n"
             "norb=%d\nactive_electrons=%d\nneleca=%d\nnelecb=%d\n"
             "na=%d\nnb=%d\necore=%.17g\nnuclear_repulsion=%.17g\n"
             "hartree_fock_energy=%.17g\n\n",
             matrix.n, matrix.nnz, ipt_k, repeats, tol, ipt_maxiter, run_primme,
             primme_max_matvecs, matrix_norm, active.generation_time_sec,
+            matrix_source, cache_path, load_matrix, save_matrix,
             pyscf_site_packages(), active.norb, active.active_electrons,
             active.neleca, active.nelecb, active.na, active.nb, active.ecore,
             active.nuclear_repulsion, active.hartree_fock_energy);

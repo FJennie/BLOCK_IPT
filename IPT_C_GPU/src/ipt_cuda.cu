@@ -3652,6 +3652,9 @@ static int ipt_block_cluster_solve_basis_gpu(
     cusparseDnMatDescr_t dense_y = NULL;
     int done = 0;
     const int threads = 256;
+    size_t update_shared_bytes = (size_t)m * (size_t)(m + 1) *
+                                     sizeof(double) +
+                                 2U * sizeof(int);
     double fixed_point_residual = NAN;
 
     *d_basis_out = NULL;
@@ -3684,6 +3687,29 @@ static int ipt_block_cluster_solve_basis_gpu(
     if (spmm_buffer_size > 0) {
         CUDA_CHECK(cudaMalloc(&d_spmm_buffer, spmm_buffer_size));
     }
+    {
+        int device = 0;
+        int max_optin_shared = 0;
+
+        CUDA_CHECK(cudaGetDevice(&device));
+        CUDA_CHECK(cudaDeviceGetAttribute(
+            &max_optin_shared, cudaDevAttrMaxSharedMemoryPerBlockOptin,
+            device));
+        if (max_optin_shared > 0 &&
+            update_shared_bytes > (size_t)max_optin_shared) {
+            fprintf(stderr,
+                    "IPT block-cluster invalid argument: update shared "
+                    "memory bytes=%zu exceeds device opt-in max=%d for "
+                    "block_size=%d\n",
+                    update_shared_bytes, max_optin_shared, m);
+            status = IPT_CUDA_INVALID_ARGUMENT;
+            goto cleanup;
+        }
+        CUDA_CHECK(cudaFuncSetAttribute(
+            ipt_block_cluster_update_kernel,
+            cudaFuncAttributeMaxDynamicSharedMemorySize,
+            (int)update_shared_bytes));
+    }
 
     ipt_block_cluster_identity_kernel<<<
         (int)((elements + threads - 1) / threads), threads>>>(d_a, n, m,
@@ -3701,9 +3727,6 @@ static int ipt_block_cluster_solve_basis_gpu(
             double delta_norm = 0.0;
             double basis_norm = 0.0;
             int singular = 0;
-            size_t shared_bytes =
-                (size_t)m * (size_t)(m + 1) * sizeof(double) +
-                2U * sizeof(int);
 
             CUSPARSE_CHECK(ipt_cusparse_spmm(
                 sparse_handle, sparse_matrix, dense_x, dense_y, d_current,
@@ -3713,7 +3736,7 @@ static int ipt_block_cluster_solve_basis_gpu(
                 d_y, d_h, n, m, first);
             CUDA_CHECK(cudaGetLastError());
             CUDA_CHECK(cudaMemset(d_singular, 0, sizeof(int)));
-            ipt_block_cluster_update_kernel<<<n, m, shared_bytes>>>(
+            ipt_block_cluster_update_kernel<<<n, m, update_shared_bytes>>>(
                 d_current, d_y, d_diagonal, d_h, d_next, n, m, first, last,
                 damping, d_singular);
             CUDA_CHECK(cudaGetLastError());
@@ -4809,6 +4832,9 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
             int width = last - first + 1;
             double block_iteration_time = 0.0;
             double block_fixed_point_residual = NAN;
+            int fallback_identity =
+                ipt_cuda_env_flag_default(
+                    "IPT_BLOCK_CLUSTER_FALLBACK_IDENTITY", 1);
 
             status = ipt_block_cluster_solve_basis_gpu(
                 sparse_handle, sparse_matrix, cublas_handle, d_diagonal, n,
@@ -4817,7 +4843,27 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                 &block_fixed_point_residual);
             if (status != IPT_CUDA_SUCCESS) {
                 cudaFree(d_block_basis);
-                goto cleanup;
+                d_block_basis = NULL;
+                if (!fallback_identity) {
+                    goto cleanup;
+                }
+                fprintf(stderr,
+                        "IPT block-cluster: block solve failed status=%d "
+                        "for block=%d:%d size=%d; using identity fallback "
+                        "basis\n",
+                        status, first, last, width);
+                status = IPT_CUDA_SUCCESS;
+                CUDA_CHECK(cudaMalloc((void **)&d_block_basis,
+                                      (size_t)n * (size_t)width *
+                                          sizeof(double)));
+                ipt_block_cluster_identity_kernel<<<
+                    (int)(((size_t)n * (size_t)width + 255U) / 256U),
+                    256>>>(d_block_basis, n, width, first);
+                CUDA_CHECK(cudaGetLastError());
+                CUDA_CHECK(cudaDeviceSynchronize());
+                block_iterations = 0;
+                block_iteration_time = 0.0;
+                block_fixed_point_residual = NAN;
             }
             iterations_done = std::max(iterations_done, block_iterations);
             if (isfinite(block_fixed_point_residual) &&
@@ -5169,11 +5215,10 @@ static int ipt_cuda_sparse_csc_block_cluster_impl(
                             return current_residuals[(size_t)a] >
                                    current_residuals[(size_t)b];
                         });
-                    round_limit =
-                        debug_active_max_enabled &&
-                                debug_active_max > 0
-                            ? debug_active_max
-                            : 1;
+                    round_limit = debug_active_max_enabled &&
+                                          debug_active_max > 0
+                                      ? debug_active_max
+                                      : k;
                 }
                 fprintf(stderr,
                         "IPT Davidson active selection: step=%d "

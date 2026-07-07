@@ -7,9 +7,9 @@ PRIMME_ROOT="${PRIMME_ROOT:-/fs1/home/nudt_liujie/ftt/primme-3.2.3}"
 PYTHON_ROOT="${PYTHON_ROOT:-/fs1/software/python/3.8_miniconda_4.10.3}"
 PYSCF_SITE_PACKAGES="${PYSCF_SITE_PACKAGES:-/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages}"
 
-TEST_DIR="$ROOT/test/sparse/NH3"
-LOG_DIR="${IPT_C_LOG_DIR:-$ROOT/logs/sparse/NH3_K30/manual}"
-RESULTS_DIR="${IPT_C_RESULTS_DIR:-$ROOT/results/sparse/NH3_k30/manual}"
+TEST_DIR="$ROOT/test/sparse/H2O"
+LOG_DIR="${IPT_C_LOG_DIR:-$ROOT/logs/sparse/H2O_k30/manual}"
+RESULTS_DIR="${IPT_C_RESULTS_DIR:-$ROOT/results/sparse/H2O_k30/manual}"
 
 mkdir -p "$LOG_DIR" "$RESULTS_DIR" "$TEST_DIR"
 
@@ -17,13 +17,13 @@ BUILD_DIR="${IPT_BENCH_BUILD_DIR:-$TEST_DIR/.codex_build}"
 mkdir -p "$BUILD_DIR"
 
 if [ "${IPT_SKIP_BUILD:-0}" = "1" ]; then
-  BENCH_BIN="${IPT_BENCH_BIN:-$TEST_DIR/benchmark_nh3_sto6g_fci_3136_ipt_cuda}"
+  BENCH_BIN="${IPT_BENCH_BIN:-$TEST_DIR/benchmark_h20_fci_primme_vs_ipt_cuda}"
 else
-  BENCH_BIN="${IPT_BENCH_BIN:-$BUILD_DIR/benchmark_nh3_sto6g_fci_3136_ipt_cuda_${SLURM_JOB_ID:-manual}_$$}"
+  BENCH_BIN="${IPT_BENCH_BIN:-$BUILD_DIR/benchmark_h20_fci_primme_vs_ipt_cuda_${SLURM_JOB_ID:-manual}_$$}"
 fi
 
-RUN_LOG="$LOG_DIR/nh3_sto6g_fci_3136_ipt_k30_${SLURM_JOB_ID:-manual}.log"
-ln -sfn "$RUN_LOG" "$LOG_DIR/latest_nh3_sto6g_fci_3136_ipt_k30.log"
+RUN_LOG="$LOG_DIR/h2o_sto6g_fci_441_ipt_k30_${SLURM_JOB_ID:-manual}.log"
+ln -sfn "$RUN_LOG" "$LOG_DIR/latest_h2o_sto6g_fci_441_ipt_k30.log"
 
 exec > >(tee "$RUN_LOG") 2>&1
 
@@ -49,7 +49,7 @@ export IPT_REPEATS="${IPT_REPEATS:-1}"
 export IPT_TOL="${IPT_TOL:-1e-12}"
 export IPT_MAXITER="${IPT_MAXITER:-200}"
 
-export IPT_NH3_MATRIX_CACHE="${IPT_NH3_MATRIX_CACHE:-$TEST_DIR/nh3_sto6g_fci_3136_csc.bin}"
+export IPT_H2O_MATRIX_CACHE="${IPT_H2O_MATRIX_CACHE:-$TEST_DIR/h2o_sto6g_fci_441_csc.bin}"
 export IPT_LOAD_MATRIX="${IPT_LOAD_MATRIX:-1}"
 export IPT_SAVE_MATRIX="${IPT_SAVE_MATRIX:-1}"
 
@@ -94,10 +94,9 @@ export IPT_DUMP_PAIR_RESIDUALS="${IPT_DUMP_PAIR_RESIDUALS:-1}"
 export IPT_DUMP_RESIDUAL_SUPPORT="${IPT_DUMP_RESIDUAL_SUPPORT:-0}"
 export IPT_JD_LOCAL_CORRECTION="${IPT_JD_LOCAL_CORRECTION:-0}"
 
-export RUN_PRIMME="${RUN_PRIMME:-1}"
-export RUN_WARMUP="${RUN_WARMUP:-0}"
 export PRIMME_MAX_MATVECS="${PRIMME_MAX_MATVECS:-200000}"
-export IPT_EST_NNZ_PER_COL="${IPT_EST_NNZ_PER_COL:-600}"
+export RUN_PRIMME=1
+export RUN_WARMUP=0
 
 unset IPT_COMPARE_FORCE_ACTIVE_PAIRS
 unset IPT_DAVIDSON_FORCE_ACTIVE_PAIRS
@@ -120,7 +119,7 @@ ln -sfn "$OPENBLAS_LIB" "$TEST_DIR/libopenblas.so"
 
 export LD_LIBRARY_PATH="$GCC_LIB_DIR:$PYTHON_ROOT/lib:$PYSCF_SITE_PACKAGES/numpy.libs:$PYSCF_SITE_PACKAGES/scipy.libs:$PYSCF_SITE_PACKAGES/h5py.libs:$PYSCF_SITE_PACKAGES/pyscf/lib:$OPENBLAS_DIR:$TEST_DIR:${LD_LIBRARY_PATH:-}"
 
-echo "===== NH3/STO-6G full FCI k=30 automatic cluster IPT vs PRIMME ====="
+echo "===== H2O/STO-6G FCI k=30 automatic cluster IPT vs PRIMME ====="
 date
 hostname
 echo "SLURM_JOB_ID=${SLURM_JOB_ID:-}"
@@ -128,7 +127,7 @@ echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-}"
 echo "BENCH_BIN=$BENCH_BIN"
 echo "RESULTS_DIR=$RESULTS_DIR"
 echo "LOG_DIR=$LOG_DIR"
-echo "MATRIX_CACHE=$IPT_NH3_MATRIX_CACHE"
+echo "MATRIX_CACHE=$IPT_H2O_MATRIX_CACHE"
 echo "IPT_LOAD_MATRIX=$IPT_LOAD_MATRIX"
 echo "IPT_SAVE_MATRIX=$IPT_SAVE_MATRIX"
 echo "IPT_K=$IPT_K"
@@ -144,9 +143,7 @@ echo "IPT_DAVIDSON_ACTIVE_CLUSTERS=${IPT_DAVIDSON_ACTIVE_CLUSTERS-<unset>}"
 echo "IPT_DAVIDSON_ACTIVE_TOL=${IPT_DAVIDSON_ACTIVE_TOL-<unset>}"
 echo "IPT_DAVIDSON_ACTIVE_MAX=${IPT_DAVIDSON_ACTIVE_MAX-<unset>}"
 echo "IPT_DAVIDSON_CORRECTION_MAX_PER_STEP=${IPT_DAVIDSON_CORRECTION_MAX_PER_STEP-<unset>}"
-echo "RUN_PRIMME=$RUN_PRIMME"
 echo "PRIMME_MAX_MATVECS=$PRIMME_MAX_MATVECS"
-echo "IPT_EST_NNZ_PER_COL=$IPT_EST_NNZ_PER_COL"
 
 module list 2>&1 || true
 
@@ -170,7 +167,7 @@ else
     -gencode arch=compute_80,code=sm_80 \
     -I"$PRIMME_ROOT/include" \
     -I"$PYTHON_ROOT/include/python3.8" \
-    "$TEST_DIR/benchmark_nh3_sto6g_fci_3136_ipt.cu" \
+    "$TEST_DIR/benchmark_h20_fci_primme_vs_ipt.cu" \
     "$PRIMME_ROOT/lib/libprimme.a" \
     -o "$BENCH_BIN" \
     -lcublas -lcusparse -lcusolver -lcudart \

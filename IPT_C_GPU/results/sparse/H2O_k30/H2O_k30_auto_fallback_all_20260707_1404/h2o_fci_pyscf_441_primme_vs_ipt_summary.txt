@@ -1,0 +1,28 @@
+warmup PRIMME status=0 time_sec=0.96786982985213399 eigenvalue=-75.731617400685565 residual=9.0586785791459782e-13 error=
+warmup IPT status=0 time_sec=0.80676201499999989 eigenvalue=-75.731617400685778 residual=5.5530383067938942e-13 error=
+
+matrix=h2o_sto6g_fci_generated_by_embedded_pyscf
+n=441
+nnz=62181
+k=30
+repeats=1
+tol=9.9999999999999998e-13
+ipt_maxiter=200
+primme_max_matvecs=200000
+matrix_inf_norm=77.231996065475755
+matrix_generation_time_sec=0
+matrix_generation_excluded_from_timings=true
+matrix_source=cache
+matrix_cache_path=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/H2O/h2o_sto6g_fci_441_csc.bin
+matrix_load_requested=1
+matrix_save_requested=1
+pyscf_site_packages=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+norb=7
+nelec=10
+na=21
+nb=21
+nuclear_repulsion=9.0843645119760303
+hartree_fock_energy=-75.679997365380373
+
+PRIMME_DYNAMIC avg_time_sec=1.1944521102122962 std_time_sec=0 avg_iterations=389 avg_matvecs=4591 avg_eigenvalue=-75.731617400685565 avg_residual=9.0586785791459782e-13
+IPT_CUDA_SPARSE avg_time_sec=0.77535778200000016 std_time_sec=0 avg_iterations=200 avg_matvecs=4625 avg_eigenvalue=-75.731617400685806 avg_residual=5.5526568996649017e-13

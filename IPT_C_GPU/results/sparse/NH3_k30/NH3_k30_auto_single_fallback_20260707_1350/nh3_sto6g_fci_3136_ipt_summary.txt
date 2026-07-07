@@ -1,0 +1,32 @@
+warmup skipped RUN_WARMUP=0
+
+matrix=nh3_sto6g_fci
+n=3136
+nnz=990976
+k=30
+repeats=1
+tol=9.9999999999999998e-13
+ipt_maxiter=200
+run_primme=1
+primme_max_matvecs=200000
+matrix_inf_norm=58.717725351607534
+integral_generation_time_sec=0
+matrix_source=cache
+matrix_cache_path=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/NH3/nh3_sto6g_fci_3136_csc.bin
+matrix_load_requested=1
+matrix_save_requested=1
+pyscf_site_packages=/fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages
+basis=sto-6g
+frozen_core_orbitals=0
+norb=8
+active_electrons=10
+neleca=5
+nelecb=5
+na=56
+nb=56
+ecore=11.954178476436654
+nuclear_repulsion=11.954178476436654
+hartree_fock_energy=-55.988398491054767
+
+PRIMME_CUBLAS avg_time_sec=2.5658119739964604 std_time_sec=0 avg_iterations=1519 avg_matvecs=5686 avg_first_eigenvalue=-56.0545168703608 last_first_eigenvalue=-56.0545168703608 last_max_residual=9.9332306608406656e-13 last_relative_fixed_point_residual=nan eigenvalue_abs_residual=0 avg_api_total_time_sec=2.5681425300426781 avg_preparation_time_sec=0 avg_transfer_setup_time_sec=0.00233055604621768 avg_iteration_time_sec=0 avg_rayleigh_ritz_time_sec=0
+IPT_CUDA_BLOCK_CLUSTER avg_time_sec=28.786900269999993 std_time_sec=0 avg_iterations=200 avg_matvecs=14176 avg_first_eigenvalue=-56.054516870360693 last_first_eigenvalue=-56.054516870360693 last_max_residual=8.2496621959338102e-13 last_relative_fixed_point_residual=1.4159021479831629e-15 eigenvalue_abs_residual=1.0658141036401503e-13 avg_api_total_time_sec=37.915627575945109 avg_preparation_time_sec=0.36989910300000001 avg_transfer_setup_time_sec=3.3790156950000001 avg_iteration_time_sec=0.040064105000000003 avg_rayleigh_ritz_time_sec=28.746836164999994
