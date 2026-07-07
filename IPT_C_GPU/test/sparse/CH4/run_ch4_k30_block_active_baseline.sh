@@ -56,7 +56,6 @@ for steps in 30 40; do
             export IPT_DAVIDSON_ACTIVE_MAX=2
             export IPT_DAVIDSON_PROTECT_TOL=1e-10
             export IPT_DAVIDSON_CONVERGED_TOL=1e-13
-            export IPT_DAVIDSON_ACTIVE_TOL=1e-13
             export IPT_DAVIDSON_FORCE_ACTIVE_PAIRS=
             export IPT_DAVIDSON_BLOCK_ACTIVE=0
             export IPT_DAVIDSON_DENOM_CLIP="$denom"

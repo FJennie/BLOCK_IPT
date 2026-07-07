@@ -1,0 +1,21 @@
+===== CH4/STO-6G FCI PRIMME k=30 =====
+Mon Jul  6 22:55:24 CST 2026
+th-hpc4-ln0
+SLURM_JOB_ID=
+CUDA_VISIBLE_DEVICES=
+PRIMME_K=30
+PRIMME_REPEATS=1
+PRIMME_TOL=5e-13
+PRIMME_RELATIVE_EIGEN_RESIDUAL_TOL=5e-13
+PRIMME_REQUIRED_RELATIVE_EIGEN_RESIDUAL=1e-12
+PRIMME_MAX_MATVECS=200000
+PRIMME_MAX_BASIS_SIZE=160
+PRIMME_MIN_RESTART_SIZE=80
+PRIMME_MAX_BLOCK_SIZE=8
+PRIMME_LOCKING=1
+PRIMME_METHOD=PRIMME_JDQMR_ETol
+PRIMME_PRINT_LEVEL=0
+IPT_CH4_MATRIX_CACHE=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ch4_sto6g_fci_15876_csc.bin
+PRIMME_CH4_OUTPUT_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ipt_vs_primme_k30_v1/cluster_fix_auto_formal_gpu_20260706_run1/primme_jdqmr_etol
+PRIMME_CH4_LOG_DIR=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/CH4_K30_dubug/ipt_vs_primme_k30_v1/cluster_fix_auto_formal_gpu_20260706_run1/primme_jdqmr_etol
+PRIMME GPU allocation failed

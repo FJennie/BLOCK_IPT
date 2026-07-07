@@ -1861,7 +1861,8 @@ static void write_davidson_selection_history(
                 "%d,%d,%.17g,%d,%d,%d,%d,%d,%d,%.17g,%.17g\n",
                 entry.davidson_step, entry.pair_index, entry.residual,
                 entry.selected_by_residual, entry.selected_forced,
-                entry.skipped_converged, entry.skipped_active_tol,
+                entry.selected_auto_cluster,
+                entry.skipped_converged_in_cluster,
                 entry.skipped_linear_dependent,
                 entry.skipped_locked_old_logic_should_not_happen,
                 entry.correction_norm_before_ortho,
@@ -2512,7 +2513,8 @@ int main(void)
             "cluster_soft_locked_count\n");
     fprintf(davidson_selection_history_csv,
             "davidson_step,pair_index,residual,selected_by_residual,"
-            "selected_forced,skipped_converged,skipped_active_tol,"
+            "selected_forced,selected_auto_cluster,"
+            "skipped_converged_in_cluster,"
             "skipped_linear_dependent,"
             "skipped_locked_old_logic_should_not_happen,"
             "correction_norm_before_ortho,"
@@ -2586,7 +2588,12 @@ int main(void)
             "fixed_point_residual_is_diagnostic_only=1\n"
             "matrix_source=%s\nn=%d\nnnz=%d\nmatrix_inf_norm=%.17g\n"
             "matrix_cache_path=%s\n"
-            "davidson_steps=%d\ndavidson_active_max=%d\n"
+            "davidson_steps=%d\n"
+            "davidson_auto_ritz_cluster_discovery=1\n"
+            "davidson_auto_gap_abs_tol=%.17g\n"
+            "davidson_auto_gap_rel_tol=%.17g\n"
+            "davidson_active_max_used=0\n"
+            "davidson_correction_max_per_step_used=0\n"
             "davidson_select_tol=%.17g\ndavidson_denom_clip=%.17g\n"
             "davidson_accept_only_if_improves=%d\n"
             "davidson_use_best_so_far=%d\n"
@@ -2608,7 +2615,10 @@ int main(void)
             cache_path == NULL || cache_path[0] == '\0' ? "(unset)"
                                                         : cache_path,
             ipt_cuda_env_int("IPT_DAVIDSON_STEPS", 1),
-            ipt_cuda_env_int("IPT_DAVIDSON_ACTIVE_MAX", 1),
+            ipt_cuda_env_double("IPT_DAVIDSON_AUTO_GAP_ABS_TOL",
+                                1.0e-12),
+            ipt_cuda_env_double("IPT_DAVIDSON_AUTO_GAP_REL_TOL",
+                                5.0e-4),
             ipt_cuda_env_double("IPT_DAVIDSON_SELECT_TOL", 1.0e-12),
             ipt_cuda_env_double("IPT_DAVIDSON_DENOM_CLIP", 1.0e-8),
             getenv("IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES") == NULL
@@ -2649,7 +2659,8 @@ int main(void)
             "baseline_steps=%d\n"
             "davidson_extra_steps=%d\n"
             "davidson_converged_tol=%.17g\n"
-            "davidson_active_tol=%.17g\n"
+            "davidson_active_tol_used=0\n"
+            "davidson_active_clusters_env_used=0\n"
             "davidson_protect_tol_role=orthogonalization_and_pollution_"
             "protection_only\n"
             "davidson_locked_old_logic_active_selection=0\n"
@@ -2658,7 +2669,6 @@ int main(void)
             ipt_cuda_env_int("IPT_DAVIDSON_STEPS", 1),
             ipt_cuda_env_int("IPT_DAVIDSON_EXTRA_STEPS", 0),
             ipt_cuda_env_double("IPT_DAVIDSON_CONVERGED_TOL", 1.0e-13),
-            ipt_cuda_env_double("IPT_DAVIDSON_ACTIVE_TOL", 1.0e-13),
             getenv("IPT_DAVIDSON_FORCE_ACTIVE_PAIRS") == NULL
                 ? "none"
                 : getenv("IPT_DAVIDSON_FORCE_ACTIVE_PAIRS"),

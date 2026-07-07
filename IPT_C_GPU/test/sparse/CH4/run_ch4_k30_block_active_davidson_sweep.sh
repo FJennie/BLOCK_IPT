@@ -59,7 +59,6 @@ for denom in 3e-9 1e-8; do
                 export IPT_DAVIDSON_ACTIVE_MAX=2
                 export IPT_DAVIDSON_PROTECT_TOL=1e-10
                 export IPT_DAVIDSON_CONVERGED_TOL=1e-13
-                export IPT_DAVIDSON_ACTIVE_TOL=1e-13
                 export IPT_DAVIDSON_FORCE_ACTIVE_PAIRS=28,29
                 export IPT_DAVIDSON_BLOCK_ACTIVE=1
                 export IPT_DAVIDSON_DENOM_CLIP="$denom"

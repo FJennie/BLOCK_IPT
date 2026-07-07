@@ -1,0 +1,313 @@
+===== CH4/STO-6G full FCI IPT sparse benchmark =====
+Mon Jul  6 23:01:38 CST 2026
+gn36
+SLURM_JOB_ID=3110952
+CUDA_VISIBLE_DEVICES=0
+BENCH_BIN=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/test/sparse/CH4/.codex_build/benchmark_ch4_sto6g_fci_15876_ipt_cuda_3110929_4038028
+IPT_REPEATS=1
+IPT_TOL=1e-12
+IPT_MAXITER=200
+IPT_K=30
+IPT_BLOCK_CLUSTER=1
+IPT_BLOCK_CLUSTER_OVERSAMPLE=3
+IPT_BLOCK_CLUSTER_QR=1
+IPT_BLOCK_CLUSTER_ADAPTIVE=0
+IPT_BLOCK_CLUSTER_COUPLING_TAU=0.1
+IPT_DAVIDSON_ENRICH=1
+IPT_DAVIDSON_STEPS=30
+IPT_DAVIDSON_EXTRA_STEPS=20
+IPT_DAVIDSON_ACTIVE_MAX=<unset>
+IPT_DAVIDSON_SELECT_TOL=1e-12
+IPT_DAVIDSON_CONVERGED_TOL=1e-12
+IPT_DAVIDSON_FORCE_ACTIVE_PAIRS=28,29
+IPT_DAVIDSON_BLOCK_ACTIVE=1
+IPT_DAVIDSON_DENOM_CLIP=3e-9
+IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES=1
+IPT_DAVIDSON_USE_BEST_SO_FAR=1
+IPT_DAVIDSON_RELAXED_ACCEPT=1
+IPT_DAVIDSON_ACCEPT_REL_SLACK=1e-12
+IPT_DAVIDSON_ACCEPT_ABS_SLACK=1e-15
+IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT=1
+IPT_DAVIDSON_LOCKED_DEGRADE_SLACK=1e-8
+IPT_DAVIDSON_RETRY_ON_REJECT=1
+IPT_DAVIDSON_RETRY_DAMPING_LIST=0.5,0.25
+IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS=10,100
+IPT_DAVIDSON_MIN_ACCEPTED_STEPS=12
+IPT_DAVIDSON_ORTHO_REPEATS=2
+IPT_DAVIDSON_PROTECT_TOL=1e-10
+IPT_DAVIDSON_LOCKED_TOL=1e-12
+IPT_DAVIDSON_RESTART_EVERY=0
+IPT_DAVIDSON_RESTART_KEEP_EXTRA=5
+IPT_DUMP_RESIDUAL_SUPPORT=0
+IPT_RESIDUAL_SUPPORT_PAIR=29
+IPT_RESIDUAL_SUPPORT_TOP=100
+IPT_JD_LOCAL_CORRECTION=0
+IPT_JD_LOCAL_ACTIVE_PAIRS=29
+IPT_JD_LOCAL_WINDOW_START=25
+IPT_JD_LOCAL_WINDOW_END=40
+IPT_JD_LOCAL_DAMPING=1e-8
+IPT_JD_LOCAL_MAX_DIM=80
+IPT_JD_LOCAL_SET=window
+IPT_JD_LOCAL_SUPPORT_TOP=80
+IPT_JD_LOCAL_OUTSIDE_CORRECTION=none
+IPT_JD_LOCAL_STEPS=1
+IPT_JD_ACCEPT_ONLY_IF_IMPROVES=1
+IPT_CH4_MATRIX_CACHE=/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ch4_sto6g_fci_15876_csc.bin
+IPT_SAVE_MATRIX=0
+IPT_LOAD_MATRIX=1
+IPT_DUMP_DIAG_GAPS=0
+IPT_DUMP_PAIR_RESIDUALS=1
+IPT_DUMP_COUPLING_GAP=0
+IPT_RITZ_CHECK_INTERVAL=0
+RUN_PRIMME=0
+RUN_WARMUP=0
+IPT_EST_NNZ_PER_COL=800
+Currently Loaded Modulefiles:
+ 1) GCC/12.2.0   2) CUDA/12.2  
+numpy 1.21.5 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/numpy/__init__.py
+scipy 1.7.3 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/scipy/__init__.py
+pyscf 2.0.1 /fs1/software/hpcsystem/THL7/software/pyscf/2.0.1-py3.8/lib/python3.8/site-packages/pyscf/__init__.py
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2023 NVIDIA Corporation
+Built on Tue_Jun_13_19:16:58_PDT_2023
+Cuda compilation tools, release 12.2, V12.2.91
+Build cuda_12.2.r12.2/compiler.32965470_0
+Mon Jul  6 23:01:41 2026       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.12             Driver Version: 535.104.12   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA A100 80GB PCIe          Off | 00000000:4B:00.0 Off |                    0 |
+| N/A   42C    P0              61W / 300W |      4MiB / 81920MiB |     25%      Default |
+|                                         |                      |             Disabled |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+===== build =====
+IPT_SKIP_BUILD=1; using existing benchmark binary
+===== run =====
+Loaded fixed CH4 CSC matrix cache from /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ch4_sto6g_fci_15876_csc.bin
+CH4/STO-6G full FCI CSC benchmark: n=15876 nnz=8905697 k=30 repeats=1 tol=1.000e-12 run_primme=0
+Matrix/integral generation time 0.000000 sec is excluded from PRIMME/IPT timings.
+IPT Davidson: FORCE_ACTIVE_PAIRS is legacy/debug-only and does not alter automatic Ritz cluster discovery or correction selection
+IPT Davidson automatic Ritz cluster discovery enabled: auto_gap_abs_tol=9.9999999999999998e-13 auto_gap_rel_tol=0.00050000000000000001 converged_tol=9.9999999999999998e-13 active_tol_used=0 active_clusters_env_used=0 active_max_used=0 correction_max_per_step_used=0 preparation_blocks_are_not_ritz_clusters=1
+IPT Davidson auto clusters: step=0 count=2 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=0 cluster=0 source=auto_gap members=25,26,27 size=3 min_abs_gap=0 min_rel_gap=0 cluster_max_residual=4.5866120787208607e-12 cluster_fro_residual=5.1985078047198669e-12 correction_members=25,26,27 correction_member_count=3 skipped_converged_in_cluster=
+IPT Davidson auto cluster: step=0 cluster=1 source=auto_gap members=28,29 size=2 min_abs_gap=0.012561951754562983 min_rel_gap=0.00032190405858259394 cluster_max_residual=0.0012740204341498797 cluster_fro_residual=0.0012740204341499439 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson auto clusters: step=1 count=2 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=1 cluster=0 source=auto_gap members=25,26,27 size=3 min_abs_gap=0 min_rel_gap=0 cluster_max_residual=4.5866120787208607e-12 cluster_fro_residual=5.1985078047198669e-12 correction_members=25,26,27 correction_member_count=3 skipped_converged_in_cluster=
+IPT Davidson auto cluster: step=1 cluster=1 source=auto_gap members=28,29 size=2 min_abs_gap=0.012561951754562983 min_rel_gap=0.00032190405858259394 cluster_max_residual=0.0012740204341498797 cluster_fro_residual=0.0012740204341499439 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=1 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=2 correction_members=29,28,25,26,27 correction_member_count=5 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=1 retry=0 cluster=0 source=auto_gap members=25,26,27 overlap_assignment=25->25;26->27;27->26 fro_before=5.1985078047198669e-12 fro_after=3.2351079132469358e-13 max_before=4.5866120787208607e-12 max_after=2.6384719569031487e-13 active_ok=1 locked_safe=1 permutation=1
+IPT Davidson cluster trial: step=1 retry=0 cluster=1 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=0.0012740204341499439 fro_after=7.0148597333330063e-05 max_before=0.0012740204341498797 max_after=7.0148597333324778e-05 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=1 selected_active_pairs=29,28,25,26,27 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=33 basis_cols_trial=38
+IPT Davidson auto clusters: step=2 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=2 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.01089541132454741 min_rel_gap=0.00027919842344758199 cluster_max_residual=7.0148597333324778e-05 cluster_fro_residual=7.0148597333330063e-05 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=2 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29,28 correction_member_count=2 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=2 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=7.0148597333330063e-05 fro_after=2.7100135701961564e-05 max_before=7.0148597333324778e-05 max_after=2.7100135701959968e-05 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=2 selected_active_pairs=29,28 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=38 basis_cols_trial=40
+IPT Davidson auto clusters: step=3 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=3 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.01088941362775131 min_rel_gap=0.00027904473053596001 cluster_max_residual=2.7100135701959968e-05 cluster_fro_residual=2.7100135701961564e-05 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=3 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29,28 correction_member_count=2 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=3 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=2.7100135701961564e-05 fro_after=2.0778597828533219e-05 max_before=2.7100135701959968e-05 max_after=2.0778597828531399e-05 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=3 selected_active_pairs=29,28 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=40 basis_cols_trial=42
+IPT Davidson auto clusters: step=4 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=4 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.01088794830553752 min_rel_gap=0.00027900718118240681 cluster_max_residual=2.0778597828531399e-05 cluster_fro_residual=2.0778597828533219e-05 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=4 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29,28 correction_member_count=2 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=4 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=2.0778597828533219e-05 fro_after=1.6493106689870361e-05 max_before=2.0778597828531399e-05 max_after=1.6493106689868511e-05 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=4 selected_active_pairs=29,28 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=42 basis_cols_trial=44
+IPT Davidson auto clusters: step=5 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=5 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010886890670825267 min_rel_gap=0.00027898007895235368 cluster_max_residual=1.6493106689868511e-05 cluster_fro_residual=1.6493106689870361e-05 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=5 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29,28 correction_member_count=2 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=5 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=1.6493106689870361e-05 fro_after=1.3482688418458678e-05 max_before=1.6493106689868511e-05 max_after=1.3482688418456778e-05 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=5 selected_active_pairs=29,28 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=44 basis_cols_trial=46
+IPT Davidson auto clusters: step=6 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=6 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010886288847707704 min_rel_gap=0.00027896465704118267 cluster_max_residual=1.3482688418456778e-05 cluster_fro_residual=1.3482688418458678e-05 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=6 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29,28 correction_member_count=2 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=6 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=1.3482688418458678e-05 fro_after=9.6812020268041833e-06 max_before=1.3482688418456778e-05 max_after=9.6812020268028603e-06 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=6 selected_active_pairs=29,28 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=46 basis_cols_trial=48
+IPT Davidson auto clusters: step=7 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=7 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.01088596736923364 min_rel_gap=0.00027895641905177024 cluster_max_residual=9.6812020268028603e-06 cluster_fro_residual=9.6812020268041833e-06 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=7 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29,28 correction_member_count=2 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=7 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=9.6812020268041833e-06 fro_after=6.2654844250119941e-06 max_before=9.6812020268028603e-06 max_after=6.2654844250109252e-06 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=7 selected_active_pairs=29,28 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=48 basis_cols_trial=50
+IPT Davidson auto clusters: step=8 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=8 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885800097014453 min_rel_gap=0.00027895213264729328 cluster_max_residual=6.2654844250109252e-06 cluster_fro_residual=6.2654844250119941e-06 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=8 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29,28 correction_member_count=2 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=8 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=6.2654844250119941e-06 fro_after=4.2139283622529102e-06 max_before=6.2654844250109252e-06 max_after=4.2139283622520988e-06 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=8 selected_active_pairs=29,28 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=50 basis_cols_trial=52
+IPT Davidson auto clusters: step=9 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=9 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885734466810959 min_rel_gap=0.00027895045085219632 cluster_max_residual=4.2139283622520988e-06 cluster_fro_residual=4.2139283622529102e-06 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=9 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29,28 correction_member_count=2 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=9 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=4.2139283622529102e-06 fro_after=2.9050616382521637e-06 max_before=4.2139283622520988e-06 max_after=2.9050616382515784e-06 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=9 selected_active_pairs=29,28 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=52 basis_cols_trial=54
+IPT Davidson auto clusters: step=10 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=10 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885701835604777 min_rel_gap=0.00027894961466703078 cluster_max_residual=2.9050616382515784e-06 cluster_fro_residual=2.9050616382521637e-06 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=10 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29,28 correction_member_count=2 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=10 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=2.9050616382521637e-06 fro_after=2.0323322144602868e-06 max_before=2.9050616382515784e-06 max_after=2.0323322144598429e-06 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=10 selected_active_pairs=29,28 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=54 basis_cols_trial=56
+IPT Davidson auto clusters: step=11 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=11 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.01088568717006666 min_rel_gap=0.00027894923885789447 cluster_max_residual=2.0323322144598429e-06 cluster_fro_residual=2.0323322144602868e-06 correction_members=28,29 correction_member_count=2 skipped_converged_in_cluster=
+IPT Davidson active selection: step=11 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29,28 correction_member_count=2 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=11 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=2.0323322144602868e-06 fro_after=1.440515486180283e-06 max_before=2.0323322144598429e-06 max_after=1.4405154861800909e-06 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=11 selected_active_pairs=29,28 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=56 basis_cols_trial=58
+IPT Davidson auto clusters: step=12 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=12 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885679656269076 min_rel_gap=0.00027894904631441174 cluster_max_residual=1.4405154861800909e-06 cluster_fro_residual=1.440515486180283e-06 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=12 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=12 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=1.440515486180283e-06 fro_after=7.320851262795252e-07 max_before=1.4405154861800909e-06 max_after=7.3208512627928856e-07 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=12 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=58 basis_cols_trial=59
+IPT Davidson auto clusters: step=13 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=13 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885676810019618 min_rel_gap=0.00027894897337835296 cluster_max_residual=7.3208512627928856e-07 cluster_fro_residual=7.320851262795252e-07 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=13 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=13 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=7.320851262795252e-07 fro_after=3.8300367540484116e-07 max_before=7.3208512627928856e-07 max_after=3.8300367540445894e-07 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=13 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=59 basis_cols_trial=60
+IPT Davidson auto clusters: step=14 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=14 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885676132581068 min_rel_gap=0.00027894895601877174 cluster_max_residual=3.8300367540445894e-07 cluster_fro_residual=3.8300367540484116e-07 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=14 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=14 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=3.8300367540484116e-07 fro_after=2.1266306981956641e-07 max_before=3.8300367540445894e-07 max_after=2.1266306981889143e-07 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=14 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=60 basis_cols_trial=61
+IPT Davidson auto clusters: step=15 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=15 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675931525896 min_rel_gap=0.00027894895086666823 cluster_max_residual=2.1266306981889143e-07 cluster_fro_residual=2.1266306981956641e-07 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=15 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=15 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=2.1266306981956641e-07 fro_after=1.36796701777959e-07 max_before=2.1266306981889143e-07 max_after=1.367967017769063e-07 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=15 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=61 basis_cols_trial=62
+IPT Davidson auto clusters: step=16 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=16 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.01088567585918554 min_rel_gap=0.00027894894901292353 cluster_max_residual=1.367967017769063e-07 cluster_fro_residual=1.36796701777959e-07 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=16 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=16 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=1.36796701777959e-07 fro_after=9.4306455272055197e-08 max_before=1.367967017769063e-07 max_after=9.4306455270531584e-08 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=16 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=62 basis_cols_trial=63
+IPT Davidson auto clusters: step=17 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=17 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675825711871 min_rel_gap=0.00027894894815514988 cluster_max_residual=9.4306455270531584e-08 cluster_fro_residual=9.4306455272055197e-08 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=17 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=17 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=9.4306455272055197e-08 fro_after=5.3783924313954631e-08 max_before=9.4306455270531584e-08 max_after=5.3783924311285445e-08 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=17 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=63 basis_cols_trial=64
+IPT Davidson auto clusters: step=18 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=18 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675811316275 min_rel_gap=0.00027894894778625849 cluster_max_residual=5.3783924311285445e-08 cluster_fro_residual=5.3783924313954631e-08 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=18 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=18 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=5.3783924313954631e-08 fro_after=2.650270150978485e-08 max_before=5.3783924311285445e-08 max_after=2.6502701504374722e-08 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=18 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=64 basis_cols_trial=65
+IPT Davidson auto clusters: step=19 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=19 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675807543294 min_rel_gap=0.00027894894768957433 cluster_max_residual=2.6502701504374722e-08 cluster_fro_residual=2.650270150978485e-08 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=19 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=19 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=2.650270150978485e-08 fro_after=1.4159892287597667e-08 max_before=2.6502701504374722e-08 max_after=1.4159892277477559e-08 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=19 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=65 basis_cols_trial=66
+IPT Davidson auto clusters: step=20 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=20 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806612483 min_rel_gap=0.00027894894766572177 cluster_max_residual=1.4159892277477559e-08 cluster_fro_residual=1.4159892287597667e-08 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=20 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=20 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=1.4159892287597667e-08 fro_after=9.2639061015363897e-09 max_before=1.4159892277477559e-08 max_after=9.263906086044885e-09 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=20 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=66 basis_cols_trial=67
+IPT Davidson auto clusters: step=21 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=21 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806299844 min_rel_gap=0.00027894894765771066 cluster_max_residual=9.263906086044885e-09 cluster_fro_residual=9.2639061015363897e-09 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=21 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=21 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=9.2639061015363897e-09 fro_after=5.2063569528423258e-09 max_before=9.263906086044885e-09 max_after=5.2063569253219739e-09 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=21 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=67 basis_cols_trial=68
+IPT Davidson auto clusters: step=22 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=22 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806164841 min_rel_gap=0.00027894894765425108 cluster_max_residual=5.2063569253219739e-09 cluster_fro_residual=5.2063569528423258e-09 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=22 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=22 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=5.2063569528423258e-09 fro_after=2.7567985152474614e-09 max_before=5.2063569253219739e-09 max_after=2.7567984636842426e-09 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=22 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=68 basis_cols_trial=69
+IPT Davidson auto clusters: step=23 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=23 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806093786 min_rel_gap=0.00027894894765243049 cluster_max_residual=2.7567984636842426e-09 cluster_fro_residual=2.7567985152474614e-09 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=23 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=23 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=2.7567985152474614e-09 fro_after=1.6914038942459869e-09 max_before=2.7567984636842426e-09 max_after=1.6914038122009278e-09 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=23 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=69 basis_cols_trial=70
+IPT Davidson auto clusters: step=24 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=24 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806065365 min_rel_gap=0.00027894894765170196 cluster_max_residual=1.6914038122009278e-09 cluster_fro_residual=1.6914038942459869e-09 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=24 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=24 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=1.6914038942459869e-09 fro_after=9.7084815313872095e-10 max_before=1.6914038122009278e-09 max_after=9.7084801239084008e-10 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=24 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=70 basis_cols_trial=71
+IPT Davidson auto clusters: step=25 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=25 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806100892 min_rel_gap=0.00027894894765261231 cluster_max_residual=9.7084801239084008e-10 cluster_fro_residual=9.7084815313872095e-10 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=25 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=25 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=9.7084815313872095e-10 fro_after=5.2738551909904136e-10 max_before=9.7084801239084008e-10 max_after=5.2738526260500294e-10 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=25 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=71 basis_cols_trial=72
+IPT Davidson auto clusters: step=26 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=26 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.01088567580607247 min_rel_gap=0.00027894894765188399 cluster_max_residual=5.2738526260500294e-10 cluster_fro_residual=5.2738551909904136e-10 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=26 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=26 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=5.2738551909904136e-10 fro_after=2.5781041625207956e-10 max_before=5.2738526260500294e-10 max_after=2.5780989221811473e-10 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=26 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=72 basis_cols_trial=73
+IPT Davidson auto clusters: step=27 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=27 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806086681 min_rel_gap=0.00027894894765224823 cluster_max_residual=2.5780989221811473e-10 cluster_fro_residual=2.5781041625207956e-10 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=27 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=27 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=2.5781041625207956e-10 fro_after=1.5716900539897638e-10 max_before=2.5780989221811473e-10 max_after=1.5716814519246274e-10 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=27 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=73 basis_cols_trial=74
+IPT Davidson auto clusters: step=28 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=28 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806107997 min_rel_gap=0.0002789489476527944 cluster_max_residual=1.5716814519246274e-10 cluster_fro_residual=1.5716900539897638e-10 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=28 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=28 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=1.5716900539897638e-10 fro_after=1.0741539784079973e-10 max_before=1.5716814519246274e-10 max_after=1.0741415253285683e-10 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=28 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=74 basis_cols_trial=75
+IPT Davidson auto clusters: step=29 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=29 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.01088567580607247 min_rel_gap=0.00027894894765188389 cluster_max_residual=1.0741415253285683e-10 cluster_fro_residual=1.0741539784079973e-10 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=29 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=29 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=1.0741539784079973e-10 fro_after=7.3091258187866449e-11 max_before=1.0741415253285683e-10 max_after=7.3089436097558625e-11 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=29 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=75 basis_cols_trial=76
+IPT Davidson auto clusters: step=30 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=30 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806051154 min_rel_gap=0.00027894894765133777 cluster_max_residual=7.3089436097558625e-11 cluster_fro_residual=7.3091258187866449e-11 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=30 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=30 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=7.3091258187866449e-11 fro_after=4.5498119359461272e-11 max_before=7.3089436097558625e-11 max_after=4.5495192460408588e-11 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=30 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=76 basis_cols_trial=77
+IPT Davidson auto clusters: step=31 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=31 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806100892 min_rel_gap=0.0002789489476526122 cluster_max_residual=4.5495192460408588e-11 cluster_fro_residual=4.5498119359461272e-11 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=31 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=31 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=4.5498119359461272e-11 fro_after=1.9676134088644275e-11 max_before=4.5495192460408588e-11 max_after=1.9669559097959051e-11 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=31 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=77 basis_cols_trial=78
+IPT Davidson auto clusters: step=32 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=32 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806086681 min_rel_gap=0.00027894894765224818 cluster_max_residual=1.9669559097959051e-11 cluster_fro_residual=1.9676134088644275e-11 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=32 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=32 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=1.9676134088644275e-11 fro_after=9.4443513454524645e-12 max_before=1.9669559097959051e-11 max_after=9.4309101502411655e-12 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=32 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=78 basis_cols_trial=79
+IPT Davidson auto clusters: step=33 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=33 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806100892 min_rel_gap=0.0002789489476526122 cluster_max_residual=9.4309101502411655e-12 cluster_fro_residual=9.4443513454524645e-12 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=33 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=33 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=9.4443513454524645e-12 fro_after=4.4712870704418414e-12 max_before=9.4309101502411655e-12 max_after=4.4429892004482299e-12 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=33 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=79 basis_cols_trial=80
+IPT Davidson auto clusters: step=34 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=34 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806122208 min_rel_gap=0.00027894894765315836 cluster_max_residual=4.4429892004482299e-12 cluster_fro_residual=4.4712870704418414e-12 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=34 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=34 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=4.4712870704418414e-12 fro_after=2.1251882549560401e-12 max_before=4.4429892004482299e-12 max_after=2.0649068427376952e-12 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=34 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=80 basis_cols_trial=81
+IPT Davidson auto clusters: step=35 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=35 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806115103 min_rel_gap=0.00027894894765297627 cluster_max_residual=2.0649068427376952e-12 cluster_fro_residual=2.1251882549560401e-12 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=35 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=35 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=2.1251882549560401e-12 fro_after=1.1461810855969174e-12 max_before=2.0649068427376952e-12 max_after=1.030107615578393e-12 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=35 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=81 basis_cols_trial=82
+IPT Davidson auto clusters: step=36 count=1 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson auto cluster: step=36 cluster=0 source=auto_gap members=28,29 size=2 min_abs_gap=0.010885675806115103 min_rel_gap=0.00027894894765297644 cluster_max_residual=1.030107615578393e-12 cluster_fro_residual=1.1461810855969174e-12 correction_members=29 correction_member_count=1 skipped_converged_in_cluster=28
+IPT Davidson active selection: step=36 auto_cluster_mode=1 legacy_force_mode=0 cluster_count=1 correction_members=29 correction_member_count=1 fallback_cap=30 active_max_used=0
+IPT Davidson cluster trial: step=36 retry=0 cluster=0 source=auto_gap members=28,29 overlap_assignment=28->28;29->29 fro_before=1.1461810855969174e-12 fro_after=8.4115385748839804e-13 max_before=1.030107615578393e-12 max_after=6.7492669123796561e-13 active_ok=1 locked_safe=1 permutation=0
+IPT Davidson trial decision: step=36 selected_active_pairs=29 accepted=1 global_ok=1 active_ok=1 locked_safe=1 reason=global_ok+active_ok retry_count=0 basis_cols_before=82 basis_cols_trial=83
+IPT Davidson auto clusters: step=37 count=0 converged_tol=9.9999999999999998e-13 active_max_used=0 correction_max_per_step_used=0
+IPT Davidson active selection: step=37 auto_cluster_mode=0 legacy_force_mode=0 cluster_count=0 correction_members=29,28,24,25,1,27,20,22,7,5,23,9,17,18,21,8,26,14,6,15,11,13,2,4,12,10,16,19,3,0 correction_member_count=30 fallback_cap=1 active_max_used=0
+repeat 1 IPT_GPU_BLOCK requested_k=30 basis_cols=83 returned_k=30 solve=5.835207e+00 preparation=3.906343e+00 setup=2.190670e+00 iteration=1.184186e+00 rr=4.651021e+00 api_total=2.691659e+01 relative_fixed_point_residual=2.651e+00 max_relative_eigen_residual=6.749e-13 best_so_far_updated=1 best_so_far_step=36 best_so_far_max_residual=6.749e-13 final_returned_from_best_so_far=0 pair28_best_residual=5.020e-13 pair29_best_residual=6.749e-13 relaxed_accept_enabled=1 accepted_steps=36 rejected_steps=1 min_accepted_steps=12 early_jump_to_continuation=0 status=success
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ipt_vs_primme_k30_v1/cluster_fix_auto_final_legacy_force_gpu_20260706/ipt_block_active_davidson/ch4_sto6g_fci_15876_ipt_relative_trials.csv
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ipt_vs_primme_k30_v1/cluster_fix_auto_final_legacy_force_gpu_20260706/ipt_block_active_davidson/ch4_sto6g_fci_15876_ipt_relative_summary.txt
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ipt_vs_primme_k30_v1/cluster_fix_auto_final_legacy_force_gpu_20260706/ipt_block_active_davidson/ch4_sto6g_fci_15876_pair_residuals.csv
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ipt_vs_primme_k30_v1/cluster_fix_auto_final_legacy_force_gpu_20260706/ipt_block_active_davidson/ch4_sto6g_fci_15876_davidson_history.csv
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ipt_vs_primme_k30_v1/cluster_fix_auto_final_legacy_force_gpu_20260706/ipt_block_active_davidson/ch4_sto6g_fci_15876_davidson_selection_history.csv
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ipt_vs_primme_k30_v1/cluster_fix_auto_final_legacy_force_gpu_20260706/ipt_block_active_davidson/ch4_sto6g_fci_15876_davidson_block_history.csv
+wrote /fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ipt_vs_primme_k30_v1/cluster_fix_auto_final_legacy_force_gpu_20260706/ipt_block_active_davidson/ch4_sto6g_fci_15876_jd_local_history.csv
+===== output files =====
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/CH4_K30_dubug/ipt_vs_primme_k30_v1/cluster_fix_auto_final_legacy_force_gpu_20260706/ipt_block_active_davidson:
+total 48K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 48K Jul  6 23:02 ch4_sto6g_fci_15876_ipt_3110952.log
+lrwxrwxrwx 1 nudt_liujie nudt_liujie 193 Jul  6 23:01 latest_ch4_sto6g_fci_15876_ipt.log -> /fs1/home/nudt_liujie/ftt/IPT_C_GPU/logs/sparse/CH4_K30_dubug/ipt_vs_primme_k30_v1/cluster_fix_auto_final_legacy_force_gpu_20260706/ipt_block_active_davidson/ch4_sto6g_fci_15876_ipt_3110952.log
+
+/fs1/home/nudt_liujie/ftt/IPT_C_GPU/results/sparse/CH4_K30_debug/ipt_vs_primme_k30_v1/cluster_fix_auto_final_legacy_force_gpu_20260706/ipt_block_active_davidson:
+total 3.5K
+-rw-r--r-- 1 nudt_liujie nudt_liujie 5.0K Jul  6 23:02 ch4_sto6g_fci_15876_davidson_block_history.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  26K Jul  6 23:02 ch4_sto6g_fci_15876_davidson_history.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.9K Jul  6 23:02 ch4_sto6g_fci_15876_davidson_selection_history.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 6.3K Jul  6 23:02 ch4_sto6g_fci_15876_ipt_relative_summary.txt
+-rw-r--r-- 1 nudt_liujie nudt_liujie 1012 Jul  6 23:02 ch4_sto6g_fci_15876_ipt_relative_trials.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie  833 Jul  6 23:02 ch4_sto6g_fci_15876_jd_local_history.csv
+-rw-r--r-- 1 nudt_liujie nudt_liujie 2.5K Jul  6 23:02 ch4_sto6g_fci_15876_pair_residuals.csv
+finished at: Mon Jul  6 23:02:09 CST 2026
