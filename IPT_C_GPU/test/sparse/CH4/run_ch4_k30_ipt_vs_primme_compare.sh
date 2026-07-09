@@ -29,11 +29,7 @@ COMPARE_SUMMARY="$RESULT_DIR/ch4_k30_ipt_vs_primme_compare_summary.txt"
 MAIN_LOG="$LOG_DIR/ch4_k30_ipt_vs_primme_compare_${TAG}.log"
 IPT_RUNNER="$TEST_DIR/run_ch4_sto6g_fci_15876_ipt.sh"
 PRIMME_RUNNER="$TEST_DIR/run_ch4_primme_k30.sh"
-IPT_COMPARE_DENOM_CLIP="${IPT_COMPARE_DENOM_CLIP:-3e-9}"
 IPT_COMPARE_EXTRA_STEPS="${IPT_COMPARE_EXTRA_STEPS:-20}"
-IPT_COMPARE_ORTHO_REPEATS="${IPT_COMPARE_ORTHO_REPEATS:-2}"
-IPT_COMPARE_FORCE_ACTIVE_PAIRS="${IPT_COMPARE_FORCE_ACTIVE_PAIRS-}"
-export IPT_COMPARE_FORCE_ACTIVE_PAIRS
 
 mkdir -p "$RESULT_DIR" "$LOG_DIR" "$IPT_RESULT_DIR" "$PRIMME_RESULT_DIR" \
     "$IPT_LOG_DIR" "$PRIMME_LOG_DIR"
@@ -59,36 +55,24 @@ echo "IPT_BLOCK_CLUSTER_OVERSAMPLE=3"
 echo "IPT_BLOCK_CLUSTER_QR=1"
 echo "IPT_DAVIDSON_STEPS=30"
 echo "IPT_DAVIDSON_EXTRA_STEPS=$IPT_COMPARE_EXTRA_STEPS"
-echo "IPT_DAVIDSON_AUTO_RITZ_CLUSTER_DISCOVERY=1"
-echo "IPT_DAVIDSON_AUTO_GAP_ABS_TOL=${IPT_DAVIDSON_AUTO_GAP_ABS_TOL:-1e-12}"
-echo "IPT_DAVIDSON_AUTO_GAP_REL_TOL=${IPT_DAVIDSON_AUTO_GAP_REL_TOL:-5e-4}"
+echo "IPT_DAVIDSON_SELECTION=residual_only"
+echo "IPT_DAVIDSON_AUTO_RITZ_CLUSTER_DISCOVERY=disabled"
 echo "IPT_DAVIDSON_CONVERGED_TOL=1e-12"
-echo "IPT_DAVIDSON_ACTIVE_MAX=<unset>"
 echo "IPT_DAVIDSON_ACTIVE_TOL=<removed>"
 echo "IPT_DAVIDSON_ACTIVE_CLUSTERS=<removed>"
 echo "IPT_DAVIDSON_CORRECTION_MAX_PER_STEP=<unset>"
-echo "IPT_DAVIDSON_FORCE_ACTIVE_PAIRS=${IPT_COMPARE_FORCE_ACTIVE_PAIRS:-<unset>}"
-echo "IPT_DAVIDSON_BLOCK_ACTIVE=1"
-echo "IPT_DAVIDSON_DENOM_CLIP=$IPT_COMPARE_DENOM_CLIP"
-echo "IPT_DAVIDSON_ORTHO_REPEATS=$IPT_COMPARE_ORTHO_REPEATS"
-echo "IPT_DAVIDSON_USE_BEST_SO_FAR=${IPT_DAVIDSON_USE_BEST_SO_FAR:-1}"
-echo "IPT_DAVIDSON_RELAXED_ACCEPT=${IPT_DAVIDSON_RELAXED_ACCEPT:-1}"
-echo "IPT_DAVIDSON_RETRY_ON_REJECT=${IPT_DAVIDSON_RETRY_ON_REJECT:-1}"
-echo "IPT_DAVIDSON_MIN_ACCEPTED_STEPS=${IPT_DAVIDSON_MIN_ACCEPTED_STEPS:-0}"
-echo "IPT_DAVIDSON_CLUSTER_AWARE_ACCEPT=1"
-echo "IPT_DAVIDSON_SOFT_CLUSTER_LOCKING=${IPT_DAVIDSON_SOFT_CLUSTER_LOCKING:-1}"
-echo "IPT_DAVIDSON_RESTART_EVERY=${IPT_DAVIDSON_RESTART_EVERY:-20}"
-echo "IPT_DAVIDSON_RESTART_KEEP_EXTRA=${IPT_DAVIDSON_RESTART_KEEP_EXTRA:-5}"
-echo "IPT_DAVIDSON_LOCKED_DEGRADE_REL_SLACK=${IPT_DAVIDSON_LOCKED_DEGRADE_REL_SLACK:-}"
-echo "IPT_DAVIDSON_LOCKED_DEGRADE_ABS_SLACK=${IPT_DAVIDSON_LOCKED_DEGRADE_ABS_SLACK:-1e-12}"
+echo "IPT_DAVIDSON_DENOM_CLIP=auto"
+echo "IPT_DAVIDSON_ORTHO_REPEATS=2"
+echo "IPT_DAVIDSON_BEST_SO_FAR=enabled"
+echo "IPT_DAVIDSON_TRIAL_ACCEPT=valid_basis"
+echo "IPT_DAVIDSON_SOFT_LOCKING=residual_le_converged_tol"
+echo "IPT_DAVIDSON_RESTART=thick_pre_dimension_maxKPlusMax16TwoThirdK_minK_lastBlock"
 
 set +e
 (
-    unset IPT_DAVIDSON_ACTIVE_MAX
     unset IPT_DAVIDSON_ACTIVE_TOL
     unset IPT_DAVIDSON_ACTIVE_CLUSTERS
     unset IPT_DAVIDSON_CORRECTION_MAX_PER_STEP
-    unset IPT_DAVIDSON_FORCE_ACTIVE_PAIRS
     export IPT_C_RESULTS_DIR="$IPT_RESULT_DIR"
     export IPT_C_LOG_DIR="$IPT_LOG_DIR"
     export IPT_CH4_MATRIX_CACHE="$CACHE"
@@ -107,35 +91,9 @@ set +e
     export IPT_DAVIDSON_ENRICH=1
     export IPT_DAVIDSON_STEPS=30
     export IPT_DAVIDSON_EXTRA_STEPS="$IPT_COMPARE_EXTRA_STEPS"
-    export IPT_DAVIDSON_SELECT_TOL=1e-12
-    export IPT_DAVIDSON_PROTECT_TOL=1e-10
     export IPT_DAVIDSON_CONVERGED_TOL=1e-12
-    if [ -n "$IPT_COMPARE_FORCE_ACTIVE_PAIRS" ]; then
-        export IPT_DAVIDSON_FORCE_ACTIVE_PAIRS="$IPT_COMPARE_FORCE_ACTIVE_PAIRS"
-    fi
-    export IPT_DAVIDSON_BLOCK_ACTIVE=1
-    export IPT_DAVIDSON_DENOM_CLIP="$IPT_COMPARE_DENOM_CLIP"
-    export IPT_DAVIDSON_ACCEPT_ONLY_IF_IMPROVES=1
-    export IPT_DAVIDSON_USE_BEST_SO_FAR="${IPT_DAVIDSON_USE_BEST_SO_FAR:-1}"
-    export IPT_DAVIDSON_RELAXED_ACCEPT="${IPT_DAVIDSON_RELAXED_ACCEPT:-1}"
-    export IPT_DAVIDSON_ACCEPT_REL_SLACK="${IPT_DAVIDSON_ACCEPT_REL_SLACK:-1e-12}"
-    export IPT_DAVIDSON_ACCEPT_ABS_SLACK="${IPT_DAVIDSON_ACCEPT_ABS_SLACK:-1e-15}"
-    export IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT="${IPT_DAVIDSON_ACTIVE_PAIR_ACCEPT:-1}"
-    export IPT_DAVIDSON_LOCKED_DEGRADE_SLACK="${IPT_DAVIDSON_LOCKED_DEGRADE_SLACK:-1e-8}"
-    export IPT_DAVIDSON_LOCKED_DEGRADE_REL_SLACK="${IPT_DAVIDSON_LOCKED_DEGRADE_REL_SLACK:-1e-8}"
-    export IPT_DAVIDSON_LOCKED_DEGRADE_ABS_SLACK="${IPT_DAVIDSON_LOCKED_DEGRADE_ABS_SLACK:-1e-12}"
-    export IPT_DAVIDSON_CLUSTER_AWARE_ACCEPT=1
-    export IPT_DAVIDSON_SOFT_CLUSTER_LOCKING="${IPT_DAVIDSON_SOFT_CLUSTER_LOCKING:-1}"
-    export IPT_DAVIDSON_RETRY_ON_REJECT="${IPT_DAVIDSON_RETRY_ON_REJECT:-1}"
-    export IPT_DAVIDSON_RETRY_DAMPING_LIST="${IPT_DAVIDSON_RETRY_DAMPING_LIST:-0.5,0.25}"
-    export IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS="${IPT_DAVIDSON_RETRY_DENOM_CLIP_MULTS:-10,100}"
-    export IPT_DAVIDSON_MIN_ACCEPTED_STEPS="${IPT_DAVIDSON_MIN_ACCEPTED_STEPS:-0}"
-    export IPT_DAVIDSON_ORTHO_REPEATS="$IPT_COMPARE_ORTHO_REPEATS"
-    export IPT_DAVIDSON_RESTART_EVERY="${IPT_DAVIDSON_RESTART_EVERY:-20}"
-    export IPT_DAVIDSON_RESTART_KEEP_EXTRA="${IPT_DAVIDSON_RESTART_KEEP_EXTRA:-5}"
     export IPT_DUMP_PAIR_RESIDUALS=1
     export IPT_DUMP_RESIDUAL_SUPPORT=0
-    export IPT_JD_LOCAL_CORRECTION=0
     export RUN_PRIMME=0
     export RUN_WARMUP=0
     bash "$IPT_RUNNER"
@@ -168,7 +126,7 @@ set -e
 
 export RESULT_DIR LOG_DIR IPT_RESULT_DIR PRIMME_RESULT_DIR IPT_LOG_DIR \
     PRIMME_LOG_DIR COMPARE_CSV COMPARE_SUMMARY ipt_exit primme_exit CACHE \
-    IPT_COMPARE_DENOM_CLIP IPT_COMPARE_EXTRA_STEPS IPT_COMPARE_ORTHO_REPEATS
+    IPT_COMPARE_EXTRA_STEPS
 
 python3 - <<'PY'
 import csv
@@ -243,17 +201,10 @@ if ipt_trial:
             ipt_trial.get("final_returned_from_best_so_far", ""),
         "pair28_best_residual": ipt_trial.get("pair28_best_residual", ""),
         "pair29_best_residual": ipt_trial.get("pair29_best_residual", ""),
-        "relaxed_accept_enabled":
-            ipt_trial.get("relaxed_accept_enabled", ""),
         "accepted_steps": ipt_trial.get("accepted_steps", ""),
         "rejected_steps": ipt_trial.get("rejected_steps", ""),
-        "min_accepted_steps": ipt_trial.get("min_accepted_steps", ""),
         "early_jump_to_continuation":
             ipt_trial.get("early_jump_to_continuation", ""),
-        "cluster_aware_accept_enabled":
-            ipt_trial.get("cluster_aware_accept_enabled", ""),
-        "soft_cluster_locking_enabled":
-            ipt_trial.get("soft_cluster_locking_enabled", ""),
         "gap28_29": ipt_trial.get("gap28_29", ""),
         "relative_gap28_29": ipt_trial.get("relative_gap28_29", ""),
         "cluster_residual_fro":
@@ -292,13 +243,9 @@ else:
         "final_returned_from_best_so_far": "",
         "pair28_best_residual": "",
         "pair29_best_residual": "",
-        "relaxed_accept_enabled": "",
         "accepted_steps": "",
         "rejected_steps": "",
-        "min_accepted_steps": "",
         "early_jump_to_continuation": "",
-        "cluster_aware_accept_enabled": "",
-        "soft_cluster_locking_enabled": "",
         "gap28_29": "",
         "relative_gap28_29": "",
         "cluster_residual_fro": "",
@@ -337,13 +284,9 @@ if primme_timing:
         "final_returned_from_best_so_far": "",
         "pair28_best_residual": "",
         "pair29_best_residual": "",
-        "relaxed_accept_enabled": "",
         "accepted_steps": "",
         "rejected_steps": "",
-        "min_accepted_steps": "",
         "early_jump_to_continuation": "",
-        "cluster_aware_accept_enabled": "",
-        "soft_cluster_locking_enabled": "",
         "gap28_29": "",
         "relative_gap28_29": "",
         "cluster_residual_fro": "",
@@ -379,13 +322,9 @@ else:
         "final_returned_from_best_so_far": "",
         "pair28_best_residual": "",
         "pair29_best_residual": "",
-        "relaxed_accept_enabled": "",
         "accepted_steps": "",
         "rejected_steps": "",
-        "min_accepted_steps": "",
         "early_jump_to_continuation": "",
-        "cluster_aware_accept_enabled": "",
-        "soft_cluster_locking_enabled": "",
         "gap28_29": "",
         "relative_gap28_29": "",
         "cluster_residual_fro": "",
@@ -408,9 +347,7 @@ fieldnames = [
     "best_so_far_step", "best_so_far_source",
     "best_so_far_max_residual", "final_returned_from_best_so_far",
     "pair28_best_residual", "pair29_best_residual",
-    "relaxed_accept_enabled", "accepted_steps", "rejected_steps",
-    "min_accepted_steps", "early_jump_to_continuation",
-    "cluster_aware_accept_enabled", "soft_cluster_locking_enabled",
+    "accepted_steps", "rejected_steps", "early_jump_to_continuation",
     "gap28_29", "relative_gap28_29", "cluster_residual_fro",
     "cluster_residual_max", "pair28_lock_state", "pair29_lock_state",
     "cluster_hard_locked", "cluster_soft_locked_count",
@@ -441,14 +378,12 @@ with compare_summary.open("w") as f:
     f.write("timing_metric=solve_time_sec\n")
     f.write("timing_scope=solver_only_excludes_cache_read_h2d_setup_d2h_residual_recompute\n")
     f.write(
-        "ipt_parameters=iter200_OS3_QR_auto_cluster_Davidson30_"
-        f"force{os.environ['IPT_COMPARE_FORCE_ACTIVE_PAIRS'].replace(',', '_') or 'none'}_"
+        "ipt_parameters=iter200_OS3_QR_residual_only_Davidson30_"
         "no_active_tol_no_active_max_no_correction_cap_"
         f"extra{os.environ['IPT_COMPARE_EXTRA_STEPS']}_"
-        f"clip{os.environ['IPT_COMPARE_DENOM_CLIP']}_"
-        f"ortho{os.environ['IPT_COMPARE_ORTHO_REPEATS']}_"
-        f"restart{os.environ.get('IPT_DAVIDSON_RESTART_EVERY', '20')}_"
-        f"keep{os.environ.get('IPT_DAVIDSON_RESTART_KEEP_EXTRA', '5')}\n")
+        "auto_denom_valid_basis_accept_"
+        "ortho2_"
+        "thick_pre_restart_maxKPlusMax16TwoThirdK_minK_lastBlock\n")
     f.write("primme_parameters=JDQMR_ETol_relative_tol5e-13_required1e-12_maxBasis160_minRestart80_block8\n")
     for row in rows:
         f.write(
@@ -465,13 +400,9 @@ with compare_summary.open("w") as f:
             f"final_returned_from_best_so_far={row['final_returned_from_best_so_far']} "
             f"pair28_best_residual={row['pair28_best_residual']} "
             f"pair29_best_residual={row['pair29_best_residual']} "
-            f"relaxed_accept_enabled={row['relaxed_accept_enabled']} "
             f"accepted_steps={row['accepted_steps']} "
             f"rejected_steps={row['rejected_steps']} "
-            f"min_accepted_steps={row['min_accepted_steps']} "
             f"early_jump_to_continuation={row['early_jump_to_continuation']} "
-            f"cluster_aware_accept_enabled={row['cluster_aware_accept_enabled']} "
-            f"soft_cluster_locking_enabled={row['soft_cluster_locking_enabled']} "
             f"gap28_29={row['gap28_29']} "
             f"relative_gap28_29={row['relative_gap28_29']} "
             f"cluster_residual_fro={row['cluster_residual_fro']} "

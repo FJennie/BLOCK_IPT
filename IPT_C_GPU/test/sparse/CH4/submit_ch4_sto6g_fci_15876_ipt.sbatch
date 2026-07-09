@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=ch4_ipt
-#SBATCH --partition=gpu1
+#SBATCH --partition=gpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
