@@ -122,6 +122,7 @@ typedef struct {
     double transfer_setup_time_sec;
     double iteration_time_sec;
     double rayleigh_ritz_time_sec;
+    double davidson_time_sec;
     int iterations;
     long long matvecs;
     double max_relative_eigen_residual;
@@ -963,21 +964,15 @@ static void csc_matvec_block(const CscMatrixView *matrix, const double *x,
     }
 }
 
-static void primme_matvec(void *x, PRIMME_INT *ldx, void *y, PRIMME_INT *ldy,
-                          int *block_size, primme_params *primme, int *ierr)
-{
-    const CscMatrixView *matrix = (const CscMatrixView *)primme->matrix;
-
-    csc_matvec_block(matrix, (const double *)x, (int)*ldx, (double *)y,
-                     (int)*ldy, *block_size);
-    *ierr = 0;
-}
-
 typedef struct {
+    int n;
     cusparseHandle_t sparse_handle;
     cusparseSpMatDescr_t matrix;
     void *buffer;
     size_t buffer_size;
+    double *d_x_scratch;
+    double *d_y_scratch;
+    int scratch_block_size;
 } PrimmeGpuMatrix;
 
 static void primme_gpu_matvec(void *x, PRIMME_INT *ldx, void *y,
@@ -991,14 +986,53 @@ static void primme_gpu_matvec(void *x, PRIMME_INT *ldx, void *y,
     const double zero = 0.0;
     size_t required = 0;
     cusparseStatus_t sparse_status = CUSPARSE_STATUS_SUCCESS;
+    cudaError_t cuda_status = cudaSuccess;
+    int n = matrix != NULL ? matrix->n : 0;
+    int block_count = block_size != NULL ? *block_size : 0;
+
+    if (matrix == NULL || x == NULL || y == NULL || ldx == NULL ||
+        ldy == NULL || n <= 0 || block_count <= 0 || *ldx < n ||
+        *ldy < n) {
+        *ierr = 1;
+        return;
+    }
+    if (matrix->scratch_block_size < block_count ||
+        matrix->d_x_scratch == NULL || matrix->d_y_scratch == NULL) {
+        cudaFree(matrix->d_x_scratch);
+        cudaFree(matrix->d_y_scratch);
+        matrix->d_x_scratch = NULL;
+        matrix->d_y_scratch = NULL;
+        matrix->scratch_block_size = 0;
+        cuda_status = cudaMalloc((void **)&matrix->d_x_scratch,
+                                 (size_t)n * (size_t)block_count *
+                                     sizeof(double));
+        if (cuda_status == cudaSuccess) {
+            cuda_status = cudaMalloc((void **)&matrix->d_y_scratch,
+                                     (size_t)n * (size_t)block_count *
+                                         sizeof(double));
+        }
+        if (cuda_status != cudaSuccess) {
+            *ierr = 1;
+            return;
+        }
+        matrix->scratch_block_size = block_count;
+    }
+    cuda_status = cudaMemcpy2D(
+        matrix->d_x_scratch, (size_t)n * sizeof(double), x,
+        (size_t)(*ldx) * sizeof(double), (size_t)n * sizeof(double),
+        (size_t)block_count, cudaMemcpyDeviceToDevice);
+    if (cuda_status != cudaSuccess) {
+        *ierr = 1;
+        return;
+    }
 
     sparse_status = cusparseCreateDnMat(
-        &dense_x, primme->nLocal, *block_size, *ldx, x, CUDA_R_64F,
+        &dense_x, n, block_count, n, matrix->d_x_scratch, CUDA_R_64F,
         CUSPARSE_ORDER_COL);
     if (sparse_status == CUSPARSE_STATUS_SUCCESS) {
         sparse_status = cusparseCreateDnMat(
-            &dense_y, primme->nLocal, *block_size, *ldy, y, CUDA_R_64F,
-            CUSPARSE_ORDER_COL);
+            &dense_y, n, block_count, n, matrix->d_y_scratch,
+            CUDA_R_64F, CUSPARSE_ORDER_COL);
     }
     if (sparse_status == CUSPARSE_STATUS_SUCCESS) {
         sparse_status = cusparseSpMM_bufferSize(
@@ -1030,6 +1064,15 @@ static void primme_gpu_matvec(void *x, PRIMME_INT *ldx, void *y,
     }
     if (dense_y != NULL) {
         cusparseDestroyDnMat(dense_y);
+    }
+    if (sparse_status == CUSPARSE_STATUS_SUCCESS) {
+        cuda_status = cudaMemcpy2D(
+            y, (size_t)(*ldy) * sizeof(double), matrix->d_y_scratch,
+            (size_t)n * sizeof(double), (size_t)n * sizeof(double),
+            (size_t)block_count, cudaMemcpyDeviceToDevice);
+        if (cuda_status != cudaSuccess) {
+            sparse_status = CUSPARSE_STATUS_EXECUTION_FAILED;
+        }
     }
     *ierr = sparse_status == CUSPARSE_STATUS_SUCCESS ? 0 : 1;
 }
@@ -1276,10 +1319,17 @@ static TrialResult run_primme_once(const CscMatrixView *matrix, double tol,
     std::vector<double> eval((size_t)k, 0.0);
     std::vector<double> rnorm((size_t)k, 0.0);
     std::vector<double> evec((size_t)matrix->n * (size_t)k, 0.0);
+    PrimmeGpuMatrix gpu_matrix = {};
+    cublasHandle_t cublas_handle = NULL;
+    int *d_col_ptr = NULL;
+    int *d_row_ind = NULL;
+    double *d_values = NULL;
+    double *d_evec = NULL;
+    int status = IPT_CUDA_SUCCESS;
     int ret = 0;
     bool primme_initialized = false;
 
-    result.method = "PRIMME_DYNAMIC";
+    result.method = "PRIMME_CUBLAS";
     result.repeat = repeat;
     result.requested_k = k;
     result.basis_cols = k;
@@ -1327,8 +1377,8 @@ static TrialResult run_primme_once(const CscMatrixView *matrix, double tol,
     primme_initialized = true;
     primme.n = matrix->n;
     primme.numEvals = k;
-    primme.matrix = (void *)matrix;
-    primme.matrixMatvec = primme_matvec;
+    primme.matrix = (void *)&gpu_matrix;
+    primme.matrixMatvec = primme_gpu_matvec;
     primme.target = primme_smallest;
     primme.eps = tol;
     primme.aNorm = matrix_norm;
@@ -1337,11 +1387,44 @@ static TrialResult run_primme_once(const CscMatrixView *matrix, double tol,
     primme.outputFile = stdout;
     primme_set_method(PRIMME_DYNAMIC, &primme);
 
-    result.transfer_setup_time_sec = 0.0;
+    {
+        double setup_start = now_seconds();
+
+        BENCH_CUDA_CHECK(cudaMalloc((void **)&d_col_ptr,
+                                    (size_t)(matrix->n + 1) * sizeof(int)));
+        BENCH_CUDA_CHECK(cudaMalloc((void **)&d_row_ind,
+                                    (size_t)matrix->nnz * sizeof(int)));
+        BENCH_CUDA_CHECK(cudaMalloc((void **)&d_values,
+                                    (size_t)matrix->nnz * sizeof(double)));
+        BENCH_CUDA_CHECK(cudaMalloc((void **)&d_evec,
+                                    (size_t)matrix->n * (size_t)k *
+                                        sizeof(double)));
+        BENCH_CUDA_CHECK(cudaMemcpy(d_col_ptr, matrix->col_ptr,
+                                    (size_t)(matrix->n + 1) * sizeof(int),
+                                    cudaMemcpyHostToDevice));
+        BENCH_CUDA_CHECK(cudaMemcpy(d_row_ind, matrix->row_ind,
+                                    (size_t)matrix->nnz * sizeof(int),
+                                    cudaMemcpyHostToDevice));
+        BENCH_CUDA_CHECK(cudaMemcpy(d_values, matrix->values,
+                                    (size_t)matrix->nnz * sizeof(double),
+                                    cudaMemcpyHostToDevice));
+        BENCH_CUSPARSE_CHECK(cusparseCreate(&gpu_matrix.sparse_handle));
+        gpu_matrix.n = matrix->n;
+        BENCH_CUSPARSE_CHECK(cusparseCreateCsr(
+            &gpu_matrix.matrix, matrix->n, matrix->n, matrix->nnz, d_col_ptr,
+            d_row_ind, d_values, CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
+            CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F));
+        BENCH_CUBLAS_CHECK(cublasCreate(&cublas_handle));
+        primme.queue = &cublas_handle;
+        BENCH_CUDA_CHECK(cudaDeviceSynchronize());
+        result.transfer_setup_time_sec = now_seconds() - setup_start;
+    }
+
     {
         double start = now_seconds();
 
-        ret = dprimme(eval.data(), evec.data(), rnorm.data(), &primme);
+        ret = cublas_dprimme(eval.data(), d_evec, rnorm.data(), &primme);
+        BENCH_CUDA_CHECK(cudaDeviceSynchronize());
         result.time_sec = now_seconds() - start;
         result.api_total_time_sec =
             result.transfer_setup_time_sec + result.time_sec;
@@ -1351,12 +1434,16 @@ static TrialResult run_primme_once(const CscMatrixView *matrix, double tol,
     result.matvecs = (long long)primme.stats.numMatvecs;
     if (ret != 0) {
         result.status = ret;
-        snprintf(result.error, sizeof(result.error), "dprimme returned %d",
+        snprintf(result.error, sizeof(result.error), "cublas_dprimme returned %d",
                  ret);
     } else {
         double max_residual = 0.0;
 
         result.returned_k = k;
+        BENCH_CUDA_CHECK(cudaMemcpy(evec.data(), d_evec,
+                                    (size_t)matrix->n * (size_t)k *
+                                        sizeof(double),
+                                    cudaMemcpyDeviceToHost));
         ipt_block_orthogonality_stats(
             evec, matrix->n, k,
             &result.ritz_vectors_orthogonality_frobenius_error,
@@ -1383,6 +1470,28 @@ static TrialResult run_primme_once(const CscMatrixView *matrix, double tol,
             pairs_to_check > 0 ? max_residual : NAN;
     }
 
+cleanup:
+    if (status != IPT_CUDA_SUCCESS && result.status == 0) {
+        result.status = status;
+        snprintf(result.error, sizeof(result.error), "%s",
+                 ipt_cuda_status_string(status));
+    }
+    cudaFree(d_col_ptr);
+    cudaFree(d_row_ind);
+    cudaFree(d_values);
+    cudaFree(d_evec);
+    cudaFree(gpu_matrix.buffer);
+    cudaFree(gpu_matrix.d_x_scratch);
+    cudaFree(gpu_matrix.d_y_scratch);
+    if (gpu_matrix.matrix != NULL) {
+        cusparseDestroySpMat(gpu_matrix.matrix);
+    }
+    if (gpu_matrix.sparse_handle != NULL) {
+        cusparseDestroy(gpu_matrix.sparse_handle);
+    }
+    if (cublas_handle != NULL) {
+        cublasDestroy(cublas_handle);
+    }
     if (primme_initialized) {
         primme_free(&primme);
     }
@@ -1469,6 +1578,7 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
         result.transfer_setup_time_sec = ipt.transfer_setup_time_sec;
         result.iteration_time_sec = ipt.iteration_time_sec;
         result.rayleigh_ritz_time_sec = ipt.rayleigh_ritz_time_sec;
+        result.davidson_time_sec = ipt.davidson_time_sec;
         result.time_sec = ipt.solve_time_sec;
         result.relative_fixed_point_residual = ipt.fixed_point_residual;
         result.basis_orthogonality_frobenius_error =
@@ -1592,13 +1702,17 @@ static bool trial_succeeded(const TrialResult &result)
 static void write_trial_csv(FILE *csv, const TrialResult &result)
 {
     fprintf(csv,
-            "%s,%d,%d,%d,%d,%d,%s,%.17g,%.17g,%d,%.17g,"
+            "%s,%d,%d,%d,%d,%d,%s,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%d,%.17g,"
             "%d,%d,%d,%s,%d,%.17g,%d,%d,%.17g,%.17g,"
             "%d,%d,%d,%.17g,%.17g,%.17g,%.17g,"
             "%s,%s,%d,%d\n",
             result.method, result.repeat, result.requested_k,
             result.basis_cols, result.returned_k, result.iterations,
             trial_status(result), result.api_total_time_sec,
+            result.time_sec, result.preparation_time_sec,
+            result.transfer_setup_time_sec, result.iteration_time_sec,
+            result.rayleigh_ritz_time_sec,
+            result.davidson_time_sec,
             result.max_relative_eigen_residual,
             result.max_relative_eigen_residual_index,
             result.relative_fixed_point_residual,
@@ -1639,6 +1753,10 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
     fprintf(summary,
             "method=%s repeat=%d requested_k=%d basis_cols=%d returned_k=%d "
             "iterations=%d status=%s time_total_sec=%.17g "
+            "compute_time_sec=%.17g preparation_time_sec=%.17g "
+            "transfer_setup_time_sec=%.17g iteration_time_sec=%.17g "
+            "rayleigh_ritz_time_sec=%.17g "
+            "davidson_time_sec=%.17g "
             "max_relative_eigen_residual=%.17g "
             "max_relative_eigen_residual_index=%d "
             "relative_fixed_point_residual=%.17g "
@@ -1681,6 +1799,10 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             result.method, result.repeat, result.requested_k,
             result.basis_cols, result.returned_k, result.iterations,
             trial_status(result), result.api_total_time_sec,
+            result.time_sec, result.preparation_time_sec,
+            result.transfer_setup_time_sec, result.iteration_time_sec,
+            result.rayleigh_ritz_time_sec,
+            result.davidson_time_sec,
             result.max_relative_eigen_residual,
             result.max_relative_eigen_residual_index,
             result.relative_fixed_point_residual, result.oversample,
@@ -2178,6 +2300,7 @@ int main(void)
     CscMatrix owned_matrix = {0, 0, std::vector<int>(), std::vector<int>(),
                               std::vector<double>()};
     int repeats = env_int("IPT_REPEATS", DEFAULT_REPEATS);
+    int run_ipt = env_bool("RUN_IPT", 1);
     int run_primme = env_bool("RUN_PRIMME", 0);
     int run_warmup = env_bool("RUN_WARMUP", 0);
     double tol = env_double("IPT_TOL", DEFAULT_TOL);
@@ -2343,7 +2466,10 @@ int main(void)
 
     fprintf(csv,
             "method,repeat,requested_k,basis_cols,returned_k,iterations,status,"
-            "time_total_sec,max_relative_eigen_residual,"
+            "time_total_sec,compute_time_sec,preparation_time_sec,"
+            "transfer_setup_time_sec,iteration_time_sec,"
+            "rayleigh_ritz_time_sec,davidson_time_sec,"
+            "max_relative_eigen_residual,"
             "max_relative_eigen_residual_index,"
             "relative_fixed_point_residual,best_so_far_enabled,"
             "best_so_far_updated,best_so_far_step,best_so_far_source,"
@@ -2420,8 +2546,9 @@ int main(void)
     }
 
     printf("Initial molecular FCI/CAS CSC benchmark: matrix_id=%s n=%d "
-           "nnz=%d k=%d repeats=%d tol=%.3e run_primme=%d\n",
-           id, matrix.n, matrix.nnz, ipt_k, repeats, tol, run_primme);
+           "nnz=%d k=%d repeats=%d tol=%.3e run_ipt=%d run_primme=%d\n",
+           id, matrix.n, matrix.nnz, ipt_k, repeats, tol, run_ipt,
+           run_primme);
     printf("Matrix/integral generation time %.6f sec is excluded from "
            "PRIMME/IPT timings.\n",
            active.generation_time_sec);
@@ -2547,7 +2674,7 @@ int main(void)
         if (run_primme) {
             TrialResult warmup_primme = run_primme_once(
                 &matrix, tol, primme_max_matvecs, matrix_norm, ipt_k, 0);
-            printf("warmup PRIMME_DYNAMIC requested_k=%d basis_cols=%d "
+            printf("warmup PRIMME_CUBLAS requested_k=%d basis_cols=%d "
                    "returned_k=%d solve=%.6e setup=%.6e "
                    "max_relative_eigen_residual=%.3e status=%s\n",
                    warmup_primme.requested_k, warmup_primme.basis_cols,
@@ -2560,50 +2687,52 @@ int main(void)
     }
 
     for (int repeat = 1; repeat <= repeats; ++repeat) {
-        TrialResult ipt_result =
-            run_ipt_once(&matrix, tol, ipt_maxiter, matrix_norm, ipt_k,
-                         repeat);
-        ipt_results.push_back(ipt_result);
+        if (run_ipt) {
+            TrialResult ipt_result =
+                run_ipt_once(&matrix, tol, ipt_maxiter, matrix_norm, ipt_k,
+                             repeat);
+            ipt_results.push_back(ipt_result);
 
-        printf("repeat %d IPT_GPU_BLOCK requested_k=%d basis_cols=%d "
-               "returned_k=%d solve=%.6e preparation=%.6e "
-               "setup=%.6e iteration=%.6e rr=%.6e api_total=%.6e "
-               "relative_fixed_point_residual=%.3e "
-               "max_relative_eigen_residual=%.3e "
-               "best_so_far_updated=%d best_so_far_step=%d "
-               "best_so_far_max_residual=%.3e "
-               "final_returned_from_best_so_far=%d "
-               "pair28_best_residual=%.3e "
-               "pair29_best_residual=%.3e "
-               "accepted_steps=%d rejected_steps=%d "
-               "early_jump_to_continuation=%d status=%s\n",
-               repeat, ipt_result.requested_k, ipt_result.basis_cols,
-               ipt_result.returned_k, ipt_result.time_sec,
-               ipt_result.preparation_time_sec,
-               ipt_result.transfer_setup_time_sec,
-               ipt_result.iteration_time_sec,
-               ipt_result.rayleigh_ritz_time_sec,
-               ipt_result.api_total_time_sec,
-               ipt_result.relative_fixed_point_residual,
-               ipt_result.max_relative_eigen_residual,
-               ipt_result.best_so_far_updated,
-               ipt_result.best_so_far_step,
-               ipt_result.best_so_far_max_residual,
-               ipt_result.final_returned_from_best_so_far,
-               ipt_result.pair28_best_residual,
-               ipt_result.pair29_best_residual,
-               ipt_result.accepted_steps,
-               ipt_result.rejected_steps,
-               ipt_result.early_jump_to_continuation,
-               trial_status(ipt_result));
-        fflush(stdout);
+            printf("repeat %d IPT_GPU_BLOCK requested_k=%d basis_cols=%d "
+                   "returned_k=%d solve=%.6e preparation=%.6e "
+                   "setup=%.6e iteration=%.6e rr=%.6e api_total=%.6e "
+                   "relative_fixed_point_residual=%.3e "
+                   "max_relative_eigen_residual=%.3e "
+                   "best_so_far_updated=%d best_so_far_step=%d "
+                   "best_so_far_max_residual=%.3e "
+                   "final_returned_from_best_so_far=%d "
+                   "pair28_best_residual=%.3e "
+                   "pair29_best_residual=%.3e "
+                   "accepted_steps=%d rejected_steps=%d "
+                   "early_jump_to_continuation=%d status=%s\n",
+                   repeat, ipt_result.requested_k, ipt_result.basis_cols,
+                   ipt_result.returned_k, ipt_result.time_sec,
+                   ipt_result.preparation_time_sec,
+                   ipt_result.transfer_setup_time_sec,
+                   ipt_result.iteration_time_sec,
+                   ipt_result.rayleigh_ritz_time_sec,
+                   ipt_result.api_total_time_sec,
+                   ipt_result.relative_fixed_point_residual,
+                   ipt_result.max_relative_eigen_residual,
+                   ipt_result.best_so_far_updated,
+                   ipt_result.best_so_far_step,
+                   ipt_result.best_so_far_max_residual,
+                   ipt_result.final_returned_from_best_so_far,
+                   ipt_result.pair28_best_residual,
+                   ipt_result.pair29_best_residual,
+                   ipt_result.accepted_steps,
+                   ipt_result.rejected_steps,
+                   ipt_result.early_jump_to_continuation,
+                   trial_status(ipt_result));
+            fflush(stdout);
+        }
 
         if (run_primme) {
             TrialResult primme_result =
                 run_primme_once(&matrix, tol, primme_max_matvecs, matrix_norm,
                                 ipt_k, repeat);
             primme_results.push_back(primme_result);
-            printf("repeat %d PRIMME_DYNAMIC requested_k=%d basis_cols=%d "
+            printf("repeat %d PRIMME_CUBLAS requested_k=%d basis_cols=%d "
                    "returned_k=%d solve=%.6e setup=%.6e "
                    "max_relative_eigen_residual=%.3e status=%s\n",
                    repeat, primme_result.requested_k,

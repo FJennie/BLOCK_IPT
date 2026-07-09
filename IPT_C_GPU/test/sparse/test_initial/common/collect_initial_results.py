@@ -176,7 +176,8 @@ def main():
                 "ipt_failure_detail": failure_detail(log_text),
                 "ipt_max_lift_block_size": max_lift_block_size,
                 "ipt_block_size": block_size,
-                "ipt_solve_time_sec": ipt.get("time_sec", ""),
+                "ipt_solve_time_sec": ipt.get("compute_time_sec")
+                or ipt.get("time_sec", ""),
                 "ipt_api_total_sec": ipt.get("time_total_sec", ""),
                 "ipt_max_rel_residual": ipt.get("max_relative_eigen_residual", ""),
                 "ipt_max_rel_residual_index": ipt.get(
@@ -187,7 +188,8 @@ def main():
                 "ipt_rejected_steps": ipt.get("rejected_steps", ""),
                 "ipt_restart_count": ipt.get("davidson_restart_count", ""),
                 "primme_status": primme.get("status", ""),
-                "primme_solve_time_sec": primme.get("time_sec", ""),
+                "primme_solve_time_sec": primme.get("compute_time_sec")
+                or primme.get("time_sec", ""),
                 "primme_max_rel_residual": primme.get(
                     "max_relative_eigen_residual", ""
                 ),

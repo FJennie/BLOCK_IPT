@@ -184,8 +184,8 @@ if ipt_trial:
         "basis_cols": ipt_trial.get("basis_cols", ""),
         "iterations": ipt_trial.get("iterations", ""),
         "matvecs": "",
-        "solve_time_sec": ipt_solve_time or ipt_trial.get("time_total_sec", ""),
-        "solve_time_source": "ipt_log_solve_field" if ipt_solve_time else "trial_csv_time_total_sec_fallback",
+        "solve_time_sec": ipt_solve_time or ipt_trial.get("compute_time_sec", "") or ipt_trial.get("time_total_sec", ""),
+        "solve_time_source": "ipt_log_solve_field" if ipt_solve_time else ("trial_csv_compute_time_sec_fallback" if ipt_trial.get("compute_time_sec", "") else "trial_csv_time_total_sec_fallback"),
         "max_relative_eigen_residual":
             ipt_trial.get("max_relative_eigen_residual", ""),
         "max_relative_eigen_residual_index":
@@ -376,7 +376,7 @@ with compare_summary.open("w") as f:
     f.write("convergence_metric=max_relative_eigen_residual\n")
     f.write("convergence_threshold=1e-12\n")
     f.write("timing_metric=solve_time_sec\n")
-    f.write("timing_scope=solver_only_excludes_cache_read_h2d_setup_d2h_residual_recompute\n")
+    f.write("timing_scope=post_preparation_solver_compute_excludes_initial_h2d_setup_includes_davidson\n")
     f.write(
         "ipt_parameters=iter200_OS3_QR_residual_only_Davidson30_"
         "no_active_tol_no_active_max_no_correction_cap_"

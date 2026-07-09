@@ -1,0 +1,6 @@
+# molecule K
+CH4_631g_cas8e8o 10
+CH4_sto6g_full 10
+H2O_sto6g_full 10
+LiH_sto6g_full 10
+NH3_sto6g_full 10

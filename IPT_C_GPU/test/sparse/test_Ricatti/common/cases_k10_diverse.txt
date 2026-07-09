@@ -1,0 +1,21 @@
+# molecule K
+BF_sto6g_cas8e8o 10
+BO_minus_sto6g_cas8e8o 10
+CN_minus_sto6g_cas8e8o 10
+CH_plus_sto6g_full 10
+NH_sto6g_full 10
+OH_minus_sto6g_full 10
+HCl_631g_cas8e8o 10
+LiF_sto6g_cas8e8o 10
+LiCl_631g_cas8e8o 10
+H2S_sto6g_cas8e8o 10
+HOF_sto6g_cas8e8o 10
+HOCl_631g_cas8e8o 10
+HNO_sto6g_cas8e8o 10
+HNC_sto6g_cas8e8o 10
+N2O_sto6g_cas8e8o 10
+NO_plus_sto6g_cas8e8o 10
+OCS_sto6g_cas8e8o 10
+SO2_sto6g_cas8e8o 10
+BeO_sto6g_cas8e8o 10
+CS2_sto6g_cas8e8o 10

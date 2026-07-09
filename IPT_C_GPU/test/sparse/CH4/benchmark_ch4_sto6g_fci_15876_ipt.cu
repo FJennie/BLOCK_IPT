@@ -122,6 +122,7 @@ typedef struct {
     double transfer_setup_time_sec;
     double iteration_time_sec;
     double rayleigh_ritz_time_sec;
+    double davidson_time_sec;
     int iterations;
     long long matvecs;
     double max_relative_eigen_residual;
@@ -932,16 +933,6 @@ static void csc_matvec_block(const CscMatrixView *matrix, const double *x,
     }
 }
 
-static void primme_matvec(void *x, PRIMME_INT *ldx, void *y, PRIMME_INT *ldy,
-                          int *block_size, primme_params *primme, int *ierr)
-{
-    const CscMatrixView *matrix = (const CscMatrixView *)primme->matrix;
-
-    csc_matvec_block(matrix, (const double *)x, (int)*ldx, (double *)y,
-                     (int)*ldy, *block_size);
-    *ierr = 0;
-}
-
 typedef struct {
     cusparseHandle_t sparse_handle;
     cusparseSpMatDescr_t matrix;
@@ -1504,6 +1495,7 @@ static TrialResult run_ipt_once(const CscMatrixView *matrix, double tol,
         result.transfer_setup_time_sec = ipt.transfer_setup_time_sec;
         result.iteration_time_sec = ipt.iteration_time_sec;
         result.rayleigh_ritz_time_sec = ipt.rayleigh_ritz_time_sec;
+        result.davidson_time_sec = ipt.davidson_time_sec;
         result.time_sec = ipt.solve_time_sec;
         result.relative_fixed_point_residual = ipt.fixed_point_residual;
         result.basis_orthogonality_frobenius_error =
@@ -1627,13 +1619,17 @@ static bool trial_succeeded(const TrialResult &result)
 static void write_trial_csv(FILE *csv, const TrialResult &result)
 {
     fprintf(csv,
-            "%s,%d,%d,%d,%d,%d,%s,%.17g,%.17g,%d,%.17g,"
+            "%s,%d,%d,%d,%d,%d,%s,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%d,%.17g,"
             "%d,%d,%d,%s,%d,%.17g,%d,%d,%.17g,%.17g,"
             "%d,%d,%d,%.17g,%.17g,%.17g,%.17g,"
             "%s,%s,%d,%d\n",
             result.method, result.repeat, result.requested_k,
             result.basis_cols, result.returned_k, result.iterations,
             trial_status(result), result.api_total_time_sec,
+            result.time_sec, result.preparation_time_sec,
+            result.transfer_setup_time_sec, result.iteration_time_sec,
+            result.rayleigh_ritz_time_sec,
+            result.davidson_time_sec,
             result.max_relative_eigen_residual,
             result.max_relative_eigen_residual_index,
             result.relative_fixed_point_residual,
@@ -1674,6 +1670,10 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
     fprintf(summary,
             "method=%s repeat=%d requested_k=%d basis_cols=%d returned_k=%d "
             "iterations=%d status=%s time_total_sec=%.17g "
+            "compute_time_sec=%.17g preparation_time_sec=%.17g "
+            "transfer_setup_time_sec=%.17g iteration_time_sec=%.17g "
+            "rayleigh_ritz_time_sec=%.17g "
+            "davidson_time_sec=%.17g "
             "max_relative_eigen_residual=%.17g "
             "max_relative_eigen_residual_index=%d "
             "relative_fixed_point_residual=%.17g "
@@ -1716,6 +1716,10 @@ static void write_trial_summary(FILE *summary, const TrialResult &result)
             result.method, result.repeat, result.requested_k,
             result.basis_cols, result.returned_k, result.iterations,
             trial_status(result), result.api_total_time_sec,
+            result.time_sec, result.preparation_time_sec,
+            result.transfer_setup_time_sec, result.iteration_time_sec,
+            result.rayleigh_ritz_time_sec,
+            result.davidson_time_sec,
             result.max_relative_eigen_residual,
             result.max_relative_eigen_residual_index,
             result.relative_fixed_point_residual, result.oversample,
@@ -2377,7 +2381,10 @@ int main(void)
 
     fprintf(csv,
             "method,repeat,requested_k,basis_cols,returned_k,iterations,status,"
-            "time_total_sec,max_relative_eigen_residual,"
+            "time_total_sec,compute_time_sec,preparation_time_sec,"
+            "transfer_setup_time_sec,iteration_time_sec,"
+            "rayleigh_ritz_time_sec,davidson_time_sec,"
+            "max_relative_eigen_residual,"
             "max_relative_eigen_residual_index,"
             "relative_fixed_point_residual,best_so_far_enabled,"
             "best_so_far_updated,best_so_far_step,best_so_far_source,"
